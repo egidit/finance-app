@@ -781,36 +781,10 @@ async function updatePassword(newPassword) {
       message: 'Password updated successfully'
     };
   } catch (error) {
-    console.error('updatePassword error:', error);
-    
-    // During password recovery, AAL2 errors should not block the update
-    // The user will verify MFA after password update
-    const requiresAAL2 = error.message.includes('AAL2') || error.message.includes('aal2_required');
-    
-    if (requiresAAL2) {
-      // Check if this is a recovery session
-      const { data: { session } } = await supabase.auth.getSession();
-      const amr = session?.user?.amr || [];
-      const isRecovery = amr.some(item => item.method === 'recovery' || item.method === 'otp');
-      
-      if (isRecovery) {
-        // During recovery, password update succeeded even with AAL2 requirement
-        // User will verify MFA after
-        return {
-          success: true,
-          user: session?.user,
-          message: 'Password updated successfully'
-        };
-      }
-    }
-    
     return {
       success: false,
       error: error.message,
-      requiresAAL2,
-      message: requiresAAL2 
-        ? 'Your account has MFA enabled. Please log in normally to change your password from Profile → Security.'
-        : error.message
+      message: error.message
     };
   }
 }

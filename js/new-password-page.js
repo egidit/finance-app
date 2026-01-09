@@ -8,21 +8,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   initPasswordStrengthVisualizer('newPassword');
 
   const passwordForm = document.getElementById('newPasswordForm');
-  const mfaForm = document.getElementById('mfaForm');
-  const recoveryForm = document.getElementById('recoveryForm');
-  
   const passwordSection = document.getElementById('passwordSection');
-  const mfaSection = document.getElementById('mfaSection');
-  const recoverySection = document.getElementById('recoverySection');
-  
   const errorMessage = document.getElementById('errorMessage');
   const successMessage = document.getElementById('successMessage');
-  
-  const useRecoveryCodeBtn = document.getElementById('useRecoveryCodeBtn');
-  const backToMfaBtn = document.getElementById('backToMfaBtn');
-
-  let userEmail = null;
-  let passwordUpdated = false;
 
   // Wait for Supabase to process recovery token from URL
   // The auth state change listener will catch when the session is established
@@ -116,24 +104,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         const result = await updatePassword(newPassword);
 
         if (result.success) {
-          passwordUpdated = true;
-          showSuccess('Password updated successfully!');
+          showSuccess('Password updated successfully! Redirecting to login...');
           
-          // Check if user has MFA enabled
-          const mfaStatus = await checkMFAStatus();
-          
-          if (mfaStatus.hasMFA) {
-            // Show MFA challenge
-            setTimeout(() => {
-              showMfaSection();
-              hideSuccess();
-            }, 1500);
-          } else {
-            // No MFA - redirect to app
-            setTimeout(() => {
-              window.location.href = 'app.html';
-            }, 2000);
-          }
+          // Sign out and redirect to login
+          setTimeout(async () => {
+            await supabase.auth.signOut();
+            window.location.href = 'index.html';
+          }, 2000);
         } else {
           showError(result.message || result.error || 'Failed to update password');
           submitBtn.disabled = false;
@@ -147,129 +124,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // Handle MFA form submission
-  if (mfaForm) {
-    mfaForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const code = document.getElementById('mfaCode').value.trim();
-
-      if (!code || code.length !== 6) {
-        showError('Please enter a valid 6-digit code');
-        return;
-      }
-
-      hideError();
-      hideSuccess();
-
-      const submitBtn = mfaForm.querySelector('button[type="submit"]');
-      const originalText = submitBtn.textContent;
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'Verifying...';
-
-      try {
-        const result = await verifyMFA(code);
-
-        if (result.success) {
-          showSuccess('Verification successful! Redirecting...');
-          setTimeout(() => {
-            window.location.href = 'app.html';
-          }, 1500);
-        } else {
-          showError(result.error || 'Invalid authentication code');
-          submitBtn.disabled = false;
-          submitBtn.textContent = originalText;
-        }
-      } catch (error) {
-        showError('An unexpected error occurred. Please try again.');
-        submitBtn.disabled = false;
-        submitBtn.textContent = originalText;
-      }
-    });
-  }
-
-  // Handle recovery code form submission
-  if (recoveryForm) {
-    recoveryForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const code = document.getElementById('recoveryCode').value.trim();
-
-      if (!code) {
-        showError('Please enter a recovery code');
-        return;
-      }
-
-      hideError();
-      hideSuccess();
-
-      const submitBtn = recoveryForm.querySelector('button[type="submit"]');
-      const originalText = submitBtn.textContent;
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'Verifying...';
-
-      try {
-        const result = await verifyMFA(code);
-
-        if (result.success) {
-          showSuccess('Verification successful! Redirecting...');
-          setTimeout(() => {
-            window.location.href = 'app.html';
-          }, 1500);
-        } else {
-          showError(result.error || 'Invalid recovery code');
-          submitBtn.disabled = false;
-          submitBtn.textContent = originalText;
-        }
-      } catch (error) {
-        showError('An unexpected error occurred. Please try again.');
-        submitBtn.disabled = false;
-        submitBtn.textContent = originalText;
-      }
-    });
-  }
-
-  // Switch to recovery code
-  if (useRecoveryCodeBtn) {
-    useRecoveryCodeBtn.addEventListener('click', () => {
-      showRecoverySection();
-    });
-  }
-
-  // Switch back to MFA
-  if (backToMfaBtn) {
-    backToMfaBtn.addEventListener('click', () => {
-      showMfaSection();
-    });
-  }
-
   // Helper functions
   function showPasswordSection() {
     passwordSection.style.display = 'block';
-    mfaSection.style.display = 'none';
-    recoverySection.style.display = 'none';
-  }
-
-  function showMfaSection() {
-    passwordSection.style.display = 'none';
-    mfaSection.style.display = 'block';
-    recoverySection.style.display = 'none';
-    
-    // Focus on MFA input
-    setTimeout(() => {
-      document.getElementById('mfaCode').focus();
-    }, 100);
-  }
-
-  function showRecoverySection() {
-    passwordSection.style.display = 'none';
-    mfaSection.style.display = 'none';
-    recoverySection.style.display = 'block';
-    
-    // Focus on recovery input
-    setTimeout(() => {
-      document.getElementById('recoveryCode').focus();
-    }, 100);
   }
 
   function showError(message) {
@@ -297,33 +154,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   function hideSuccess() {
     if (successMessage) {
       successMessage.classList.add('hidden');
-    }
-  }
-
-  /**
-   * Check if user has MFA enabled
-   */
-  async function checkMFAStatus() {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        return { hasMFA: false };
-      }
-
-      // Check if user has MFA factors enrolled
-      const factors = user.factors || [];
-      const hasTOTP = factors.some(factor => 
-        factor.factor_type === 'totp' && factor.status === 'verified'
-      );
-
-      return {
-        hasMFA: hasTOTP,
-        factors: factors
-      };
-    } catch (error) {
-      console.error('Error checking MFA status:', error);
-      return { hasMFA: false };
     }
   }
 });
