@@ -2,629 +2,594 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Personal Finance - Dashboard</title>
-  
-  <!-- CSS -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Personal Finance</title>
   <link rel="stylesheet" href="css/style.css">
-  
-  <!-- Supabase JS (locally hosted to avoid tracking prevention) -->
   <script src="js/supabase-lib.js"></script>
+  <script src="js/password-strength.js"></script>
 </head>
-<body>
-  
-  <div class="app-container">
-    
-    <!-- Mobile Menu Toggle -->
-    <button id="mobileMenuBtn" class="mobile-menu-btn">
+<body class="app-body">
+
+  <!-- Mobile Header -->
+  <header class="app-header">
+    <button id="mobileMenuBtn" class="icon-btn" aria-label="Menu">
       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
       </svg>
     </button>
-    
-    <!-- Sidebar Navigation -->
-    <aside id="sidebar" class="sidebar">
-      <div class="sidebar-header">
-        <h1>
+    <h1 class="app-title">Personal Finance</h1>
+    <div class="header-spacer"></div>
+  </header>
+
+  <!-- Mobile Menu Overlay -->
+  <div id="mobileMenu" class="mobile-menu-overlay">
+    <div class="mobile-menu">
+      <div class="mobile-menu-header">
+        <div class="menu-user-info">
+          <div class="avatar-large" id="menuAvatar">U</div>
+          <div class="menu-user-details">
+            <div class="menu-user-name" id="menuUserName">Loading...</div>
+            <div class="menu-user-email" id="menuUserEmail"></div>
+          </div>
+        </div>
+        <button id="closeMobileMenu" class="icon-btn">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
           </svg>
-          Finance App
-        </h1>
+        </button>
       </div>
-      
-      <nav class="sidebar-nav">
-        <a class="nav-item active" data-tab="dashboard">
+      <nav class="mobile-menu-nav">
+        <button class="menu-item" data-action="logout">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
           </svg>
-          Dashboard
-        </a>
-        
-        <a class="nav-item" data-tab="income">
+          <span>Logout</span>
+        </button>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Desktop Sidebar -->
+  <aside class="desktop-sidebar">
+    <div class="sidebar-header">
+      <h1 class="sidebar-title">Personal Finance</h1>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <button class="sidebar-nav-btn active" data-tab="dashboard">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+        </svg>
+        <span>Dashboard</span>
+      </button>
+      <button class="sidebar-nav-btn" data-tab="income">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <span>Income</span>
+      </button>
+      <button class="sidebar-nav-btn" data-tab="expenses">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+        </svg>
+        <span>Expenses</span>
+      </button>
+      <button class="sidebar-nav-btn" data-tab="profile">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+        </svg>
+        <span>Profile</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="avatar-large" id="sidebarAvatar">U</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="sidebarUserName">Loading...</div>
+          <div class="sidebar-user-email" id="sidebarUserEmail"></div>
+        </div>
+      </div>
+      <button class="btn-full btn-secondary" onclick="handleLogout()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 20px; height: 20px; margin-right: 8px;">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+        </svg>
+        Logout
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="app-main">
+    
+    <!-- Dashboard Tab -->
+    <section id="dashboardTab" class="tab-view active">
+      <div class="page-header">
+        <h2>Dashboard</h2>
+        <p class="page-subtitle">Your financial overview</p>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="stats-row">
+        <div class="stat-card stat-income">
+          <div class="stat-icon-wrapper">
+            <svg class="stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <div class="stat-label">Total Income</div>
+          <div class="stat-value" id="totalIncome">$0.00</div>
+        </div>
+
+        <div class="stat-card stat-expense">
+          <div class="stat-icon-wrapper">
+            <svg class="stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+            </svg>
+          </div>
+          <div class="stat-label">Total Expenses</div>
+          <div class="stat-value" id="totalExpenses">$0.00</div>
+        </div>
+
+        <div class="stat-card stat-balance">
+          <div class="stat-icon-wrapper">
+            <svg class="stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+          </div>
+          <div class="stat-label">Balance</div>
+          <div class="stat-value" id="balance">$0.00</div>
+        </div>
+      </div>
+
+      <!-- Chart Card -->
+      <div class="card">
+        <div class="card-header-simple">
+          <h3 class="card-title">Overview</h3>
+        </div>
+        <div class="chart-container">
+          <canvas id="financeChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="card">
+        <div class="card-header-simple">
+          <h3 class="card-title">Recent Activity</h3>
+        </div>
+        <div id="recentActivity" class="activity-list"></div>
+        <div id="recentEmpty" class="empty-view-sm" style="display: none;">
+          <p>No recent transactions</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Income Tab -->
+    <section id="incomeTab" class="tab-view">
+      <div class="page-header">
+        <div class="page-header-content">
+          <div>
+            <h2>Income</h2>
+            <p class="page-subtitle">Track your income sources</p>
+          </div>
+          <button id="addIncomeBtnDesktop" class="btn-primary btn-desktop-add">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 20px; height: 20px;">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Add Income
+          </button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div id="incomeList" class="list-view"></div>
+        <div id="incomeEmpty" class="empty-view" style="display: none;">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
-          Income
-        </a>
-        
-        <a class="nav-item" data-tab="expenses">
+          <h3>No Income Yet</h3>
+          <p>Tap the + button to add income</p>
+        </div>
+      </div>
+
+      <button id="addIncomeBtn" class="btn-fab">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+      </button>
+    </section>
+
+    <!-- Expenses Tab -->
+    <section id="expensesTab" class="tab-view">
+      <div class="page-header">
+        <div class="page-header-content">
+          <div>
+            <h2>Expenses</h2>
+            <p class="page-subtitle">Manage your expenses</p>
+          </div>
+          <button id="addExpenseBtnDesktop" class="btn-primary btn-desktop-add">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 20px; height: 20px;">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Add Expense
+          </button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div id="expensesList" class="list-view"></div>
+        <div id="expensesEmpty" class="empty-view" style="display: none;">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
           </svg>
-          Expenses
-        </a>
-        
-        <a class="nav-item" data-tab="profile">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-          </svg>
-          Profile
-        </a>
-      </nav>
-      
-      <div class="sidebar-footer">
-        <div class="user-info">
-          <div class="user-avatar" id="userAvatar">U</div>
-          <div class="user-details">
-            <div class="user-name" id="userName">Loading...</div>
-            <div class="user-email" id="userEmail"></div>
-          </div>
-        </div>
-        <button id="logoutBtn" class="btn btn-secondary w-full">
-          Logout
-        </button>
-      </div>
-    </aside>
-    
-    <!-- Main Content -->
-    <main class="main-content">
-      
-      <!-- Dashboard Tab -->
-      <div id="dashboardTab" class="tab-content active">
-        <div class="content-header">
-          <h2>Dashboard</h2>
-          <p>Overview of your financial status</p>
-        </div>
-        
-        <!-- Stats Grid -->
-        <div class="stats-grid">
-          <div class="stat-card income">
-            <div class="stat-icon income">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-              </svg>
-            </div>
-            <div class="stat-label">Monthly Income</div>
-            <div class="stat-value" id="totalIncome">$0.00</div>
-          </div>
-          
-          <div class="stat-card expense">
-            <div class="stat-icon expense">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path>
-              </svg>
-            </div>
-            <div class="stat-label">Monthly Expenses</div>
-            <div class="stat-value" id="totalExpenses">$0.00</div>
-          </div>
-          
-          <div class="stat-card balance">
-            <div class="stat-icon balance">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-            </div>
-            <div class="stat-label">Remaining Balance</div>
-            <div class="stat-value" id="remainingBalance">$0.00</div>
-          </div>
-        </div>
-        
-        <!-- Charts -->
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">Income vs Expenses</h3>
-          </div>
-          <div class="card-body">
-            <div class="chart-container">
-              <canvas id="incomeExpenseChart"></canvas>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Upcoming Due Dates -->
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">Upcoming Due Dates</h3>
-          </div>
-          <div class="card-body">
-            <ul id="dueDatesList" class="due-dates-list"></ul>
-          </div>
+          <h3>No Expenses Yet</h3>
+          <p>Tap the + button to add expense</p>
         </div>
       </div>
-      
-      <!-- Income Tab -->
-      <div id="incomeTab" class="tab-content">
-        <div class="content-header">
-          <h2>Income</h2>
-          <p>Manage your income sources</p>
-        </div>
-        
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">Income Sources</h3>
-            <button id="addIncomeBtn" class="btn btn-primary">
-              Add Income
-            </button>
-          </div>
-          <div class="card-body">
-            <div class="table-container">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>Source</th>
-                    <th>Amount</th>
-                    <th>Frequency</th>
-                    <th>Added</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="incomeTableBody"></tbody>
-              </table>
-            </div>
-            <div id="incomeEmptyState" class="empty-state hidden">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-              <h3>No Income Sources</h3>
-              <p>Add your first income source to get started</p>
-              <button class="btn btn-primary" onclick="document.getElementById('addIncomeBtn').click()">
-                Add Income
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Expenses Tab -->
-      <div id="expensesTab" class="tab-content">
-        <div class="content-header">
-          <h2>Expenses</h2>
-          <p>Track and manage your expenses</p>
-        </div>
-        
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">Expense List</h3>
-            <button id="addExpenseBtn" class="btn btn-primary">
-              Add Expense
-            </button>
-          </div>
-          <div class="card-body">
-            <div class="table-container">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Amount</th>
-                    <th>Category</th>
-                    <th>Due Date</th>
-                    <th>Recurring</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="expensesTableBody"></tbody>
-              </table>
-            </div>
-            <div id="expensesEmptyState" class="empty-state hidden">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
-              </svg>
-              <h3>No Expenses</h3>
-              <p>Add your first expense to start tracking</p>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Profile Tab -->
-      <div id="profileTab" class="tab-content">
-        <div class="content-header">
-          <h2>Profile</h2>
-          <p>Manage your account settings</p>
-        </div>
-        
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">Account Information</h3>
-          </div>
-          <div class="card-body">
-            <div class="form-group">
-              <label for="profileEmail" class="form-label">Email Address (Read-only)</label>
-              <input 
-                type="email" 
-                id="profileEmail" 
-                class="form-input" 
-                readonly
-                disabled
-              >
-            </div>
-          </div>
-        </div>
-        
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">Security</h3>
-          </div>
-          <div class="card-body">
-            <!-- Password Section -->
-            <div class="security-section">
-              <h4 class="security-section-title">Password</h4>
-              <p class="text-sm text-gray-600 mb-3">Change your account password.</p>
-              <button type="button" id="changePasswordBtn" class="btn btn-primary">
-                Change Password
-              </button>
-            </div>
-            
-            <!-- MFA Section -->
-            <div class="security-section mt-4">
-              <h4 class="security-section-title">Two-Factor Authentication (MFA)</h4>
-              <p class="text-sm text-gray-600 mb-3">Add an extra layer of security to your account.</p>
-              
-              <!-- MFA Status (will be updated by JavaScript) -->
-              <div id="mfaStatus" class="mb-3">
-                <div class="alert alert-info">
-                  <p>Checking MFA status...</p>
-                </div>
-              </div>
-              
-              <!-- MFA Controls (shown/hidden based on status) -->
-              <div id="mfaControls">
-                <button type="button" id="enableMFABtn" class="btn btn-primary" style="display: none;">
-                  Enable MFA
-                </button>
-                <button type="button" id="disableMFABtn" class="btn btn-danger" style="display: none;">
-                  Disable MFA
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">Account Deletion</h3>
-          </div>
-          <div class="card-body">
-            <p class="text-sm text-gray-600 mb-3">If you wish to permanently delete your account and all associated data, you can request account deletion by contacting support.</p>
-            <button type="button" id="requestDeletionBtn" class="btn btn-secondary">
-              Request Account Deletion
-            </button>
-          </div>
-        </div>
-      </div>
-      
-    </main>
-  </div>
 
-  <!-- Change Password Modal -->
-  <div id="passwordModal" class="modal-overlay hidden">
-    <div class="modal">
-      <h2>Change Password</h2>
-      <p>Enter your current password and choose a new password.</p>
-      
-      <form id="passwordForm">
-        <div class="form-group">
-          <label for="currentPassword" class="form-label">Current Password</label>
-          <div class="password-input-wrapper">
-            <input 
-              type="password" 
-              id="currentPassword" 
-              class="form-input"
-              placeholder="Enter current password"
-              required
-            >
-            <button type="button" class="password-toggle-btn" data-target="currentPassword" aria-label="Toggle password visibility">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="eye-icon">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-              </svg>
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="eye-slash-icon hidden">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
-              </svg>
-            </button>
-          </div>
-        </div>
+      <button id="addExpenseBtn" class="btn-fab">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+      </button>
+    </section>
 
-        <div class="form-group">
-          <label for="newPassword" class="form-label">New Password</label>
-          <div class="password-input-wrapper">
-            <input 
-              type="password" 
-              id="newPassword" 
-              class="form-input"
-              placeholder="Enter new password"
-              minlength="6"
-              required
-            >
-            <button type="button" class="password-toggle-btn" data-target="newPassword" aria-label="Toggle password visibility">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="eye-icon">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-              </svg>
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="eye-slash-icon hidden">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
-              </svg>
-            </button>
-          </div>
-        </div>
-        
-        <div class="form-group">
-          <label for="confirmPassword" class="form-label">Confirm New Password</label>
-          <div class="password-input-wrapper">
-            <input 
-              type="password" 
-              id="confirmPassword" 
-              class="form-input"
-              placeholder="Confirm new password"
-              minlength="6"
-              required
-            >
-            <button type="button" class="password-toggle-btn" data-target="confirmPassword" aria-label="Toggle password visibility">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="eye-icon">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-              </svg>
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="eye-slash-icon hidden">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
-              </svg>
-            </button>
-          </div>
-        </div>
-        
-        <div class="modal-actions">
-          <button type="button" id="cancelPasswordBtn" class="btn btn-secondary">Cancel</button>
-          <button type="submit" class="btn btn-primary">Update Password</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Enable MFA Modal -->
-  <div id="enableMFAModal" class="modal-overlay hidden">
-    <div class="modal">
-      <div class="modal-header">
-        <h2 class="modal-title">Enable Two-Factor Authentication</h2>
+    <!-- Profile Tab -->
+    <section id="profileTab" class="tab-view">
+      <div class="page-header">
+        <h2>Profile</h2>
+        <p class="page-subtitle">Manage your account</p>
       </div>
-      <div class="modal-body">
-        <div id="mfaStep1" class="mfa-step">
-          <h4>Step 1: Scan QR Code</h4>
-          <p class="text-sm text-gray-600 mb-3">Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)</p>
-          <div id="qrCodeContainer" class="text-center mb-3">
-            <!-- QR code will be inserted here -->
-          </div>
-          <p class="text-xs text-gray-500">Or enter this code manually:</p>
-          <div class="code-display mb-3">
-            <code id="mfaSecret"></code>
-          </div>
-          <button type="button" id="mfaNextBtn" class="btn btn-primary w-full">Next</button>
-        </div>
-        
-        <div id="mfaStep2" class="mfa-step" style="display: none;">
-          <h4>Step 2: Verify Code</h4>
-          <p class="text-sm text-gray-600 mb-3">Enter the 6-digit code from your authenticator app</p>
-          <form id="verifyMFAForm">
-            <div class="form-group">
-              <input 
-                type="text" 
-                id="mfaVerifyCode" 
-                class="form-input form-input-code"
-                placeholder="000000"
-                maxlength="6"
-                pattern="[0-9]{6}"
-                required
-              >
+
+      <!-- Account Info Card -->
+      <div class="card">
+        <div class="profile-section">
+          <div class="profile-avatar-section">
+            <div class="avatar-xl" id="profileAvatar">U</div>
+            <div class="profile-info">
+              <div class="profile-name" id="profileName">Loading...</div>
+              <div class="profile-email" id="profileEmail"></div>
             </div>
-            <button type="submit" class="btn btn-primary w-full">Verify & Enable</button>
-          </form>
-        </div>
-        
-        <div id="mfaStep3" class="mfa-step" style="display: none;">
-          <h4>✅ MFA Enabled Successfully!</h4>
-          <p class="text-sm text-gray-600 mb-3">Save these recovery codes in a safe place. You'll need them if you lose access to your authenticator app.</p>
-          <div class="alert alert-warning mb-3">
-            <p><strong>Important:</strong> These codes will only be shown once!</p>
           </div>
-          <div id="recoveryCodesContainer" class="recovery-codes-container mb-3">
-            <!-- Recovery codes will be inserted here -->
+        </div>
+      </div>
+
+      <!-- Security Card -->
+      <div class="card">
+        <div class="card-header-simple">
+          <h3 class="card-title">Security</h3>
+        </div>
+        <div class="settings-list">
+          <button class="settings-item" id="changePasswordBtn">
+            <div class="settings-icon">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+              </svg>
+            </div>
+            <div class="settings-content">
+              <div class="settings-label">Change Password</div>
+              <div class="settings-desc">Update your password</div>
+            </div>
+            <svg class="settings-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </button>
+
+          <div class="settings-item">
+            <div class="settings-icon">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+              </svg>
+            </div>
+            <div class="settings-content">
+              <div class="settings-label">Two-Factor Auth</div>
+              <div class="settings-desc" id="mfaStatusText">Loading...</div>
+            </div>
+            <div class="settings-actions">
+              <button id="enableMFABtn" class="btn-sm btn-primary" style="display: none;">Enable</button>
+              <button id="disableMFABtn" class="btn-sm btn-danger" style="display: none;">Disable</button>
+            </div>
           </div>
-          <button type="button" id="copyRecoveryCodesBtn" class="btn btn-secondary w-full mb-2">Copy Codes</button>
-          <button type="button" id="closeMFAModalBtn" class="btn btn-primary w-full">Done</button>
         </div>
       </div>
-    </div>
-  </div>
 
-  <!-- Disable MFA Modal -->
-  <div id="disableMFAModal" class="modal-overlay hidden">
-    <div class="modal">
-      <div class="modal-header">
-        <h2 class="modal-title">Disable Two-Factor Authentication</h2>
-      </div>
-      <div class="modal-body">
-        <div class="alert alert-warning mb-3">
-          <p><strong>Warning:</strong> Disabling MFA will make your account less secure.</p>
+      <!-- Danger Zone -->
+      <div class="card card-danger">
+        <div class="card-header-simple">
+          <h3 class="card-title">Danger Zone</h3>
         </div>
-        <p class="text-sm text-gray-600 mb-3">Are you sure you want to disable two-factor authentication?</p>
+        <p class="card-text">Permanently delete your account and all data. This action cannot be undone.</p>
+        <button id="deleteAccountBtn" class="btn-full btn-danger-outline">Delete Account</button>
       </div>
-      <div class="modal-footer">
-        <button type="button" id="cancelDisableMFABtn" class="btn btn-secondary">Cancel</button>
-        <button type="button" id="confirmDisableMFABtn" class="btn btn-danger">Disable MFA</button>
-      </div>
-    </div>
-  </div>
+    </section>
 
-  <!-- Request Deletion Confirmation Modal -->
-  <div id="requestDeletionModal" class="modal-overlay hidden">
-    <div class="modal">
-      <h3>Request Account Deletion</h3>
-      <div class="modal-body">
-        <p class="text-gray-700 mb-3">This will open your mail client to send a deletion request to our support team.</p>
-        <p class="text-sm text-gray-600 mb-4">Please note:</p>
-        <ul class="deletion-info-list">
-          <li>Your account deletion request will be processed within 48 hours</li>
-          <li>All your data (income, expenses, profile) will be permanently deleted</li>
-          <li>This action cannot be undone once completed</li>
-        </ul>
-      </div>
-      <div class="modal-actions">
-        <button type="button" id="cancelRequestDeletionBtn" class="btn btn-secondary">
-          Cancel
-        </button>
-        <button type="button" id="confirmRequestDeletionBtn" class="btn btn-primary">
-          Open Mail Client
-        </button>
-      </div>
-    </div>
-  </div>
+  </main>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" data-tab="dashboard">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+      </svg>
+      <span>Dashboard</span>
+    </button>
+    <button class="nav-btn" data-tab="income">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+      <span>Income</span>
+    </button>
+    <button class="nav-btn" data-tab="expenses">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+      </svg>
+      <span>Expenses</span>
+    </button>
+    <button class="nav-btn" data-tab="profile">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+      </svg>
+      <span>Profile</span>
+    </button>
+  </nav>
 
   <!-- Income Modal -->
-  <div id="incomeModal" class="modal-overlay hidden">
-    <div class="modal">
-      <h3 id="incomeModalTitle">Add Income</h3>
-      <form id="incomeForm">
+  <div id="incomeModal" class="modal-overlay">
+    <div class="modal mobile-modal">
+      <div class="modal-header">
+        <h3 id="incomeModalTitle">Add Income</h3>
+        <button class="icon-btn" onclick="closeIncomeModal()">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <form id="incomeForm" class="modal-form">
         <input type="hidden" id="incomeId">
-        
         <div class="form-group">
-          <label for="incomeSource" class="form-label">Source</label>
-          <input 
-            type="text" 
-            id="incomeSource" 
-            class="form-input"
-            placeholder="e.g., Salary, Freelance"
-            required
-          >
+          <label class="form-label">Source</label>
+          <input type="text" id="incomeSource" class="form-input" placeholder="e.g., Salary" required>
         </div>
-        
         <div class="form-group">
-          <label for="incomeAmount" class="form-label">Amount</label>
-          <input 
-            type="number" 
-            id="incomeAmount" 
-            class="form-input"
-            placeholder="0.00"
-            step="0.01"
-            min="0"
-            required
-          >
+          <label class="form-label">Amount</label>
+          <input type="number" id="incomeAmount" class="form-input" placeholder="0.00" step="0.01" required>
         </div>
-        
         <div class="form-group">
-          <label for="incomeFrequency" class="form-label">Frequency</label>
-          <select id="incomeFrequency" class="form-select" required>
-            <option value="">Select frequency</option>
-            <option value="weekly">Weekly</option>
-            <option value="biweekly">Bi-weekly</option>
+          <label class="form-label">Frequency</label>
+          <select id="incomeFrequency" class="form-input" required>
             <option value="monthly">Monthly</option>
+            <option value="weekly">Weekly</option>
             <option value="yearly">Yearly</option>
             <option value="one-time">One-time</option>
           </select>
         </div>
-        
         <div class="modal-actions">
-          <button type="button" class="btn btn-secondary" onclick="closeIncomeModal()">
-            Cancel
-          </button>
-          <button type="submit" class="btn btn-primary">
-            Save
-          </button>
+          <button type="button" class="btn-half btn-secondary" onclick="closeIncomeModal()">Cancel</button>
+          <button type="submit" class="btn-half btn-primary">Save</button>
         </div>
       </form>
     </div>
   </div>
 
   <!-- Expense Modal -->
-  <div id="expenseModal" class="modal-overlay hidden">
-    <div class="modal">
-      <h3 id="expenseModalTitle">Add Expense</h3>
-      <form id="expenseForm">
+  <div id="expenseModal" class="modal-overlay">
+    <div class="modal mobile-modal">
+      <div class="modal-header">
+        <h3 id="expenseModalTitle">Add Expense</h3>
+        <button class="icon-btn" onclick="closeExpenseModal()">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <form id="expenseForm" class="modal-form">
         <input type="hidden" id="expenseId">
-        
         <div class="form-group">
-          <label for="expenseName" class="form-label">Name</label>
-          <input 
-            type="text" 
-            id="expenseName" 
-            class="form-input"
-            placeholder="e.g., Rent, Groceries"
-            required
-          >
+          <label class="form-label">Name</label>
+          <input type="text" id="expenseName" class="form-input" placeholder="e.g., Grocery Shopping" required>
         </div>
-        
         <div class="form-group">
-          <label for="expenseAmount" class="form-label">Amount</label>
-          <input 
-            type="number" 
-            id="expenseAmount" 
-            class="form-input"
-            placeholder="0.00"
-            step="0.01"
-            min="0"
-            required
-          >
+          <label class="form-label">Category</label>
+          <input type="text" id="expenseCategory" class="form-input" placeholder="e.g., Food" required>
         </div>
-        
         <div class="form-group">
-          <label for="expenseCategory" class="form-label">Category</label>
-          <select id="expenseCategory" class="form-select" required>
-            <option value="">Select category</option>
-            <option value="housing">Housing</option>
-            <option value="utilities">Utilities</option>
-            <option value="food">Food & Groceries</option>
-            <option value="transportation">Transportation</option>
-            <option value="healthcare">Healthcare</option>
-            <option value="entertainment">Entertainment</option>
-            <option value="shopping">Shopping</option>
-            <option value="education">Education</option>
-            <option value="insurance">Insurance</option>
-            <option value="other">Other</option>
-          </select>
+          <label class="form-label">Amount</label>
+          <input type="number" id="expenseAmount" class="form-input" placeholder="0.00" step="0.01" required>
         </div>
-        
         <div class="form-group">
-          <label for="expenseDueDate" class="form-label">Due Date</label>
-          <input 
-            type="date" 
-            id="expenseDueDate" 
-            class="form-input"
-            required
-          >
+          <label class="form-label">Due Date</label>
+          <input type="date" id="expenseDueDate" class="form-input" required>
         </div>
-        
         <div class="form-group">
-          <div class="form-checkbox-group">
-            <input 
-              type="checkbox" 
-              id="expenseRecurring" 
-              class="form-checkbox"
-            >
-            <label for="expenseRecurring" class="form-label">Recurring expense</label>
-          </div>
+          <label class="form-label" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+            <input type="checkbox" id="expenseRecurring" style="width: 20px; height: 20px; cursor: pointer;">
+            <span>Recurring expense</span>
+          </label>
         </div>
-        
         <div class="modal-actions">
-          <button type="button" class="btn btn-secondary" onclick="closeExpenseModal()">
-            Cancel
-          </button>
-          <button type="submit" class="btn btn-primary">
-            Save
-          </button>
+          <button type="button" class="btn-half btn-secondary" onclick="closeExpenseModal()">Cancel</button>
+          <button type="submit" class="btn-half btn-primary">Save</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Load Scripts -->
+  <!-- Password Modal -->
+  <div id="passwordModal" class="modal-overlay">
+    <div class="modal mobile-modal">
+      <div class="modal-header">
+        <h3>Change Password</h3>
+        <button class="icon-btn" onclick="closePasswordModal()">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <form id="passwordForm" class="modal-form">
+        <div class="form-group">
+          <label class="form-label">Current Password</label>
+          <input type="password" id="currentPassword" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">New Password</label>
+          <input type="password" id="newPassword" class="form-input" required>
+          <div class="password-requirements">
+            <div class="password-requirements-title">Password must contain:</div>
+            <div class="password-requirement" data-requirement="length">
+              <span class="requirement-icon circle">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" stroke-width="2"></circle>
+                </svg>
+              </span>
+              <span>At least 8 characters</span>
+            </div>
+            <div class="password-requirement" data-requirement="lowercase">
+              <span class="requirement-icon circle">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" stroke-width="2"></circle>
+                </svg>
+              </span>
+              <span>Lowercase letter (a-z)</span>
+            </div>
+            <div class="password-requirement" data-requirement="uppercase">
+              <span class="requirement-icon circle">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" stroke-width="2"></circle>
+                </svg>
+              </span>
+              <span>Uppercase letter (A-Z)</span>
+            </div>
+            <div class="password-requirement" data-requirement="digit">
+              <span class="requirement-icon circle">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" stroke-width="2"></circle>
+                </svg>
+              </span>
+              <span>Number (0-9)</span>
+            </div>
+            <div class="password-requirement" data-requirement="symbol">
+              <span class="requirement-icon circle">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" stroke-width="2"></circle>
+                </svg>
+              </span>
+              <span>Special character (!@#$%^&*)</span>
+            </div>
+          </div>
+          <div class="password-strength-bar">
+            <div class="password-strength-bar-fill" style="width: 0%"></div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirm New Password</label>
+          <input type="password" id="confirmPassword" class="form-input" required>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-half btn-secondary" onclick="closePasswordModal()">Cancel</button>
+          <button type="submit" class="btn-half btn-primary">Update</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MFA Enable Modal -->
+  <div id="enableMFAModal" class="modal-overlay">
+    <div class="modal mobile-modal">
+      <div class="modal-header">
+        <h3>Enable 2FA</h3>
+        <button class="icon-btn" onclick="closeEnableMFAModal()">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Step 1: QR Code -->
+        <div id="mfaStep1" class="mfa-step">
+          <p class="step-text">Scan with your authenticator app</p>
+          <div id="qrCodeContainer" class="qr-container"></div>
+          <div class="secret-key-section">
+            <p class="secret-key-label">Or enter this key manually:</p>
+            <div class="secret-key-display">
+              <code id="secretKeyText" class="secret-key-code"></code>
+              <button type="button" class="btn-icon" onclick="copySecretKey()" title="Copy to clipboard">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                </svg>
+              </button>
+            </div>
+            <p class="form-hint">Use this if you can't scan the QR code (e.g., on mobile)</p>
+          </div>
+          <button type="button" class="btn-full btn-primary" onclick="showMFAStep2()">Next</button>
+        </div>
+        <!-- Step 2: Verify Code -->
+        <div id="mfaStep2" class="mfa-step" style="display: none;">
+          <p class="step-text">Enter the 6-digit code</p>
+          <form id="verifyMFAForm" class="modal-form">
+            <div class="form-group">
+              <input type="text" id="mfaVerifyCode" class="form-input code-input" placeholder="000000" maxlength="6" inputmode="numeric" pattern="[0-9]{6}" required>
+            </div>
+            <div class="modal-actions">
+              <button type="button" class="btn-half btn-secondary" onclick="showMFAStep1()">Back</button>
+              <button type="submit" class="btn-half btn-primary">Verify</button>
+            </div>
+          </form>
+        </div>
+        <!-- Step 3: Recovery Codes -->
+        <div id="mfaStep3" class="mfa-step" style="display: none;">
+          <p class="step-text">Save these recovery codes in a safe place</p>
+          <div id="recoveryCodesDisplay" class="recovery-codes"></div>
+          <button type="button" class="btn-full btn-primary" onclick="closeEnableMFAModal()">Done</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MFA Disable Modal -->
+  <div id="disableMFAModal" class="modal-overlay">
+    <div class="modal mobile-modal">
+      <div class="modal-header">
+        <h3>Disable 2FA</h3>
+        <button class="icon-btn" onclick="closeDisableMFAModal()">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="warning-text">This will make your account less secure. Continue?</p>
+        <div class="modal-actions">
+          <button type="button" class="btn-half btn-secondary" onclick="closeDisableMFAModal()">Cancel</button>
+          <button type="button" class="btn-half btn-danger" onclick="handleDisableMFA()">Disable</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Account Confirmation Modal -->
+  <div id="deleteAccountModal" class="modal-overlay">
+    <div class="modal mobile-modal">
+      <div class="modal-header">
+        <h3>Delete Account</h3>
+        <button class="icon-btn" onclick="closeDeleteAccountModal()">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="warning-text">To delete your account, please contact support at <a href="mailto:contact@egidit.com">contact@egidit.com</a></p>
+        <div class="modal-actions">
+          <button type="button" class="btn-full btn-secondary" onclick="closeDeleteAccountModal()">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast"></div>
+
+  <!-- Scripts -->
   <script src="js/supabase.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/guard.js"></script>

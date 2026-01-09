@@ -4,6 +4,9 @@
  */
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // Initialize password strength visualizer
+  initPasswordStrengthVisualizer('newPassword');
+
   const requestForm = document.getElementById('requestResetForm');
   const resetForm = document.getElementById('resetPasswordForm');
   const requestSection = document.getElementById('requestSection');
@@ -102,8 +105,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
 
-      if (newPassword.length < 6) {
-        showError('Password must be at least 6 characters');
+      if (!validatePasswordStrength(newPassword)) {
+        showError('Please meet all password requirements (8+ characters with lowercase, uppercase, number, and symbol)');
         return;
       }
 

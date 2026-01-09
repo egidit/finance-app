@@ -10,6 +10,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const confirmationPage = document.getElementById('confirmationPage');
   const registrationForm = document.getElementById('registrationForm');
 
+  // Initialize password strength visualizer
+  initPasswordStrengthVisualizer('password');
+
   // Password strength indicator
   const passwordInput = document.getElementById('password');
   const strengthIndicator = document.getElementById('passwordStrength');
@@ -77,10 +80,9 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      // Validate password strength
-      const strength = calculatePasswordStrength(password);
-      if (strength < 2) {
-        showError('Please choose a stronger password (at least 8 characters with uppercase, lowercase, and numbers)');
+      // Validate password strength using new requirements
+      if (!validatePasswordStrength(password)) {
+        showError('Please meet all password requirements (8+ characters with lowercase, uppercase, number, and symbol)');
         return;
       }
 
@@ -91,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
       submitBtn.textContent = 'Creating account...';
 
       try {
-        // Register user
+        // Register user (handles duplicate email detection internally)
         const result = await registerUser(email, password, username);
 
         if (result.success) {

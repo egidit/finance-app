@@ -13,8 +13,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const recoverySection = document.getElementById('recoverySection');
   const recoveryForm = document.getElementById('recoveryForm');
 
+  // MFA state - stores factor ID when MFA challenge is required
   let pendingFactorId = null;
-  let userEmail = null;
 
   // Check for recovery link in URL
   checkForRecoveryLink();
@@ -63,14 +63,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (result.success) {
           if (result.requiresMFA) {
-            // MFA required - show MFA input
+            // MFA verification required
+            // Session is active at AAL1 - need MFA to upgrade to AAL2
+            console.log('→ Showing MFA input (session active at AAL1)');
             pendingFactorId = result.factorId;
-            userEmail = email;
             showMFASection();
             submitBtn.disabled = false;
             submitBtn.textContent = originalText;
           } else {
-            // Login successful - redirect to app
+            // No MFA required - redirect to app
+            console.log('→ Redirecting to app (no MFA required)');
             window.location.href = 'app.html';
           }
         } else {
@@ -106,10 +108,70 @@ document.addEventListener('DOMContentLoaded', () => {
       submitBtn.textContent = 'Verifying...';
 
       try {
+        console.log('\n========================================');
+        console.log('  SUBMITTING MFA CODE FOR VERIFICATION');
+        console.log('========================================\n');
+        
+        // ===== Call verifyMFA - handles all backend verification and session upgrade =====
+        // verifyMFA already:
+        // 1. Creates MFA challenge
+        // 2. Verifies TOTP code
+        // 3. Gets backend response with AAL2 session
+        // 4. Handles multiple response structures
+        // 5. Decodes JWT tokens to extract AAL
+        // 6. Calls setSession() and refreshSession()
+        // 7. Validates session is AAL2
+        // 8. Ensures localStorage persistence
+        // So we can trust its result without re-checking
+        console.log('[LOGIN PAGE] Calling verifyMFA()...');
         const result = await verifyMFA(pendingFactorId, code);
 
         if (result.success) {
-          // MFA verified - redirect to app
+          console.log('\n========================================');
+          console.log('  ✓✓✓ verifyMFA() SUCCESSFUL ✓✓✓');
+          console.log('========================================');
+          console.log('Result summary:');
+          console.log('  → Success:', result.success);
+          console.log('  → Session exists:', !!result.session);
+          console.log('  → Session AAL:', result.session?.aal);
+          console.log('  → User ID:', result.user?.id);
+          console.log('  → User email:', result.user?.email);
+          
+          // ===== Basic Validation - verifyMFA should guarantee these =====
+          if (!result.session) {
+            console.error('\n✗ FATAL: verifyMFA returned success but no session');
+            console.error('  → This should never happen - indicates bug in verifyMFA');
+            showError('Session error after MFA. Please try logging in again.');
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+            return;
+          }
+          
+          if (result.session.aal !== 'aal2') {
+            console.error('\n✗ FATAL: verifyMFA returned non-AAL2 session');
+            console.error('  → Expected: aal2');
+            console.error('  → Received:', result.session.aal);
+            console.error('  → This should never happen - verifyMFA should validate this');
+            showError('MFA verification incomplete. Please try again.');
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+            return;
+          }
+          
+          console.log('\n✓ Session validated (AAL2 confirmed)');
+          
+          // ===== Final Pre-Redirect Wait =====
+          // Give browser one last moment to complete any pending storage operations
+          console.log('\n→ Final 200ms wait before redirect...');
+          await new Promise(resolve => setTimeout(resolve, 200));
+          
+          console.log('\n========================================');
+          console.log('  ✓✓✓ AUTHENTICATION COMPLETE ✓✓✓');
+          console.log('  User:', result.user?.email);
+          console.log('  Session AAL: aal2');
+          console.log('  Redirecting to app.html...');
+          console.log('========================================\n');
+          
           window.location.href = 'app.html';
         } else {
           showError(result.error || 'Invalid code. Please try again.');

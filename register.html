@@ -6,6 +6,7 @@
   <title>Personal Finance - Register</title>
   <link rel="stylesheet" href="css/style.css">
   <script src="js/supabase-lib.js"></script>
+  <script src="js/password-strength.js"></script>
 </head>
 <body>
   
@@ -85,8 +86,52 @@
                 </svg>
               </button>
             </div>
-            <div id="passwordStrength" class="password-strength"></div>
-            <p class="form-hint">At least 8 characters with uppercase, lowercase, and numbers</p>
+            <div class="password-requirements">
+              <div class="password-requirements-title">Password must contain:</div>
+              <div class="password-requirement" data-requirement="length">
+                <span class="requirement-icon circle">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" stroke-width="2"></circle>
+                  </svg>
+                </span>
+                <span>At least 8 characters</span>
+              </div>
+              <div class="password-requirement" data-requirement="lowercase">
+                <span class="requirement-icon circle">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" stroke-width="2"></circle>
+                  </svg>
+                </span>
+                <span>Lowercase letter (a-z)</span>
+              </div>
+              <div class="password-requirement" data-requirement="uppercase">
+                <span class="requirement-icon circle">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" stroke-width="2"></circle>
+                  </svg>
+                </span>
+                <span>Uppercase letter (A-Z)</span>
+              </div>
+              <div class="password-requirement" data-requirement="digit">
+                <span class="requirement-icon circle">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" stroke-width="2"></circle>
+                  </svg>
+                </span>
+                <span>Number (0-9)</span>
+              </div>
+              <div class="password-requirement" data-requirement="symbol">
+                <span class="requirement-icon circle">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" stroke-width="2"></circle>
+                  </svg>
+                </span>
+                <span>Special character (!@#$%^&*)</span>
+              </div>
+            </div>
+            <div class="password-strength-bar">
+              <div class="password-strength-bar-fill" style="width: 0%"></div>
+            </div>
           </div>
           
           <!-- Confirm Password Field -->

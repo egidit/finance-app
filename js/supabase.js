@@ -17,7 +17,7 @@ const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     flowType: 'pkce', // Use PKCE flow for enhanced security
     storage: window.localStorage,
     storageKey: 'supabase.auth.token',
-    debug: false
+    debug: false // Debug mode disabled - MFA working correctly
   }
 });
 
