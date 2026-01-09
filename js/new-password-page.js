@@ -24,29 +24,46 @@ document.addEventListener('DOMContentLoaded', async () => {
   let userEmail = null;
   let passwordUpdated = false;
 
-  // Get user session - if it exists, the recovery link is valid
-  try {
-    const { data: { session, user } } = await supabase.auth.getSession();
+  // Wait for Supabase to process recovery token from URL
+  // The auth state change listener will catch when the session is established
+  let sessionEstablished = false;
+  
+  const unsubscribe = supabase.auth.onAuthStateChange(async (event, session) => {
+    if (sessionEstablished) return;
     
-    if (!session || !user) {
+    console.log('Auth event:', event, 'Session:', session);
+    
+    if (event === 'PASSWORD_RECOVERY' || (event === 'SIGNED_IN' && session)) {
+      sessionEstablished = true;
+      userEmail = session?.user?.email;
+      showPasswordSection();
+      unsubscribe.data.subscription.unsubscribe();
+    } else if (event === 'SIGNED_OUT' || (!session && event !== 'INITIAL_SESSION')) {
       showError('Invalid or expired reset link. Please request a new one.');
       setTimeout(() => {
         window.location.href = 'reset-password.html';
       }, 3000);
-      return;
+      unsubscribe.data.subscription.unsubscribe();
     }
-    
-    // Valid session - show password form
-    userEmail = user.email;
-    showPasswordSection();
-  } catch (error) {
-    console.error('Error getting session:', error);
-    showError('An error occurred. Please try again.');
-    setTimeout(() => {
-      window.location.href = 'reset-password.html';
-    }, 3000);
-    return;
-  }
+  });
+  
+  // Also check immediately in case session already exists
+  setTimeout(async () => {
+    if (!sessionEstablished) {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        sessionEstablished = true;
+        userEmail = session.user?.email;
+        showPasswordSection();
+        unsubscribe.data.subscription.unsubscribe();
+      } else {
+        showError('Invalid or expired reset link. Please request a new one.');
+        setTimeout(() => {
+          window.location.href = 'reset-password.html';
+        }, 3000);
+      }
+    }
+  }, 1000);
 
   // Handle password toggle buttons
   document.querySelectorAll('.password-toggle-btn').forEach(btn => {
