@@ -745,7 +745,7 @@ function generateRecoveryCodes() {
 async function resetPassword(email) {
   try {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password.html`
+      redirectTo: `${window.location.origin}/new-password.html`
     });
 
     if (error) throw error;
