@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const mfaForm = document.getElementById('mfaForm');
   const recoveryForm = document.getElementById('recoveryForm');
   
+  const loadingSection = document.getElementById('loadingSection');
   const passwordSection = document.getElementById('passwordSection');
   const mfaSection = document.getElementById('mfaSection');
   const recoverySection = document.getElementById('recoverySection');
@@ -29,6 +30,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const isRecoveryLink = hash.includes('type=recovery');
 
   if (!isRecoveryLink) {
+    hideLoading();
     showError('Invalid reset link. Please request a new password reset.');
     setTimeout(() => {
       window.location.href = 'reset-password.html';
@@ -39,12 +41,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Verify recovery session
   const recoveryCheck = await isRecoverySession();
   if (!recoveryCheck.isRecovery) {
+    hideLoading();
     showError('Invalid or expired reset link. Please request a new one.');
     setTimeout(() => {
       window.location.href = 'reset-password.html';
     }, 3000);
     return;
   }
+
+  // Valid recovery session - show password form
+  hideLoading();
+  showPasswordSection();
 
   // Get user info for MFA check later
   try {
@@ -235,7 +242,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // Helper functions
+  function hideLoading() {
+    if (loadingSection) {
+      loadingSection.style.display = 'none';
+    }
+  }
+
   function showPasswordSection() {
+    if (loadingSection) loadingSection.style.display = 'none';
     passwordSection.style.display = 'block';
     mfaSection.style.display = 'none';
     recoverySection.style.display = 'none';
