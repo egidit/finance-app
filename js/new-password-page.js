@@ -37,14 +37,21 @@ document.addEventListener('DOMContentLoaded', async () => {
       sessionEstablished = true;
       userEmail = session?.user?.email;
       
-      // Check if user has MFA enabled
-      const mfaStatus = await checkMFAStatus();
+      // Check if user has MFA enabled using session factors
+      const factors = session?.user?.factors || [];
+      const hasMFA = factors.some(factor => 
+        factor.factor_type === 'totp' && factor.status === 'verified'
+      );
       
-      if (mfaStatus.hasMFA) {
+      console.log('MFA Check:', { hasMFA, factors, user: session?.user });
+      
+      if (hasMFA) {
         // Show MFA challenge FIRST
+        console.log('Showing MFA section');
         showMfaSection();
       } else {
         // No MFA - go directly to password form
+        console.log('Showing password section');
         showPasswordSection();
       }
       
@@ -66,14 +73,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         sessionEstablished = true;
         userEmail = session.user?.email;
         
-        // Check if user has MFA enabled
-        const mfaStatus = await checkMFAStatus();
+        // Check if user has MFA enabled using session factors
+        const factors = session?.user?.factors || [];
+        const hasMFA = factors.some(factor => 
+          factor.factor_type === 'totp' && factor.status === 'verified'
+        );
         
-        if (mfaStatus.hasMFA) {
+        console.log('MFA Check (timeout):', { hasMFA, factors, user: session?.user });
+        
+        if (hasMFA) {
           // Show MFA challenge FIRST
+          console.log('Showing MFA section (timeout)');
           showMfaSection();
         } else {
           // No MFA - go directly to password form
+          console.log('Showing password section (timeout)');
           showPasswordSection();
         }
         
