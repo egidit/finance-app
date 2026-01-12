@@ -32,7 +32,10 @@ async function loadUserProfile() {
   }
 
   currentUser = result.user;
-  
+  await updateUserDisplay();
+}
+
+async function updateUserDisplay() {
   // Fetch profile data from profiles table
   let displayName = currentUser.email.split('@')[0];
   try {
@@ -70,6 +73,13 @@ async function loadUserProfile() {
     const el = document.getElementById(id);
     if (el) el.textContent = currentUser.email;
   });
+
+  // Populate username form in profile tab
+  const usernameInput = document.getElementById('usernameInput');
+  const emailDisplay = document.getElementById('emailDisplay');
+  
+  if (usernameInput) usernameInput.value = displayName;
+  if (emailDisplay) emailDisplay.textContent = currentUser.email;
 }
 
 async function loadAllData() {
@@ -403,22 +413,22 @@ async function handleIncomeSubmit(e) {
   }
 }
 
-async function deleteIncome(id) {
-  if (!confirm('Delete this income source?')) return;
+function deleteIncome(id) {
+  showDeleteConfirm('Delete Income', 'Are you sure you want to delete this income source?', async () => {
+    try {
+      const { error } = await supabase
+        .from('income')
+        .delete()
+        .eq('id', id);
 
-  try {
-    const { error } = await supabase
-      .from('income')
-      .delete()
-      .eq('id', id);
-
-    if (error) throw error;
-    showToast('Income deleted', 'success');
-    await loadIncomeData();
-    updateDashboard();
-  } catch (error) {
-    showToast('Failed to delete income', 'error');
-  }
+      if (error) throw error;
+      showToast('Income deleted', 'success');
+      await loadIncomeData();
+      updateDashboard();
+    } catch (error) {
+      showToast('Failed to delete income', 'error');
+    }
+  });
 }
 
 // ========================================
@@ -501,22 +511,22 @@ async function handleExpenseSubmit(e) {
   }
 }
 
-async function deleteExpense(id) {
-  if (!confirm('Delete this expense?')) return;
+function deleteExpense(id) {
+  showDeleteConfirm('Delete Expense', 'Are you sure you want to delete this expense?', async () => {
+    try {
+      const { error } = await supabase
+        .from('expenses')
+        .delete()
+        .eq('id', id);
 
-  try {
-    const { error } = await supabase
-      .from('expenses')
-      .delete()
-      .eq('id', id);
-
-    if (error) throw error;
-    showToast('Expense deleted', 'success');
-    await loadExpensesData();
-    updateDashboard();
-  } catch (error) {
-    showToast('Failed to delete expense', 'error');
-  }
+      if (error) throw error;
+      showToast('Expense deleted', 'success');
+      await loadExpensesData();
+      updateDashboard();
+    } catch (error) {
+      showToast('Failed to delete expense', 'error');
+    }
+  });
 }
 
 // ========================================
@@ -571,6 +581,7 @@ async function handlePasswordSubmit(e) {
 // ========================================
 async function checkMFAStatus() {
   const statusText = document.getElementById('mfaStatusText');
+  const statusBadge = document.getElementById('mfaStatusBadge');
   const enableBtn = document.getElementById('enableMFABtn');
   const disableBtn = document.getElementById('disableMFABtn');
 
@@ -581,15 +592,28 @@ async function checkMFAStatus() {
 
     if (hasMFA) {
       statusText.textContent = 'Enabled';
+      statusBadge.innerHTML = `
+        <svg class="status-icon status-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.2"></circle>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4"></path>
+        </svg>
+      `;
       enableBtn.style.display = 'none';
       disableBtn.style.display = 'inline-block';
     } else {
       statusText.textContent = 'Disabled';
+      statusBadge.innerHTML = `
+        <svg class="status-icon status-error" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.2"></circle>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 15L15 9M9 9l6 6"></path>
+        </svg>
+      `;
       enableBtn.style.display = 'inline-block';
       disableBtn.style.display = 'none';
     }
   } catch (error) {
     statusText.textContent = 'Error';
+    statusBadge.innerHTML = '';
   }
 }
 
@@ -658,6 +682,19 @@ function copySecretKey() {
   const secretKey = document.getElementById('secretKeyText').textContent;
   navigator.clipboard.writeText(secretKey).then(() => {
     showToast('Secret key copied to clipboard', 'success');
+  }).catch(() => {
+    showToast('Failed to copy', 'error');
+  });
+}
+
+function copyRecoveryCodes() {
+  const codesContainer = document.getElementById('recoveryCodesDisplay');
+  const codes = Array.from(codesContainer.querySelectorAll('.recovery-code'))
+    .map(el => el.textContent)
+    .join('\n');
+  
+  navigator.clipboard.writeText(codes).then(() => {
+    showToast('Recovery codes copied to clipboard', 'success');
   }).catch(() => {
     showToast('Failed to copy', 'error');
   });
@@ -799,6 +836,57 @@ function hideModal(modalId) {
   if (modal) modal.classList.remove('active');
 }
 
+// Delete confirmation modal
+let pendingDeleteCallback = null;
+
+function showDeleteConfirm(title, message, onConfirm) {
+  document.getElementById('deleteConfirmTitle').textContent = title;
+  document.getElementById('deleteConfirmMessage').textContent = message;
+  pendingDeleteCallback = onConfirm;
+  showModal('deleteConfirmModal');
+}
+
+function closeDeleteConfirmModal() {
+  hideModal('deleteConfirmModal');
+  pendingDeleteCallback = null;
+}
+
+function confirmDelete() {
+  if (pendingDeleteCallback) {
+    pendingDeleteCallback();
+  }
+  closeDeleteConfirmModal();
+}
+
+// ========================================
+// USERNAME UPDATE
+// ========================================
+async function handleUsernameUpdate(e) {
+  e.preventDefault();
+  
+  const username = document.getElementById('usernameInput').value.trim();
+  
+  if (!username) {
+    showToast('Please enter a username', 'error');
+    return;
+  }
+
+  try {
+    const { error } = await supabase
+      .from('profiles')
+      .update({ display_name: username })
+      .eq('id', currentUser.id);
+
+    if (error) throw error;
+
+    showToast('Username updated successfully', 'success');
+    await updateUserDisplay();
+  } catch (error) {
+    console.error('Error updating username:', error);
+    showToast('Failed to update username', 'error');
+  }
+}
+
 // ========================================
 // TOAST NOTIFICATIONS
 // ========================================
@@ -838,6 +926,24 @@ function setupEventListeners() {
     btn.addEventListener('click', handleLogout);
   });
 
+  document.querySelectorAll('[data-action="profile"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      closeMobileMenu();
+      switchTab('profile');
+    });
+  });
+
+  // Click sidebar user section to open profile
+  document.getElementById('sidebarUserBtn')?.addEventListener('click', () => {
+    switchTab('profile');
+  });
+
+  // Click mobile menu user section to open profile
+  document.querySelector('.menu-user-info')?.addEventListener('click', () => {
+    closeMobileMenu();
+    switchTab('profile');
+  });
+
   // Income
   document.getElementById('addIncomeBtn')?.addEventListener('click', openIncomeModal);
   document.getElementById('addIncomeBtnDesktop')?.addEventListener('click', openIncomeModal);
@@ -860,12 +966,24 @@ function setupEventListeners() {
   // Delete account
   document.getElementById('deleteAccountBtn')?.addEventListener('click', openDeleteAccountModal);
 
+  // Username update
+  document.getElementById('updateUsernameForm')?.addEventListener('submit', handleUsernameUpdate);
+
   // Modal overlays (close on background click)
+  // Track mousedown location to ensure both down and up happen on overlay
+  let mouseDownTarget = null;
+  
   document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('mousedown', (e) => {
+      mouseDownTarget = e.target;
+    });
+    
     overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) {
+      // Only close if both mousedown and click occurred on the overlay (not modal content)
+      if (e.target === overlay && mouseDownTarget === overlay) {
         overlay.classList.remove('active');
       }
+      mouseDownTarget = null;
     });
   });
 }

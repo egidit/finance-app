@@ -156,6 +156,14 @@
             <div class="form-footer-link">
               <a href="#" id="backToMFA" class="text-link-sm">Back to authentication code</a>
             </div>
+            
+            <!-- Support Contact -->
+            <div class="recovery-support-section">
+              <p class="recovery-help-text">Lost your recovery codes?</p>
+              <label for="supportModalToggle" class="text-link recovery-support-link">
+                Contact Support
+              </label>
+            </div>
           </form>
         </div>
         
@@ -172,6 +180,29 @@
     <p class="auth-footer-text">
       © 2026 Personal Finance App. All rights reserved.
     </p>
+  </div>
+  
+  <!-- Support Modal -->
+  <input type="checkbox" id="supportModalToggle" class="modal-toggle">
+  <div class="modal-overlay">
+    <label for="supportModalToggle" class="modal-backdrop"></label>
+    <div class="modal mobile-modal">
+      <div class="modal-header">
+        <h3>Contact Support</h3>
+        <label for="supportModalToggle" class="icon-btn">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </label>
+      </div>
+      <div class="modal-body">
+        <p class="support-description">Lost access to your authenticator app and recovery codes? Contact our support team for assistance.</p>
+        
+        <div class="support-email-box">
+          <a href="mailto:support@egidit.com" class="support-email">support@egidit.com</a>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Scripts -->
