@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   let userEmail = null;
   let mfaVerified = false;
+  let userFactors = []; // Store user's MFA factors
 
   // Wait for Supabase to process recovery token from URL
   // The auth state change listener will catch when the session is established
@@ -39,6 +40,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       
       // Check if user has MFA enabled using session factors
       const factors = session?.user?.factors || [];
+      userFactors = factors; // Store for later use
       const hasMFA = factors.some(factor => 
         factor.factor_type === 'totp' && factor.status === 'verified'
       );
@@ -75,6 +77,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         // Check if user has MFA enabled using session factors
         const factors = session?.user?.factors || [];
+        userFactors = factors; // Store for later use
         const hasMFA = factors.some(factor => 
           factor.factor_type === 'totp' && factor.status === 'verified'
         );
@@ -142,7 +145,19 @@ document.addEventListener('DOMContentLoaded', async () => {
       submitBtn.textContent = 'Verifying...';
 
       try {
-        const result = await verifyMFA(code);
+        // Get the TOTP factor ID
+        const totpFactor = userFactors.find(factor => 
+          factor.factor_type === 'totp' && factor.status === 'verified'
+        );
+        
+        if (!totpFactor) {
+          showError('MFA factor not found. Please try again.');
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalText;
+          return;
+        }
+        
+        const result = await verifyMFA(totpFactor.id, code);
 
         if (result.success) {
           mfaVerified = true;
@@ -187,7 +202,19 @@ document.addEventListener('DOMContentLoaded', async () => {
       submitBtn.textContent = 'Verifying...';
 
       try {
-        const result = await verifyMFA(code);
+        // Get the TOTP factor ID (recovery codes use the same factor)
+        const totpFactor = userFactors.find(factor => 
+          factor.factor_type === 'totp' && factor.status === 'verified'
+        );
+        
+        if (!totpFactor) {
+          showError('MFA factor not found. Please try again.');
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalText;
+          return;
+        }
+        
+        const result = await verifyMFA(totpFactor.id, code);
 
         if (result.success) {
           mfaVerified = true;
