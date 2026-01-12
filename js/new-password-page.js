@@ -8,9 +8,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   initPasswordStrengthVisualizer('newPassword');
 
   const passwordForm = document.getElementById('newPasswordForm');
+  const mfaForm = document.getElementById('mfaForm');
+  const recoveryForm = document.getElementById('recoveryForm');
+  
   const passwordSection = document.getElementById('passwordSection');
+  const mfaSection = document.getElementById('mfaSection');
+  const recoverySection = document.getElementById('recoverySection');
+  
   const errorMessage = document.getElementById('errorMessage');
   const successMessage = document.getElementById('successMessage');
+  
+  const useRecoveryCodeBtn = document.getElementById('useRecoveryCodeBtn');
+  const backToMfaBtn = document.getElementById('backToMfaBtn');
+
+  let userEmail = null;
+  let mfaVerified = false;
 
   // Wait for Supabase to process recovery token from URL
   // The auth state change listener will catch when the session is established
@@ -24,7 +36,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (event === 'PASSWORD_RECOVERY' || (event === 'SIGNED_IN' && session)) {
       sessionEstablished = true;
       userEmail = session?.user?.email;
-      showPasswordSection();
+      
+      // Check if user has MFA enabled
+      const mfaStatus = await checkMFAStatus();
+      
+      if (mfaStatus.hasMFA) {
+        // Show MFA challenge FIRST
+        showMfaSection();
+      } else {
+        // No MFA - go directly to password form
+        showPasswordSection();
+      }
+      
       unsubscribe.data.subscription.unsubscribe();
     } else if (event === 'SIGNED_OUT' || (!session && event !== 'INITIAL_SESSION')) {
       showError('Invalid or expired reset link. Please request a new one.');
@@ -42,7 +65,18 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (session) {
         sessionEstablished = true;
         userEmail = session.user?.email;
-        showPasswordSection();
+        
+        // Check if user has MFA enabled
+        const mfaStatus = await checkMFAStatus();
+        
+        if (mfaStatus.hasMFA) {
+          // Show MFA challenge FIRST
+          showMfaSection();
+        } else {
+          // No MFA - go directly to password form
+          showPasswordSection();
+        }
+        
         unsubscribe.data.subscription.unsubscribe();
       } else {
         showError('Invalid or expired reset link. Please request a new one.');
@@ -73,6 +107,110 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
+  // Handle MFA form submission
+  if (mfaForm) {
+    mfaForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const code = document.getElementById('mfaCode').value.trim();
+
+      if (!code || code.length !== 6) {
+        showError('Please enter a valid 6-digit code');
+        return;
+      }
+
+      hideError();
+      hideSuccess();
+
+      const submitBtn = mfaForm.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Verifying...';
+
+      try {
+        const result = await verifyMFA(code);
+
+        if (result.success) {
+          mfaVerified = true;
+          showSuccess('Verification successful! Now set your new password.');
+          
+          // Show password form after MFA verification
+          setTimeout(() => {
+            showPasswordSection();
+            hideSuccess();
+          }, 1500);
+        } else {
+          showError(result.error || 'Invalid authentication code');
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalText;
+        }
+      } catch (error) {
+        showError('An unexpected error occurred. Please try again.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+      }
+    });
+  }
+
+  // Handle recovery code form submission
+  if (recoveryForm) {
+    recoveryForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const code = document.getElementById('recoveryCode').value.trim();
+
+      if (!code) {
+        showError('Please enter a recovery code');
+        return;
+      }
+
+      hideError();
+      hideSuccess();
+
+      const submitBtn = recoveryForm.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Verifying...';
+
+      try {
+        const result = await verifyMFA(code);
+
+        if (result.success) {
+          mfaVerified = true;
+          showSuccess('Verification successful! Now set your new password.');
+          
+          // Show password form after recovery code verification
+          setTimeout(() => {
+            showPasswordSection();
+            hideSuccess();
+          }, 1500);
+        } else {
+          showError(result.error || 'Invalid recovery code');
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalText;
+        }
+      } catch (error) {
+        showError('An unexpected error occurred. Please try again.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+      }
+    });
+  }
+
+  // Switch to recovery code
+  if (useRecoveryCodeBtn) {
+    useRecoveryCodeBtn.addEventListener('click', () => {
+      showRecoverySection();
+    });
+  }
+
+  // Switch back to MFA
+  if (backToMfaBtn) {
+    backToMfaBtn.addEventListener('click', () => {
+      showMfaSection();
+    });
+  }
+
   // Handle new password form submission
   if (passwordForm) {
     passwordForm.addEventListener('submit', async (e) => {
@@ -100,7 +238,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       submitBtn.textContent = 'Updating password...';
 
       try {
-        // Update password
+        // Update password (now works because MFA verified = AAL2)
         const result = await updatePassword(newPassword);
 
         if (result.success) {
@@ -127,6 +265,30 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Helper functions
   function showPasswordSection() {
     passwordSection.style.display = 'block';
+    mfaSection.style.display = 'none';
+    recoverySection.style.display = 'none';
+  }
+
+  function showMfaSection() {
+    passwordSection.style.display = 'none';
+    mfaSection.style.display = 'block';
+    recoverySection.style.display = 'none';
+    
+    // Focus on MFA input
+    setTimeout(() => {
+      document.getElementById('mfaCode').focus();
+    }, 100);
+  }
+
+  function showRecoverySection() {
+    passwordSection.style.display = 'none';
+    mfaSection.style.display = 'none';
+    recoverySection.style.display = 'block';
+    
+    // Focus on recovery input
+    setTimeout(() => {
+      document.getElementById('recoveryCode').focus();
+    }, 100);
   }
 
   function showError(message) {
@@ -154,6 +316,33 @@ document.addEventListener('DOMContentLoaded', async () => {
   function hideSuccess() {
     if (successMessage) {
       successMessage.classList.add('hidden');
+    }
+  }
+
+  /**
+   * Check if user has MFA enabled
+   */
+  async function checkMFAStatus() {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        return { hasMFA: false };
+      }
+
+      // Check if user has MFA factors enrolled
+      const factors = user.factors || [];
+      const hasTOTP = factors.some(factor => 
+        factor.factor_type === 'totp' && factor.status === 'verified'
+      );
+
+      return {
+        hasMFA: hasTOTP,
+        factors: factors
+      };
+    } catch (error) {
+      console.error('Error checking MFA status:', error);
+      return { hasMFA: false };
     }
   }
 });
