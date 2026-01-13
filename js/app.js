@@ -5,6 +5,7 @@ let currentUser = null;
 let incomeData = [];
 let expensesData = [];
 let financeChart = null;
+let pendingDeleteCallback = null;
 
 // ========================================
 // INITIALIZATION
@@ -77,9 +78,41 @@ async function updateUserDisplay() {
   // Populate username form in profile tab
   const usernameInput = document.getElementById('usernameInput');
   const emailDisplay = document.getElementById('emailDisplay');
+  const memberSinceDisplay = document.getElementById('memberSinceDisplay');
   
   if (usernameInput) usernameInput.value = displayName;
   if (emailDisplay) emailDisplay.textContent = currentUser.email;
+  
+  // Load and display account creation date
+  if (memberSinceDisplay) {
+    loadAccountCreationDate();
+  }
+}
+
+async function loadAccountCreationDate() {
+  const memberSinceDisplay = document.getElementById('memberSinceDisplay');
+  if (!memberSinceDisplay) return;
+  
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('created_at')
+      .eq('id', currentUser.id)
+      .single();
+    
+    if (error) throw error;
+    
+    if (data && data.created_at) {
+      const createdDate = new Date(data.created_at);
+      const options = { year: 'numeric', month: 'long', day: 'numeric' };
+      memberSinceDisplay.textContent = createdDate.toLocaleDateString('en-US', options);
+    } else {
+      memberSinceDisplay.textContent = 'N/A';
+    }
+  } catch (error) {
+    console.error('Error loading account creation date:', error);
+    memberSinceDisplay.textContent = 'N/A';
+  }
 }
 
 async function loadAllData() {
@@ -549,6 +582,7 @@ async function handlePasswordSubmit(e) {
   const currentPassword = document.getElementById('currentPassword').value;
   const newPassword = document.getElementById('newPassword').value;
   const confirmPassword = document.getElementById('confirmPassword').value;
+  const submitBtn = document.getElementById('updatePasswordBtn');
 
   if (newPassword !== confirmPassword) {
     showToast('Passwords do not match', 'error');
@@ -560,12 +594,17 @@ async function handlePasswordSubmit(e) {
     return;
   }
 
+  // Set loading state
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Updating...';
+
   try {
     // User already authenticated via guard.js - no need to re-check AAL here
     // guard.js ensures proper AAL level before page loads
     
     const result = await changePassword(currentPassword, newPassword);
     if (result.success) {
+      submitBtn.textContent = 'Success!';
       showToast('Password changed successfully. You will now be signed out.', 'success');
       closePasswordModal();
       
@@ -574,16 +613,27 @@ async function handlePasswordSubmit(e) {
         window.location.href = 'index.html';
       }, 2000);
     } else {
+      // Reset button state
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Update';
+      
       // Show user-friendly error messages
       let errorMessage = result.error || 'Failed to update password';
       
       if (errorMessage.includes('requiresMFA') || errorMessage.includes('AAL2') || errorMessage.includes('MFA verification')) {
         errorMessage = 'MFA verification required. Please complete the MFA challenge before changing your password.';
+      } else if (errorMessage.includes('rate limit') || errorMessage.includes('too many')) {
+        errorMessage = 'Too many attempts. Please wait a few minutes before trying again.';
+      } else if (errorMessage.includes('Invalid password') || errorMessage.includes('incorrect')) {
+        errorMessage = 'Current password is incorrect.';
       }
       
       showToast(errorMessage, 'error');
     }
   } catch (error) {
+    // Reset button state
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Update';
     showToast('Failed to update password', 'error');
   }
 }
@@ -596,11 +646,20 @@ async function checkMFAStatus() {
   const statusBadge = document.getElementById('mfaStatusBadge');
   const enableBtn = document.getElementById('enableMFABtn');
   const disableBtn = document.getElementById('disableMFABtn');
+  const mfaMetadata = document.getElementById('mfaMetadata');
+  const mfaMetadataText = document.getElementById('mfaMetadataText');
 
   try {
     const { data: { user } } = await supabase.auth.getUser();
     const factors = user?.factors || [];
     const hasMFA = factors.some(f => f.status === 'verified');
+
+    // Load MFA metadata from profiles table
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('last_mfa_change, mfa_factors_count')
+      .eq('id', currentUser.id)
+      .single();
 
     if (hasMFA) {
       statusText.textContent = 'Enabled';
@@ -612,6 +671,25 @@ async function checkMFAStatus() {
       `;
       enableBtn.style.display = 'none';
       disableBtn.style.display = 'inline-block';
+      
+      // Display MFA metadata
+      if (profile && mfaMetadata && mfaMetadataText) {
+        let metadataStr = '';
+        if (profile.last_mfa_change) {
+          const mfaDate = new Date(profile.last_mfa_change);
+          const options = { year: 'numeric', month: 'short', day: 'numeric' };
+          metadataStr = `MFA enabled since ${mfaDate.toLocaleDateString('en-US', options)}`;
+        }
+        if (profile.mfa_factors_count) {
+          metadataStr += metadataStr ? ` • ${profile.mfa_factors_count} factor(s)` : `${profile.mfa_factors_count} factor(s)`;
+        }
+        if (metadataStr) {
+          mfaMetadataText.textContent = metadataStr;
+          mfaMetadata.style.display = 'block';
+        } else {
+          mfaMetadata.style.display = 'none';
+        }
+      }
     } else {
       statusText.textContent = 'Disabled';
       statusBadge.innerHTML = `
@@ -622,22 +700,32 @@ async function checkMFAStatus() {
       `;
       enableBtn.style.display = 'inline-block';
       disableBtn.style.display = 'none';
+      
+      // Hide metadata when MFA is disabled
+      if (mfaMetadata) {
+        mfaMetadata.style.display = 'none';
+      }
     }
   } catch (error) {
     statusText.textContent = 'Error';
     statusBadge.innerHTML = '';
+    if (mfaMetadata) {
+      mfaMetadata.style.display = 'none';
+    }
   }
 }
 
 function openEnableMFAModal() {
   showModal('enableMFAModal');
-  showMFAStep1();
-  enrollMFAProcess();
+  showMFAStep0();
+  document.getElementById('mfaPasswordVerify').value = '';
+  document.getElementById('mfaVerifyCode').value = '';
 }
 
 function closeEnableMFAModal() {
   hideModal('enableMFAModal');
   currentMFAFactorId = null;
+  document.getElementById('mfaPasswordVerify').value = '';
   document.getElementById('mfaVerifyCode').value = '';
 }
 
@@ -712,22 +800,92 @@ function copyRecoveryCodes() {
   });
 }
 
+function showMFAStep0() {
+  document.getElementById('mfaStep0').style.display = 'block';
+  document.getElementById('mfaStep1').style.display = 'none';
+  document.getElementById('mfaStep2').style.display = 'none';
+  document.getElementById('mfaStep3').style.display = 'none';
+}
+
 function showMFAStep1() {
+  document.getElementById('mfaStep0').style.display = 'none';
   document.getElementById('mfaStep1').style.display = 'block';
   document.getElementById('mfaStep2').style.display = 'none';
   document.getElementById('mfaStep3').style.display = 'none';
 }
 
 function showMFAStep2() {
+  document.getElementById('mfaStep0').style.display = 'none';
   document.getElementById('mfaStep1').style.display = 'none';
   document.getElementById('mfaStep2').style.display = 'block';
   document.getElementById('mfaStep3').style.display = 'none';
 }
 
 function showMFAStep3() {
+  document.getElementById('mfaStep0').style.display = 'none';
   document.getElementById('mfaStep1').style.display = 'none';
   document.getElementById('mfaStep2').style.display = 'none';
   document.getElementById('mfaStep3').style.display = 'block';
+}
+
+async function handlePasswordVerifyForMFA(e) {
+  e.preventDefault();
+  const password = document.getElementById('mfaPasswordVerify').value;
+
+  if (!password) {
+    showToast('Please enter your password', 'error');
+    return;
+  }
+
+  try {
+    // Verify password by attempting to sign in
+    const { data: { user } } = await supabase.auth.getUser();
+    const { error } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: password
+    });
+
+    if (error) {
+      showToast('Invalid password', 'error');
+      return;
+    }
+
+    // Password verified, proceed to MFA enrollment
+    showMFAStep1();
+    enrollMFAProcess();
+  } catch (error) {
+    showToast('Password verification failed', 'error');
+  }
+}
+
+async function handlePasswordVerifyForMFA(e) {
+  e.preventDefault();
+  const password = document.getElementById('mfaPasswordVerify').value;
+
+  if (!password) {
+    showToast('Please enter your password', 'error');
+    return;
+  }
+
+  try {
+    // Verify password by attempting to sign in
+    const { data: { user } } = await supabase.auth.getUser();
+    const { error } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: password
+    });
+
+    if (error) {
+      showToast('Invalid password', 'error');
+      return;
+    }
+
+    // Password verified, proceed to MFA enrollment
+    showMFAStep1();
+    enrollMFAProcess();
+  } catch (error) {
+    showToast('Password verification failed', 'error');
+  }
 }
 
 async function handleMFAVerify(e) {
@@ -801,6 +959,10 @@ async function handleDisableMFA(e) {
       
       if (result.requiresAAL2) {
         errorMessage = 'Session expired. Please refresh the page and complete MFA verification again.';
+      } else if (errorMessage.includes('rate limit') || errorMessage.includes('too many')) {
+        errorMessage = 'Too many attempts. Please wait a few minutes before trying again.';
+      } else if (errorMessage.includes('Invalid') || errorMessage.includes('incorrect')) {
+        errorMessage = 'Invalid password or MFA code.';
       }
       
       showToast(errorMessage, 'error');
@@ -862,7 +1024,6 @@ function hideModal(modalId) {
 }
 
 // Delete confirmation modal
-let pendingDeleteCallback = null;
 
 function showDeleteConfirm(title, message, onConfirm) {
   document.getElementById('deleteConfirmTitle').textContent = title;
@@ -986,6 +1147,7 @@ function setupEventListeners() {
   // MFA
   document.getElementById('enableMFABtn')?.addEventListener('click', openEnableMFAModal);
   document.getElementById('disableMFABtn')?.addEventListener('click', openDisableMFAModal);
+  document.getElementById('verifyPasswordMFAForm')?.addEventListener('submit', handlePasswordVerifyForMFA);
   document.getElementById('verifyMFAForm')?.addEventListener('submit', handleMFAVerify);
 
   // Delete account

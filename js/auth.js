@@ -680,6 +680,27 @@ async function verifyMFAEnrollment(factorId, code) {
     // Generate recovery codes
     const recoveryCodes = generateRecoveryCodes();
 
+    // Store recovery codes in database
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/store-recovery-codes`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({ codes: recoveryCodes })
+      });
+
+      if (!response.ok) {
+        console.error('Failed to store recovery codes:', await response.text());
+        // Don't fail the enrollment, just log the error
+      }
+    } catch (storeError) {
+      console.error('Error storing recovery codes:', storeError);
+      // Don't fail the enrollment
+    }
+
     return {
       success: true,
       session: data.session,
@@ -702,61 +723,36 @@ async function verifyMFAEnrollment(factorId, code) {
  */
 async function disableMFA(password, mfaCode) {
   try {
+    // Get current session for auth header
     const { data: { session } } = await supabase.auth.getSession();
-    if (!session) throw new Error('No active session');
+    if (!session) {
+      throw new Error('Not logged in. Please sign in again.');
+    }
 
-    const response = await fetch('https://hvzpiqnnsiorjizbkzdl.supabase.co/functions/v1/disable-mfa-secure', {
+    // Call Edge Function with rate limiting
+    const response = await fetch(`${supabase.supabaseUrl}/functions/v1/disable-mfa`, {
       method: 'POST',
       headers: {
+        'Authorization': `Bearer ${session.access_token}`,
         'Content-Type': 'application/json',
-        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2enBpcW5uc2lvcmppemJremRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc4MDA4NDMsImV4cCI6MjA4MzM3Njg0M30.3eOmNtn-up9VqbSa8IZFY4suHJD8A2EUke4lVKG4ffk',
-        'x-user-token': session.access_token
       },
-      body: JSON.stringify({
-        password,
-        mfaCode
-      })
+      body: JSON.stringify({ password, mfaCode })
     });
 
-    const result = await response.json();
+    const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(result.error || 'Failed to disable MFA');
+      throw new Error(data.error || 'Failed to disable MFA');
     }
 
     return {
       success: true,
-      message: 'MFA disabled successfully'
+      message: data.message || 'MFA disabled successfully'
     };
   } catch (error) {
-    // Handle specific AAL2 requirement error
-    if (error.message && (error.message.includes('requiresAAL2') || error.message.includes('MFA verification required'))) {
-      return {
-        success: false,
-        error: 'You must complete MFA verification before disabling. Please refresh the page and verify your MFA code.',
-        requiresAAL2: true
-      };
-    }
-    
-    // Handle factor hierarchy violation
-    if (error.message && error.message.includes('stronger security factors')) {
-      return {
-        success: false,
-        error: error.message // Pass through the detailed hierarchy error
-      };
-    }
-    
-    // Handle cooling period error
-    if (error.message && error.message.includes('24 hours')) {
-      return {
-        success: false,
-        error: error.message // Pass through the cooling period message
-      };
-    }
-    
     return {
       success: false,
-      error: error.message
+      error: error.message || 'Failed to disable MFA'
     };
   }
 }

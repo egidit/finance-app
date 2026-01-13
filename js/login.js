@@ -94,11 +94,23 @@ loginForm.addEventListener('submit', async (e) => {
 
     if (error) throw error;
     
-    // Login successful
-    showSuccess('Login successful! Redirecting...');
-    setTimeout(() => {
-      window.location.href = 'app.html';
-    }, 1000);
+    // Check if user has MFA enabled
+    const { data: { user } } = await supabase.auth.getUser();
+    const verifiedFactors = user?.factors?.filter(f => f.status === 'verified') || [];
+    
+    if (verifiedFactors.length > 0) {
+      // MFA is enabled - show MFA form
+      console.log('MFA enabled, prompting for verification');
+      loadingState.classList.add('hidden');
+      document.getElementById('mfaSection').style.display = 'block';
+      document.getElementById('mfaCode').focus();
+    } else {
+      // No MFA - redirect to app
+      showSuccess('Login successful! Redirecting...');
+      setTimeout(() => {
+        window.location.href = 'app.html';
+      }, 1000);
+    }
     
   } catch (error) {
     loginForm.classList.remove('hidden');
@@ -159,6 +171,54 @@ forgotPasswordModal.addEventListener('mouseup', (e) => {
 
 forgotPasswordModal.addEventListener('mouseleave', () => {
   mouseDownOnOverlay = false;
+});
+
+// Handle MFA verification
+const mfaForm = document.getElementById('mfaForm');
+mfaForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const mfaCode = document.getElementById('mfaCode').value.trim();
+  
+  if (!mfaCode || mfaCode.length !== 6) {
+    showError('Please enter a valid 6-digit code');
+    return;
+  }
+  
+  try {
+    // Get current session for auth header
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      throw new Error('Session expired. Please log in again.');
+    }
+
+    // Call Edge Function with rate limiting
+    const response = await fetch(`${supabase.supabaseUrl}/functions/v1/verify-mfa-login`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${session.access_token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ mfaCode })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'MFA verification failed');
+    }
+
+    // Success - session is now upgraded to AAL2
+    showSuccess('MFA verified! Redirecting...');
+    setTimeout(() => {
+      window.location.href = 'app.html';
+    }, 1000);
+    
+  } catch (error) {
+    showError(error.message || 'Invalid code. Please try again.');
+    document.getElementById('mfaCode').value = '';
+    document.getElementById('mfaCode').focus();
+  }
 });
 
 // Password visibility toggle functionality

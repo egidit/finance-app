@@ -242,12 +242,16 @@
         </div>
         <form id="updateUsernameForm" class="form-standard">
           <div class="form-group">
-            <label class="form-label">Username</label>
+            <label class="form-label">Username <span class="required">*</span></label>
             <input type="text" id="usernameInput" class="form-input" placeholder="Enter your username" required>
           </div>
           <div class="form-group">
             <label class="form-label">Email</label>
             <div class="form-display" id="emailDisplay"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Member Since</label>
+            <div class="form-display" id="memberSinceDisplay">Loading...</div>
           </div>
           <button type="submit" class="btn-full btn-primary">Update</button>
         </form>
@@ -258,36 +262,39 @@
         <div class="card-header-simple">
           <h3 class="card-title">Security</h3>
         </div>
-        <div class="settings-list">
-          <button class="settings-item" id="changePasswordBtn">
-            <div class="settings-icon">
+        <div class="security-row">
+          <button class="security-item" id="changePasswordBtn">
+            <div class="security-icon">
               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
               </svg>
             </div>
-            <div class="settings-content">
-              <div class="settings-label">Change Password</div>
-              <div class="settings-desc">Update your password</div>
+            <div class="security-info">
+              <div class="security-title">Change Password</div>
+              <div class="security-subtitle">Update your password</div>
             </div>
-            <svg class="settings-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="security-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
             </svg>
           </button>
 
-          <div class="settings-item">
-            <div class="settings-icon">
+          <div class="security-item">
+            <div class="security-icon">
               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
               </svg>
             </div>
-            <div class="settings-content">
-              <div class="settings-label">Two-Factor Auth</div>
-              <div class="settings-desc">
+            <div class="security-info">
+              <div class="security-title">Two-Factor Authentication</div>
+              <div class="security-subtitle">
                 <span class="status-badge" id="mfaStatusBadge"></span>
                 <span id="mfaStatusText">Loading...</span>
               </div>
+              <div class="security-meta" id="mfaMetadata" style="display: none;">
+                <span id="mfaMetadataText"></span>
+              </div>
             </div>
-            <div class="settings-actions">
+            <div class="security-action">
               <button id="enableMFABtn" class="btn-sm btn-primary" style="display: none;">Enable</button>
               <button id="disableMFABtn" class="btn-sm btn-danger" style="display: none;">Disable</button>
             </div>
@@ -343,15 +350,15 @@
       <form id="incomeForm" class="modal-form">
         <input type="hidden" id="incomeId">
         <div class="form-group">
-          <label class="form-label">Source</label>
+          <label class="form-label">Source <span class="required">*</span></label>
           <input type="text" id="incomeSource" class="form-input" placeholder="e.g., Salary" required>
         </div>
         <div class="form-group">
-          <label class="form-label">Amount</label>
+          <label class="form-label">Amount <span class="required">*</span></label>
           <input type="number" id="incomeAmount" class="form-input" placeholder="0.00" step="0.01" required>
         </div>
         <div class="form-group">
-          <label class="form-label">Frequency</label>
+          <label class="form-label">Frequency <span class="required">*</span></label>
           <select id="incomeFrequency" class="form-input" required>
             <option value="monthly">Monthly</option>
             <option value="weekly">Weekly</option>
@@ -381,19 +388,19 @@
       <form id="expenseForm" class="modal-form">
         <input type="hidden" id="expenseId">
         <div class="form-group">
-          <label class="form-label">Name</label>
+          <label class="form-label">Name <span class="required">*</span></label>
           <input type="text" id="expenseName" class="form-input" placeholder="e.g., Grocery Shopping" required>
         </div>
         <div class="form-group">
-          <label class="form-label">Category</label>
+          <label class="form-label">Category <span class="required">*</span></label>
           <input type="text" id="expenseCategory" class="form-input" placeholder="e.g., Food" required>
         </div>
         <div class="form-group">
-          <label class="form-label">Amount</label>
+          <label class="form-label">Amount <span class="required">*</span></label>
           <input type="number" id="expenseAmount" class="form-input" placeholder="0.00" step="0.01" required>
         </div>
         <div class="form-group">
-          <label class="form-label">Due Date</label>
+          <label class="form-label">Due Date <span class="required">*</span></label>
           <input type="date" id="expenseDueDate" class="form-input" required>
         </div>
         <div class="form-group">
@@ -423,11 +430,11 @@
       </div>
       <form id="passwordForm" class="modal-form">
         <div class="form-group">
-          <label class="form-label">Current Password</label>
+          <label class="form-label">Current Password <span class="required">*</span></label>
           <input type="password" id="currentPassword" class="form-input" required>
         </div>
         <div class="form-group">
-          <label class="form-label">New Password</label>
+          <label class="form-label">New Password <span class="required">*</span></label>
           <input type="password" id="newPassword" class="form-input" required>
           <div class="password-requirements">
             <div class="password-requirements-title">Password must contain:</div>
@@ -477,12 +484,12 @@
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">Confirm New Password</label>
+          <label class="form-label">Confirm New Password <span class="required">*</span></label>
           <input type="password" id="confirmPassword" class="form-input" required>
         </div>
         <div class="modal-actions">
           <button type="button" class="btn-half btn-secondary" onclick="closePasswordModal()">Cancel</button>
-          <button type="submit" class="btn-half btn-primary">Update</button>
+          <button type="submit" class="btn-half btn-primary" id="updatePasswordBtn">Update</button>
         </div>
       </form>
     </div>
@@ -500,6 +507,25 @@
         </button>
       </div>
       <div class="modal-body">
+        <!-- Step 0: Password Verification -->
+        <div id="mfaStep0" class="mfa-step">
+          <div class="alert alert-info" style="margin-bottom: var(--space-4);">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 24px; height: 24px; flex-shrink: 0;">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+            </svg>
+            <div>
+              <strong style="display: block; margin-bottom: 4px;">Security Verification Required</strong>
+              <span>Please confirm your password before enabling 2FA.</span>
+            </div>
+          </div>
+          <form id="verifyPasswordMFAForm" class="modal-form">
+            <div class="form-group">
+              <label for="mfaPasswordVerify" class="form-label">Current Password <span class="required">*</span></label>
+              <input type="password" id="mfaPasswordVerify" class="form-input" placeholder="Enter your password" required autocomplete="current-password">
+            </div>
+            <button type="submit" class="btn-full btn-primary">Continue</button>
+          </form>
+        </div>
         <!-- Step 1: QR Code -->
         <div id="mfaStep1" class="mfa-step">
           <p class="step-text">Scan with your authenticator app</p>
@@ -571,18 +597,23 @@
         </button>
       </div>
       <div class="modal-body">
-        <div class="alert alert-warning">
-          <strong>Security Verification Required</strong>
-          <p>To disable 2FA, you must verify your identity with your password and MFA code.</p>
+        <div class="alert alert-warning" style="margin-bottom: var(--space-5);">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+          </svg>
+          <div>
+            <strong>Security Verification Required</strong>
+            <p>To disable 2FA, you must verify your identity with your password and MFA code.</p>
+          </div>
         </div>
         <form onsubmit="handleDisableMFA(event)">
           <div class="form-group">
-            <label for="disableMfaPassword">Current Password</label>
-            <input type="password" id="disableMfaPassword" required autocomplete="current-password">
+            <label class="form-label" for="disableMfaPassword">Current Password <span class="required">*</span></label>
+            <input type="password" class="form-input" id="disableMfaPassword" required autocomplete="current-password">
           </div>
           <div class="form-group">
-            <label for="disableMfaCode">MFA Code (from your authenticator app)</label>
-            <input type="text" id="disableMfaCode" required pattern="[0-9]{6}" maxlength="6" placeholder="000000" autocomplete="one-time-code">
+            <label class="form-label" for="disableMfaCode">MFA Code (from your authenticator app) <span class="required">*</span></label>
+            <input type="text" class="form-input code-input" id="disableMfaCode" required pattern="[0-9]{6}" maxlength="6" placeholder="000000" autocomplete="one-time-code" inputmode="numeric">
           </div>
           <div class="modal-actions">
             <button type="button" class="btn-half btn-secondary" onclick="closeDisableMFAModal()">Cancel</button>
