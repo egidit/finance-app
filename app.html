@@ -571,11 +571,24 @@
         </button>
       </div>
       <div class="modal-body">
-        <p class="warning-text">This will make your account less secure. Continue?</p>
-        <div class="modal-actions">
-          <button type="button" class="btn-half btn-secondary" onclick="closeDisableMFAModal()">Cancel</button>
-          <button type="button" class="btn-half btn-danger" onclick="handleDisableMFA()">Disable</button>
+        <div class="alert alert-warning">
+          <strong>Security Verification Required</strong>
+          <p>To disable 2FA, you must verify your identity with your password and MFA code.</p>
         </div>
+        <form onsubmit="handleDisableMFA(event)">
+          <div class="form-group">
+            <label for="disableMfaPassword">Current Password</label>
+            <input type="password" id="disableMfaPassword" required autocomplete="current-password">
+          </div>
+          <div class="form-group">
+            <label for="disableMfaCode">MFA Code (from your authenticator app)</label>
+            <input type="text" id="disableMfaCode" required pattern="[0-9]{6}" maxlength="6" placeholder="000000" autocomplete="one-time-code">
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn-half btn-secondary" onclick="closeDisableMFAModal()">Cancel</button>
+            <button type="submit" class="btn-half btn-danger">Disable 2FA</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>

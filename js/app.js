@@ -566,10 +566,22 @@ async function handlePasswordSubmit(e) {
     
     const result = await changePassword(currentPassword, newPassword);
     if (result.success) {
-      showToast('Password updated', 'success');
+      showToast('Password changed successfully. You will now be signed out.', 'success');
       closePasswordModal();
+      
+      // User will be signed out by Edge Function - redirect to login after short delay
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 2000);
     } else {
-      showToast(result.error || 'Failed to update password', 'error');
+      // Show user-friendly error messages
+      let errorMessage = result.error || 'Failed to update password';
+      
+      if (errorMessage.includes('requiresMFA') || errorMessage.includes('AAL2') || errorMessage.includes('MFA verification')) {
+        errorMessage = 'MFA verification required. Please complete the MFA challenge before changing your password.';
+      }
+      
+      showToast(errorMessage, 'error');
     }
   } catch (error) {
     showToast('Failed to update password', 'error');
@@ -760,29 +772,42 @@ function closeDisableMFAModal() {
   hideModal('disableMFAModal');
 }
 
-async function handleDisableMFA() {
+async function handleDisableMFA(e) {
+  if (e) e.preventDefault();
+  
+  const password = document.getElementById('disableMfaPassword').value;
+  const mfaCode = document.getElementById('disableMfaCode').value;
+  
+  if (!password || !mfaCode) {
+    showToast('Please provide both password and MFA code', 'error');
+    return;
+  }
+  
   try {
-    // Get the verified factor ID first
-    const { data: { user } } = await supabase.auth.getUser();
-    const verifiedFactor = user?.factors?.find(f => f.status === 'verified');
-    
-    if (!verifiedFactor) {
-      showToast('No MFA factor found', 'error');
-      closeDisableMFAModal();
-      return;
-    }
-    
-    const result = await disableMFA(verifiedFactor.id);
+    const result = await disableMFA(password, mfaCode);
     if (result.success) {
-      showToast('MFA disabled', 'success');
+      showToast('2FA disabled successfully. You will now be signed out.', 'success');
       closeDisableMFAModal();
-      await checkMFAStatus();
+      document.getElementById('disableMfaPassword').value = '';
+      document.getElementById('disableMfaCode').value = '';
+      
+      // User will be signed out by Edge Function - redirect to login after short delay
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 2000);
     } else {
-      showToast(result.error || 'Failed to disable MFA', 'error');
+      // Show user-friendly error messages
+      let errorMessage = result.error || 'Failed to disable 2FA';
+      
+      if (result.requiresAAL2) {
+        errorMessage = 'Session expired. Please refresh the page and complete MFA verification again.';
+      }
+      
+      showToast(errorMessage, 'error');
     }
   } catch (error) {
     console.error('Disable MFA error:', error);
-    showToast('Failed to disable MFA', 'error');
+    showToast('Failed to disable 2FA', 'error');
   }
 }
 

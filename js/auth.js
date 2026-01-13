@@ -695,27 +695,68 @@ async function verifyMFAEnrollment(factorId, code) {
 }
 
 /**
- * Disable MFA for user account (requires AAL2 session)
- * @param {string} factorId - MFA factor ID to unenroll
+ * Disable MFA for user account (secure Edge Function with password + MFA verification)
+ * @param {string} password - Current password for verification
+ * @param {string} mfaCode - Current MFA code for verification
  * @returns {Promise<Object>} - Returns success status
  */
-async function disableMFA(factorId) {
+async function disableMFA(password, mfaCode) {
   try {
-    const { data, error } = await supabase.auth.mfa.unenroll({
-      factorId
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) throw new Error('No active session');
+
+    const response = await fetch('https://hvzpiqnnsiorjizbkzdl.supabase.co/functions/v1/disable-mfa-secure', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2enBpcW5uc2lvcmppemJremRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc4MDA4NDMsImV4cCI6MjA4MzM3Njg0M30.3eOmNtn-up9VqbSa8IZFY4suHJD8A2EUke4lVKG4ffk',
+        'x-user-token': session.access_token
+      },
+      body: JSON.stringify({
+        password,
+        mfaCode
+      })
     });
 
-    if (error) throw error;
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to disable MFA');
+    }
 
     return {
       success: true,
       message: 'MFA disabled successfully'
     };
   } catch (error) {
+    // Handle specific AAL2 requirement error
+    if (error.message && (error.message.includes('requiresAAL2') || error.message.includes('MFA verification required'))) {
+      return {
+        success: false,
+        error: 'You must complete MFA verification before disabling. Please refresh the page and verify your MFA code.',
+        requiresAAL2: true
+      };
+    }
+    
+    // Handle factor hierarchy violation
+    if (error.message && error.message.includes('stronger security factors')) {
+      return {
+        success: false,
+        error: error.message // Pass through the detailed hierarchy error
+      };
+    }
+    
+    // Handle cooling period error
+    if (error.message && error.message.includes('24 hours')) {
+      return {
+        success: false,
+        error: error.message // Pass through the cooling period message
+      };
+    }
+    
     return {
       success: false,
-      error: error.message,
-      requiresAAL2: error.message.includes('AAL2')
+      error: error.message
     };
   }
 }
@@ -790,32 +831,33 @@ async function updatePassword(newPassword) {
 }
 
 /**
- * Change password (requires current password verification)
+ * Change password (secure Edge Function with current password verification)
  * @param {string} currentPassword - Current password for verification
  * @param {string} newPassword - New password
  * @returns {Promise<Object>} - Returns success status
  */
 async function changePassword(currentPassword, newPassword) {
   try {
-    // Get current user
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('No authenticated user');
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) throw new Error('No active session');
 
-    // Supabase updateUser will verify the user is properly authenticated
-    // For MFA users, it requires AAL2 session (which guard.js already verified)
-    // We don't re-authenticate here because signInWithPassword would create
-    // a new AAL1 session that overwrites the existing AAL2 session
-    
-    const { data, error } = await supabase.auth.updateUser({
-      password: newPassword
+    const response = await fetch('https://hvzpiqnnsiorjizbkzdl.supabase.co/functions/v1/change-password-secure', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2enBpcW5uc2lvcmppemJremRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc4MDA4NDMsImV4cCI6MjA4MzM3Njg0M30.3eOmNtn-up9VqbSa8IZFY4suHJD8A2EUke4lVKG4ffk',
+        'x-user-token': session.access_token
+      },
+      body: JSON.stringify({
+        currentPassword,
+        newPassword
+      })
     });
 
-    if (error) {
-      // Check if it's an AAL2 requirement error
-      if (error.message.includes('AAL2') || error.message.includes('aal2')) {
-        throw new Error('MFA verification required. Please sign out and sign in again with MFA.');
-      }
-      throw error;
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to change password');
     }
 
     return {
