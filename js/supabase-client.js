@@ -86,6 +86,17 @@ async function requireAuth(clientParam) {
     throw new Error('Not authenticated');
   }
   
+  // Check if MFA is required but not completed
+  const { data: factors } = await client.auth.mfa.listFactors();
+  const verifiedFactors = factors?.totp?.filter(f => f.status === 'verified') || [];
+  
+  if (verifiedFactors.length > 0 && session.aal === 'aal1') {
+    // User has MFA enabled but hasn't completed verification
+    // Redirect to login to complete MFA
+    window.location.href = 'login.html';
+    throw new Error('MFA verification required');
+  }
+  
   return session;
 }
 

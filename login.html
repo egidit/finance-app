@@ -177,6 +177,50 @@
       padding: var(--sp-1);
     }
     
+    .mfa-code-input {
+      font-size: var(--text-2xl);
+      text-align: center;
+      letter-spacing: 0.5em;
+      padding: var(--sp-4);
+      font-family: monospace;
+    }
+    
+    .mfa-info {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-3);
+      padding: var(--sp-4);
+      background: var(--bg-surface);
+      border-radius: var(--radius-lg);
+      margin-bottom: var(--sp-5);
+    }
+    
+    .mfa-info svg {
+      width: 24px;
+      height: 24px;
+      color: var(--color-primary);
+      flex-shrink: 0;
+    }
+    
+    .mfa-info-text {
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+    }
+    
+    .back-link {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+      margin-bottom: var(--sp-4);
+      cursor: pointer;
+    }
+    
+    .back-link:hover {
+      color: var(--text-primary);
+    }
+    
     @media (min-width: 1024px) {
       .auth-sidebar {
         display: flex;
@@ -220,6 +264,35 @@
         
         <div id="alertContainer"></div>
         
+        <!-- MFA Verification Form (hidden by default) -->
+        <form class="auth-form hidden" id="mfaForm">
+          <div class="back-link" id="backToLogin">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+            Back to login
+          </div>
+          
+          <div class="mfa-info">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            <span class="mfa-info-text">Enter the 6-digit code from your authenticator app</span>
+          </div>
+          
+          <div class="form-group">
+            <label class="label">Verification Code</label>
+            <input type="text" class="input mfa-code-input" id="mfaCode" placeholder="000000" 
+                   autocomplete="one-time-code" inputmode="numeric" maxlength="6" required>
+          </div>
+          
+          <button type="submit" class="btn btn-primary" id="mfaSubmitBtn">
+            Verify
+          </button>
+        </form>
+        
+        <!-- Login Form -->
         <form class="auth-form" id="loginForm">
           <div class="form-group">
             <label class="label">Email</label>
@@ -262,15 +335,51 @@
   
   <script>
     const client = initSupabase();
+    let currentFactorId = null;
     
-    // Check if already logged in
+    // Check if already logged in with full MFA
     async function checkAuth() {
       const { data: { session } } = await client.auth.getSession();
       if (session) {
+        // Check if MFA is required but not completed
+        const { data: factors } = await client.auth.mfa.listFactors();
+        const verifiedFactors = factors?.totp?.filter(f => f.status === 'verified') || [];
+        
+        if (verifiedFactors.length > 0 && session.aal === 'aal1') {
+          // MFA enabled but not verified - show MFA form
+          currentFactorId = verifiedFactors[0].id;
+          showMfaForm();
+          return;
+        }
+        
+        // Fully authenticated
         window.location.href = 'dashboard.html';
       }
     }
     checkAuth();
+    
+    function showMfaForm() {
+      document.getElementById('loginForm').classList.add('hidden');
+      document.getElementById('mfaForm').classList.remove('hidden');
+      document.querySelector('.auth-title').textContent = 'Two-Factor Authentication';
+      document.querySelector('.auth-subtitle').textContent = 'Verify your identity';
+      document.getElementById('mfaCode').focus();
+    }
+    
+    function showLoginForm() {
+      document.getElementById('mfaForm').classList.add('hidden');
+      document.getElementById('loginForm').classList.remove('hidden');
+      document.querySelector('.auth-title').textContent = 'Welcome back';
+      document.querySelector('.auth-subtitle').textContent = 'Sign in to your account';
+      document.getElementById('alertContainer').innerHTML = '';
+      currentFactorId = null;
+    }
+    
+    // Back to login handler
+    document.getElementById('backToLogin').addEventListener('click', async function() {
+      await client.auth.signOut();
+      showLoginForm();
+    });
     
     // Toggle password visibility
     document.getElementById('togglePassword').addEventListener('click', function() {
@@ -283,7 +392,7 @@
         : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
     });
     
-    // Form submission
+    // Login form submission
     document.getElementById('loginForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       
@@ -305,6 +414,20 @@
         
         if (error) throw error;
         
+        // Check if MFA is required
+        const { data: factors } = await client.auth.mfa.listFactors();
+        const verifiedFactors = factors?.totp?.filter(f => f.status === 'verified') || [];
+        
+        // Check AAL level - if MFA is enrolled but at aal1, need verification
+        if (verifiedFactors.length > 0 && data.session?.aal === 'aal1') {
+          currentFactorId = verifiedFactors[0].id;
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Sign In';
+          showMfaForm();
+          return;
+        }
+        
+        // No MFA required, go to dashboard
         window.location.href = 'dashboard.html';
         
       } catch (err) {
@@ -312,6 +435,57 @@
         submitBtn.disabled = false;
         submitBtn.textContent = 'Sign In';
       }
+    });
+    
+    // MFA form submission
+    document.getElementById('mfaForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const submitBtn = document.getElementById('mfaSubmitBtn');
+      const alertContainer = document.getElementById('alertContainer');
+      const code = document.getElementById('mfaCode').value.trim();
+      
+      if (code.length !== 6 || !/^\d+$/.test(code)) {
+        alertContainer.innerHTML = '<div class="alert alert-error">Please enter a valid 6-digit code</div>';
+        return;
+      }
+      
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px;"></span> Verifying...';
+      alertContainer.innerHTML = '';
+      
+      try {
+        // Create MFA challenge
+        const { data: challengeData, error: challengeError } = await client.auth.mfa.challenge({
+          factorId: currentFactorId
+        });
+        
+        if (challengeError) throw challengeError;
+        
+        // Verify the challenge with the code
+        const { error: verifyError } = await client.auth.mfa.verify({
+          factorId: currentFactorId,
+          challengeId: challengeData.id,
+          code: code
+        });
+        
+        if (verifyError) throw verifyError;
+        
+        // MFA verified successfully, go to dashboard
+        window.location.href = 'dashboard.html';
+        
+      } catch (err) {
+        alertContainer.innerHTML = `<div class="alert alert-error">${err.message}</div>`;
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Verify';
+        document.getElementById('mfaCode').value = '';
+        document.getElementById('mfaCode').focus();
+      }
+    });
+    
+    // Auto-format MFA code input
+    document.getElementById('mfaCode').addEventListener('input', function(e) {
+      this.value = this.value.replace(/\D/g, '').slice(0, 6);
     });
   </script>
 </body>

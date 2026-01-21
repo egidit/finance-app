@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Verify MFA Database Enforcement</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 800px; margin: 2rem auto; padding: 1rem; }
+    .result { padding: 1rem; margin: 1rem 0; border-radius: 8px; }
+    .success { background: #d4edda; border: 1px solid #28a745; }
+    .error { background: #f8d7da; border: 1px solid #dc3545; }
+    .info { background: #e7f3ff; border: 1px solid #0066cc; }
+    pre { background: #f5f5f5; padding: 1rem; overflow-x: auto; border-radius: 4px; }
+    h1 { color: #333; }
+    button { padding: 0.75rem 1.5rem; font-size: 1rem; cursor: pointer; margin: 0.5rem; }
+  </style>
+</head>
+<body>
+  <h1>MFA Database Enforcement Verification</h1>
+  <p>This page verifies that MFA is enforced at the database level via RLS policies.</p>
+  
+  <div id="results"></div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script>
+    const client = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonKey);
+    const results = document.getElementById('results');
+    
+    function addResult(title, content, type = 'info') {
+      const div = document.createElement('div');
+      div.className = `result ${type}`;
+      div.innerHTML = `<strong>${title}</strong><pre>${typeof content === 'object' ? JSON.stringify(content, null, 2) : content}</pre>`;
+      results.appendChild(div);
+    }
+    
+    async function verify() {
+      results.innerHTML = '<p>Running verification...</p>';
+      
+      try {
+        // 1. Check if the function exists
+        addResult('Step 1: Checking if check_mfa_aal() function exists...', 'Querying pg_proc catalog...');
+        
+        const { data: funcData, error: funcError } = await client.rpc('check_mfa_aal');
+        
+        if (funcError && funcError.message.includes('Could not find the function')) {
+          addResult('❌ Function NOT Found', funcError.message, 'error');
+        } else if (funcError && funcError.code === 'PGRST202') {
+          addResult('❌ Function NOT Found', 'Function public.check_mfa_aal() does not exist in the database', 'error');
+        } else if (funcError) {
+          // Function exists but requires auth - that's expected
+          addResult('✅ Function Exists', `Function is callable. Error (expected if not logged in): ${funcError.message}`, 'success');
+        } else {
+          addResult('✅ Function Exists and Returned', `Result: ${funcData}`, 'success');
+        }
+        
+        // 2. Try to access subscriptions without auth (should fail)
+        addResult('Step 2: Testing RLS - Accessing subscriptions without authentication...', 'Attempting unauthenticated query...');
+        
+        const { data: noAuthData, error: noAuthError } = await client.from('subscriptions').select('*').limit(1);
+        
+        if (noAuthError) {
+          addResult('✅ RLS Working', `Unauthenticated access blocked: ${noAuthError.message}`, 'success');
+        } else if (!noAuthData || noAuthData.length === 0) {
+          addResult('✅ RLS Working', 'Query returned no data (RLS filtering or no data exists)', 'success');
+        } else {
+          addResult('⚠️ Unexpected', `Got data without auth: ${JSON.stringify(noAuthData)}`, 'error');
+        }
+        
+        // 3. Check current session
+        const { data: { session } } = await client.auth.getSession();
+        
+        if (session) {
+          addResult('Step 3: Current Session', {
+            user: session.user.email,
+            aal: session.aal,
+            expires_at: new Date(session.expires_at * 1000).toLocaleString()
+          }, 'info');
+          
+          // 4. Check MFA factors
+          const { data: factors } = await client.auth.mfa.listFactors();
+          const verifiedFactors = factors?.totp?.filter(f => f.status === 'verified') || [];
+          
+          addResult('Step 4: MFA Factors', {
+            total_totp_factors: factors?.totp?.length || 0,
+            verified_factors: verifiedFactors.length,
+            factors: factors?.totp?.map(f => ({ id: f.id.substring(0,8) + '...', status: f.status }))
+          }, 'info');
+          
+          // 5. Test subscription access with current session
+          addResult('Step 5: Testing data access with current session...', `Session AAL: ${session.aal}`);
+          
+          const { data: subData, error: subError } = await client.from('subscriptions').select('id, name').limit(3);
+          
+          if (subError) {
+            if (verifiedFactors.length > 0 && session.aal === 'aal1') {
+              addResult('✅ MFA ENFORCEMENT WORKING!', 
+                `You have MFA enabled but only aal1 session. Database correctly blocked access: ${subError.message}`, 'success');
+            } else {
+              addResult('❌ Query Error', subError.message, 'error');
+            }
+          } else {
+            if (verifiedFactors.length > 0 && session.aal === 'aal1') {
+              addResult('❌ MFA NOT ENFORCED!', 
+                'You have MFA but only aal1, yet data was returned. MFA enforcement is NOT working!', 'error');
+            } else if (verifiedFactors.length === 0) {
+              addResult('✅ Access Granted (No MFA)', 
+                `User has no MFA factors, aal1 is sufficient. Found ${subData?.length || 0} subscriptions.`, 'success');
+            } else if (session.aal === 'aal2') {
+              addResult('✅ Access Granted (MFA Verified)', 
+                `User has MFA and aal2 session. Access correctly granted. Found ${subData?.length || 0} subscriptions.`, 'success');
+            }
+          }
+          
+        } else {
+          addResult('Step 3: No Active Session', 'Not logged in - log in to test MFA enforcement with your account', 'info');
+        }
+        
+        addResult('Verification Complete', 'Check the results above to confirm MFA enforcement is working.', 'info');
+        
+      } catch (err) {
+        addResult('Error', err.message, 'error');
+      }
+    }
+    
+    verify();
+  </script>
+</body>
+</html>
