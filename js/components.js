@@ -4,23 +4,35 @@
    Custom dropdowns, date picker, number inputs, context menu
    ============================================================================ */
 
+// Helper to resolve element from selector or element
+function resolveElement(elementOrSelector) {
+  if (typeof elementOrSelector === 'string') {
+    return document.querySelector(elementOrSelector);
+  }
+  return elementOrSelector;
+}
+
 // ============================================================================
 // Custom Select Dropdown
 // ============================================================================
 class CustomSelect {
-  constructor(element) {
-    this.element = element;
-    this.trigger = element.querySelector('.custom-select-trigger');
-    this.options = element.querySelector('.custom-select-options');
-    this.hiddenInput = element.querySelector('input[type="hidden"]');
-    this.items = element.querySelectorAll('.custom-select-option');
-    this.valueDisplay = this.trigger.querySelector('.custom-select-value');
+  constructor(elementOrSelector, options = {}) {
+    this.element = resolveElement(elementOrSelector);
+    if (!this.element) return;
+    
+    this.trigger = this.element.querySelector('.custom-select-trigger');
+    this.options = this.element.querySelector('.custom-select-options');
+    this.hiddenInput = this.element.querySelector('input[type="hidden"]');
+    this.items = this.element.querySelectorAll('.custom-select-option');
+    this.valueDisplay = this.trigger?.querySelector('.custom-select-value');
     
     this.isOpen = false;
     this.init();
   }
   
   init() {
+    if (!this.trigger) return;
+    
     this.trigger.addEventListener('click', (e) => {
       e.stopPropagation();
       this.toggle();
@@ -71,22 +83,37 @@ class CustomSelect {
 // Custom Date Picker
 // ============================================================================
 class DatePicker {
-  constructor(element) {
-    this.element = element;
-    this.input = element.querySelector('.date-picker-input');
-    this.dropdown = element.querySelector('.date-picker-dropdown');
-    this.hiddenInput = element.querySelector('input[type="hidden"]');
+  constructor(elementOrSelector, options = {}) {
+    this.container = resolveElement(elementOrSelector);
+    if (!this.container) return;
     
+    this.options = options;
     this.currentDate = new Date();
-    this.selectedDate = null;
-    this.viewDate = new Date();
+    this.selectedDate = options.defaultDate ? new Date(options.defaultDate) : null;
+    this.viewDate = this.selectedDate ? new Date(this.selectedDate) : new Date();
     
     this.monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
                        'July', 'August', 'September', 'October', 'November', 'December'];
     this.dayNames = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
     
     this.isOpen = false;
+    this.build();
     this.init();
+  }
+  
+  build() {
+    this.container.innerHTML = `
+      <div class="date-picker">
+        <input type="text" class="input date-picker-input" placeholder="${this.options.placeholder || 'Select date'}" readonly>
+        <input type="hidden" name="${this.options.name || ''}">
+        <div class="date-picker-dropdown"></div>
+      </div>
+    `;
+    
+    this.element = this.container.querySelector('.date-picker');
+    this.input = this.container.querySelector('.date-picker-input');
+    this.dropdown = this.container.querySelector('.date-picker-dropdown');
+    this.hiddenInput = this.container.querySelector('input[type="hidden"]');
   }
   
   init() {
@@ -98,13 +125,11 @@ class DatePicker {
     });
     
     document.addEventListener('click', (e) => {
-      if (!this.element.contains(e.target)) this.close();
+      if (!this.container.contains(e.target)) this.close();
     });
     
-    // If hidden input has a value, parse it
-    if (this.hiddenInput && this.hiddenInput.value) {
-      this.selectedDate = new Date(this.hiddenInput.value);
-      this.viewDate = new Date(this.selectedDate);
+    // Set initial date if provided
+    if (this.selectedDate) {
       this.updateInput();
     }
   }
@@ -248,10 +273,17 @@ class DatePicker {
     this.isOpen = false;
   }
   
+  getValue() {
+    return this.hiddenInput ? this.hiddenInput.value : null;
+  }
+  
   setValue(dateStr) {
+    if (!dateStr) return;
     this.selectedDate = new Date(dateStr);
     this.viewDate = new Date(this.selectedDate);
-    if (this.hiddenInput) this.hiddenInput.value = dateStr;
+    // Store as YYYY-MM-DD format
+    const formatted = this.selectedDate.toISOString().split('T')[0];
+    if (this.hiddenInput) this.hiddenInput.value = formatted;
     this.updateInput();
     this.render();
   }
@@ -261,17 +293,48 @@ class DatePicker {
 // Custom Number Input
 // ============================================================================
 class NumberInput {
-  constructor(element) {
-    this.element = element;
-    this.input = element.querySelector('input');
-    this.minusBtn = element.querySelector('[data-action="minus"]');
-    this.plusBtn = element.querySelector('[data-action="plus"]');
+  constructor(elementOrSelector, options = {}) {
+    this.container = resolveElement(elementOrSelector);
+    if (!this.container) return;
     
-    this.min = parseFloat(this.input.min) || -Infinity;
-    this.max = parseFloat(this.input.max) || Infinity;
-    this.step = parseFloat(this.input.step) || 1;
+    this.options = options;
+    this.min = options.min !== undefined ? options.min : -Infinity;
+    this.max = options.max !== undefined ? options.max : Infinity;
+    this.step = options.step !== undefined ? options.step : 1;
     
+    this.build();
     this.init();
+  }
+  
+  build() {
+    const prefix = this.options.prefix || '';
+    this.container.innerHTML = `
+      <div class="number-input">
+        <button type="button" class="number-input-btn" data-action="minus">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+        </button>
+        <div class="number-input-field">
+          ${prefix ? `<span class="number-input-prefix">${prefix}</span>` : ''}
+          <input type="number" class="input" placeholder="${this.options.placeholder || '0'}" 
+                 min="${this.min !== -Infinity ? this.min : ''}" 
+                 max="${this.max !== Infinity ? this.max : ''}" 
+                 step="${this.step}">
+        </div>
+        <button type="button" class="number-input-btn" data-action="plus">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+        </button>
+      </div>
+    `;
+    
+    this.element = this.container.querySelector('.number-input');
+    this.input = this.container.querySelector('input');
+    this.minusBtn = this.container.querySelector('[data-action="minus"]');
+    this.plusBtn = this.container.querySelector('[data-action="plus"]');
   }
   
   init() {

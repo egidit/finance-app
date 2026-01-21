@@ -57,14 +57,36 @@ async function isAuthenticated() {
   return !!session;
 }
 
-// Redirect to login if not authenticated
+// Require authentication - throws if not authenticated
 async function requireAuth(clientParam) {
-  const authenticated = await isAuthenticated();
-  if (!authenticated) {
-    window.location.href = 'login.html';
-    return false;
+  const client = clientParam || initSupabase();
+  if (!client) {
+    throw new Error('Supabase client not initialized');
   }
-  return true;
+  
+  // First try to get current session
+  let { data: { session }, error } = await client.auth.getSession();
+  
+  if (error) {
+    throw error;
+  }
+  
+  // If no session, try refreshing in case the session is in storage but not loaded
+  if (!session) {
+    const refreshResult = await client.auth.refreshSession();
+    session = refreshResult.data?.session;
+    error = refreshResult.error;
+    
+    if (error && error.message !== 'Auth session missing!') {
+      throw error;
+    }
+  }
+  
+  if (!session) {
+    throw new Error('Not authenticated');
+  }
+  
+  return session;
 }
 
 // Sign out

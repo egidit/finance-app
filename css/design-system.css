@@ -928,6 +928,32 @@ textarea.input {
   color: var(--color-primary);
 }
 
+.number-input-field {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  background: var(--bg-surface);
+}
+
+.number-input-prefix {
+  padding-left: var(--sp-3);
+  color: var(--text-muted);
+  font-size: var(--text-base);
+  user-select: none;
+}
+
+.number-input-field .input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.number-input-field .input:focus {
+  box-shadow: none;
+}
+
 /* ============================================================================
    Context Menu
    ============================================================================ */
