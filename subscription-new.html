@@ -392,19 +392,35 @@
       
       try {
         await requireAuth(client);
-        setupForm();
+        await setupForm();
       } catch (err) {
         window.location.href = 'login.html';
       }
     }
     
-    function setupForm() {
+    async function setupForm() {
+      // Load user preferences and set default currency
+      const prefs = await loadUserPreferences(client);
+      const defaultCurrency = prefs?.default_currency || 'EUR';
+      document.getElementById('currency').value = defaultCurrency;
+      
+      // Get currency symbol for amount input prefix
+      const currencySymbols = { USD: '$', EUR: '€', GBP: '£', JPY: '¥', CAD: '$', AUD: '$' };
+      const currencySymbol = currencySymbols[defaultCurrency] || '$';
+      
       // Initialize custom components
       amountInput = new NumberInput('#amountInput', {
         min: 0,
         step: 0.01,
         placeholder: '9.99',
-        prefix: '$'
+        prefix: currencySymbol
+      });
+      
+      // Update prefix when currency changes
+      document.getElementById('currency').addEventListener('change', (e) => {
+        const newSymbol = currencySymbols[e.target.value] || '$';
+        const prefixEl = document.querySelector('#amountInput .number-input-prefix');
+        if (prefixEl) prefixEl.textContent = newSymbol;
       });
       
       startDatePicker = new DatePicker('#startDatePicker', {

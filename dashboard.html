@@ -138,12 +138,12 @@
               <div class="stat-value" id="statActive">0</div>
             </div>
             <div class="stat-card">
-              <div class="stat-label">Monthly Cost</div>
-              <div class="stat-value" id="statMonthlyCost">$0</div>
+              <div class="stat-label">Monthly Cost <span id="currencyNote" class="text-muted" style="font-size: var(--text-xs); font-weight: normal;"></span></div>
+              <div class="stat-value" id="statMonthlyCost">€0</div>
             </div>
             <div class="stat-card">
               <div class="stat-label">Yearly Cost</div>
-              <div class="stat-value" id="statYearlyCost">$0</div>
+              <div class="stat-value" id="statYearlyCost">€0</div>
             </div>
             <div class="stat-card">
               <div class="stat-label">Upcoming Renewals</div>
@@ -228,6 +228,7 @@
   
   <script>
     let client;
+    let userCurrency = 'EUR';
     
     async function init() {
       client = initSupabase();
@@ -236,6 +237,9 @@
       
       try {
         await requireAuth(client);
+        // Load user's preferred currency
+        const prefs = await loadUserPreferences(client);
+        userCurrency = prefs?.default_currency || 'EUR';
         await loadDashboard();
       } catch (err) {
         console.error('Auth error:', err);
@@ -261,16 +265,24 @@
           return;
         }
         
-        // Calculate stats
-        const activeCount = subscriptions.filter(s => s.is_active).length;
-        const monthlyCost = calculateMonthlyCost(subscriptions.filter(s => s.is_active));
+        // Calculate stats (only for subscriptions in user's preferred currency)
+        const activeSubs = subscriptions.filter(s => s.is_active);
+        const activeInCurrency = activeSubs.filter(s => s.currency === userCurrency);
+        const activeCount = activeSubs.length;
+        const monthlyCost = calculateMonthlyCost(activeInCurrency);
         const yearlyCost = monthlyCost * 12;
-        const upcomingCount = countUpcomingRenewals(subscriptions.filter(s => s.is_active));
+        const upcomingCount = countUpcomingRenewals(activeSubs);
         
         document.getElementById('statActive').textContent = activeCount;
-        document.getElementById('statMonthlyCost').textContent = formatCurrency(monthlyCost);
-        document.getElementById('statYearlyCost').textContent = formatCurrency(yearlyCost);
+        document.getElementById('statMonthlyCost').textContent = formatCurrency(monthlyCost, userCurrency);
+        document.getElementById('statYearlyCost').textContent = formatCurrency(yearlyCost, userCurrency);
         document.getElementById('statUpcoming').textContent = upcomingCount;
+        
+        // Show note if there are subscriptions in other currencies
+        const otherCurrencyCount = activeSubs.filter(s => s.currency !== userCurrency).length;
+        if (otherCurrencyCount > 0) {
+          document.getElementById('currencyNote').textContent = `(${userCurrency} only)`;
+        }
         
         // Render subscriptions (limit to 5 recent)
         renderSubscriptions(subscriptions.slice(0, 5));

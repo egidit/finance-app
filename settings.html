@@ -336,8 +336,9 @@
       const currentTheme = document.documentElement.getAttribute('data-theme');
       document.getElementById('themeToggle').checked = currentTheme === 'dark';
       
-      // Load saved currency
-      const savedCurrency = localStorage.getItem('defaultCurrency') || 'USD';
+      // Load saved currency from database
+      const prefs = await loadUserPreferences(client);
+      const savedCurrency = prefs?.default_currency || 'EUR';
       document.getElementById('currencySelect').value = savedCurrency;
       
       // Check MFA status
@@ -448,9 +449,13 @@
     }
     
     // Currency select
-    document.getElementById('currencySelect').addEventListener('change', (e) => {
-      localStorage.setItem('defaultCurrency', e.target.value);
-      Toast.success('Currency preference saved');
+    document.getElementById('currencySelect').addEventListener('change', async (e) => {
+      const result = await updateUserPreferences({ default_currency: e.target.value }, client);
+      if (result) {
+        Toast.success('Currency preference saved');
+      } else {
+        Toast.error('Failed to save currency preference');
+      }
     });
     
     async function deleteAllSubscriptions() {
