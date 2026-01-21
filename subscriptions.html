@@ -482,13 +482,7 @@
               </div>
             </div>
             <div class="sub-progress">
-              <div class="sub-progress-label">
-                <span>Progress</span>
-                <span>${progress}%</span>
-              </div>
-              <div class="progress ${progress > 75 ? 'progress-warning' : ''}">
-                <div class="progress-bar" style="width: ${progress}%"></div>
-              </div>
+              ${renderProgress(sub, progress)}
             </div>
             <div class="sub-amount">
               <div class="sub-price">${formatCurrency(sub.amount, sub.currency)}</div>
@@ -511,6 +505,10 @@
           </div>
         `;
       }).join('');
+    }
+    
+    function isOngoing(sub) {
+      return !sub.total_payments && !sub.explicit_end_date;
     }
     
     function calculateProgress(sub) {
@@ -542,6 +540,29 @@
       }
       
       return 0;
+    }
+    
+    function renderProgress(sub, progress) {
+      if (isOngoing(sub)) {
+        return `
+          <div class="sub-progress-label">
+            <span>Lifecycle</span>
+            <span style="color: var(--color-primary); font-weight: 500;">∞ Ongoing</span>
+          </div>
+          <div class="progress" style="background: var(--color-primary-light);">
+            <div class="progress-bar" style="width: 100%; background: var(--color-primary); opacity: 0.3;"></div>
+          </div>
+        `;
+      }
+      return `
+        <div class="sub-progress-label">
+          <span>Progress</span>
+          <span>${progress}%</span>
+        </div>
+        <div class="progress ${progress > 75 ? 'progress-warning' : ''}">
+          <div class="progress-bar" style="width: ${progress}%"></div>
+        </div>
+      `;
     }
     
     function formatCurrency(amount, currency = 'USD') {

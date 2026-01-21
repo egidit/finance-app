@@ -413,18 +413,26 @@
     
     async function startMFASetup() {
       try {
-        // Unenroll any existing unverified factors
+        // Unenroll ALL existing unverified factors (including ones with same friendly name)
         const { data: factors } = await client.auth.mfa.listFactors();
         for (const factor of (factors.totp || [])) {
           if (factor.status === 'unverified') {
-            await client.auth.mfa.unenroll({ factorId: factor.id });
+            try {
+              await client.auth.mfa.unenroll({ factorId: factor.id });
+            } catch (e) {
+              console.warn('Failed to unenroll factor:', e);
+            }
           }
         }
         
-        // Enroll new TOTP
+        // Small delay to ensure cleanup is complete
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Enroll new TOTP with unique friendly name
+        const timestamp = Date.now();
         const { data, error } = await client.auth.mfa.enroll({
           factorType: 'totp',
-          friendlyName: 'Authenticator App'
+          friendlyName: `Authenticator-${timestamp}`
         });
         
         if (error) throw error;
@@ -432,8 +440,17 @@
         currentFactorId = data.id;
         totpSecret = data.totp.secret;
         
-        // Display QR code
-        document.getElementById('qrCode').innerHTML = `<img src="${data.totp.qr_code}" alt="QR Code">`;
+        // Display QR code - ensure image loads properly
+        const qrContainer = document.getElementById('qrCode');
+        const qrImg = document.createElement('img');
+        qrImg.src = data.totp.qr_code;
+        qrImg.alt = 'Scan this QR code with your authenticator app';
+        qrImg.style.cssText = 'display: block; width: 180px; height: 180px; object-fit: contain;';
+        qrImg.onerror = () => {
+          qrContainer.innerHTML = '<div style="color: var(--color-error); padding: 20px;">Failed to load QR code. Please use the manual code below.</div>';
+        };
+        qrContainer.innerHTML = '';
+        qrContainer.appendChild(qrImg);
         
         // Display secret for manual entry
         document.getElementById('secretValue').textContent = formatSecret(totpSecret);

@@ -956,6 +956,13 @@ textarea.input {
   box-shadow: none;
 }
 
+/* Wrapper classes for form components */
+.number-input-wrapper,
+.date-picker-wrapper {
+  display: block;
+  width: 100%;
+}
+
 /* ============================================================================
    Context Menu
    ============================================================================ */

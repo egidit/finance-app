@@ -6,14 +6,40 @@
   <title>Add Subscription - SubTracker</title>
   <link rel="stylesheet" href="css/design-system.css">
   <style>
+    .page-container {
+      max-width: 720px;
+    }
+    
     .form-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: var(--sp-4);
+      gap: var(--sp-5) var(--sp-6);
     }
     
     .form-grid-full {
       grid-column: 1 / -1;
+    }
+    
+    .form-group {
+      margin-bottom: 0;
+    }
+    
+    .form-section {
+      margin-top: var(--sp-6);
+      padding-top: var(--sp-6);
+      border-top: 1px solid var(--border-color);
+    }
+    
+    .form-section-title {
+      font-size: var(--text-md);
+      font-weight: 600;
+      margin-bottom: var(--sp-2);
+    }
+    
+    .form-section-desc {
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+      margin-bottom: var(--sp-5);
     }
     
     .end-type-options {
@@ -58,20 +84,22 @@
     .end-type-option span {
       font-size: var(--text-sm);
       font-weight: 500;
+      text-align: center;
     }
     
     .form-actions {
       display: flex;
       gap: var(--sp-3);
       justify-content: flex-end;
-      padding-top: var(--sp-5);
+      padding-top: var(--sp-6);
       border-top: 1px solid var(--border-color);
-      margin-top: var(--sp-5);
+      margin-top: var(--sp-6);
     }
     
     @media (max-width: 768px) {
       .form-grid {
         grid-template-columns: 1fr;
+        gap: var(--sp-4);
       }
       
       .end-type-options {
@@ -253,9 +281,9 @@
             </div>
             
             <!-- Lifecycle Section -->
-            <div class="form-group" style="margin-top: var(--sp-5);">
-              <label class="label">Subscription Lifecycle</label>
-              <p class="text-muted" style="font-size: var(--text-sm); margin-bottom: var(--sp-4);">How does this subscription end?</p>
+            <div class="form-section">
+              <h3 class="form-section-title">Subscription Lifecycle</h3>
+              <p class="form-section-desc">How does this subscription end?</p>
               
               <div class="end-type-options">
                 <div class="end-type-option active" data-type="ongoing">
@@ -288,10 +316,13 @@
               </div>
             </div>
             
-            <!-- Notes -->
-            <div class="form-group" style="margin-top: var(--sp-4);">
-              <label class="label">Notes</label>
-              <textarea class="input" id="notes" rows="3" placeholder="Any additional notes..."></textarea>
+            <!-- Notes Section -->
+            <div class="form-section">
+              <h3 class="form-section-title">Additional Notes</h3>
+              <p class="form-section-desc">Any extra details about this subscription</p>
+              <div class="form-group">
+                <textarea class="input" id="notes" rows="3" placeholder="Notes about this subscription..."></textarea>
+              </div>
             </div>
             
             <div class="form-actions">
