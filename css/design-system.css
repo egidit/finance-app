@@ -407,6 +407,7 @@ input, select, textarea { font-family: inherit; }
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
+  padding: var(--sp-6);
 }
 
 .card-compact {
@@ -543,7 +544,8 @@ input, select, textarea { font-family: inherit; }
   margin-bottom: var(--sp-5);
 }
 
-.form-label {
+.form-label,
+.label {
   display: block;
   font-size: var(--text-sm);
   font-weight: 500;

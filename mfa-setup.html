@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Enable Two-Factor Authentication - SubTracker</title>
+  <link rel="stylesheet" href="css/design-system.css">
+  <style>
+    .mfa-container {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: var(--sp-6);
+    }
+    
+    .mfa-header {
+      text-align: center;
+      margin-bottom: var(--sp-8);
+    }
+    
+    .mfa-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 64px;
+      height: 64px;
+      background: var(--color-primary-light);
+      border-radius: 50%;
+      margin-bottom: var(--sp-5);
+    }
+    
+    .mfa-icon svg {
+      width: 32px;
+      height: 32px;
+      color: var(--color-primary);
+    }
+    
+    .mfa-header h1 {
+      font-size: var(--text-2xl);
+      font-weight: 600;
+      margin-bottom: var(--sp-2);
+    }
+    
+    .mfa-header p {
+      color: var(--text-secondary);
+    }
+    
+    .mfa-step {
+      margin-bottom: var(--sp-6);
+      padding: var(--sp-5);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+    }
+    
+    .mfa-step-header {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-3);
+      margin-bottom: var(--sp-4);
+    }
+    
+    .mfa-step-number {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: var(--color-primary);
+      color: white;
+      border-radius: 50%;
+      font-size: var(--text-sm);
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    
+    .mfa-step-title {
+      font-weight: 600;
+      font-size: var(--text-md);
+    }
+    
+    .qr-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--sp-4);
+      padding: var(--sp-5);
+      background: var(--bg-hover);
+      border-radius: var(--radius-md);
+    }
+    
+    .qr-code {
+      background: white;
+      padding: var(--sp-4);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .qr-code img,
+    .qr-code svg {
+      display: block;
+      width: 180px;
+      height: 180px;
+    }
+    
+    .secret-section {
+      width: 100%;
+      text-align: center;
+    }
+    
+    .secret-label {
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+      margin-bottom: var(--sp-2);
+    }
+    
+    .secret-code {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--sp-2);
+      padding: var(--sp-3) var(--sp-4);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all var(--duration-fast);
+    }
+    
+    .secret-code:hover {
+      border-color: var(--color-primary);
+    }
+    
+    .secret-code-value {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      word-break: break-all;
+    }
+    
+    .secret-code svg {
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+    
+    .copy-feedback {
+      font-size: var(--text-xs);
+      color: var(--color-success);
+      height: 16px;
+      margin-top: var(--sp-2);
+    }
+    
+    .totp-input {
+      display: flex;
+      gap: var(--sp-2);
+      justify-content: center;
+    }
+    
+    .totp-input input {
+      width: 48px;
+      height: 56px;
+      text-align: center;
+      font-size: var(--text-xl);
+      font-weight: 600;
+      font-family: var(--font-mono);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      background: var(--bg-surface);
+      color: var(--text-primary);
+      outline: none;
+      transition: all var(--duration-fast);
+    }
+    
+    .totp-input input:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px var(--color-primary-light);
+    }
+    
+    .totp-input input.error {
+      border-color: var(--color-error);
+      animation: shake 0.3s ease;
+    }
+    
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      75% { transform: translateX(4px); }
+    }
+    
+    .mfa-actions {
+      display: flex;
+      gap: var(--sp-3);
+      margin-top: var(--sp-6);
+    }
+    
+    .mfa-actions .btn {
+      flex: 1;
+    }
+    
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg-overlay);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: var(--z-modal);
+      opacity: 0;
+      visibility: hidden;
+      transition: all var(--duration-slow);
+    }
+    
+    .loading-overlay.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .loading-card {
+      background: var(--bg-surface);
+      padding: var(--sp-8);
+      border-radius: var(--radius-xl);
+      text-align: center;
+      box-shadow: var(--shadow-xl);
+    }
+    
+    .loading-card .spinner {
+      margin: 0 auto var(--sp-4);
+    }
+    
+    /* Success State */
+    .mfa-success {
+      text-align: center;
+      padding: var(--sp-8);
+    }
+    
+    .mfa-success-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 80px;
+      height: 80px;
+      background: var(--color-success-light);
+      border-radius: 50%;
+      margin-bottom: var(--sp-5);
+    }
+    
+    .mfa-success-icon svg {
+      width: 40px;
+      height: 40px;
+      color: var(--color-success);
+    }
+    
+    .mfa-success h2 {
+      font-size: var(--text-xl);
+      font-weight: 600;
+      margin-bottom: var(--sp-2);
+    }
+    
+    .mfa-success p {
+      color: var(--text-secondary);
+      margin-bottom: var(--sp-6);
+    }
+    
+    @media (max-width: 480px) {
+      .mfa-container {
+        padding: var(--sp-4);
+      }
+      
+      .totp-input input {
+        width: 42px;
+        height: 50px;
+        font-size: var(--text-lg);
+      }
+      
+      .mfa-actions {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-container" style="padding-top: var(--sp-8);">
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+      <div class="loading-card">
+        <div class="spinner" style="width: 40px; height: 40px;"></div>
+        <p>Setting up 2FA...</p>
+      </div>
+    </div>
+    
+    <div class="mfa-container" id="setupView">
+      <!-- Header -->
+      <div class="mfa-header">
+        <div class="mfa-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+        </div>
+        <h1>Enable Two-Factor Authentication</h1>
+        <p>Secure your account with an authenticator app</p>
+      </div>
+      
+      <!-- Step 1: Scan QR Code -->
+      <div class="mfa-step">
+        <div class="mfa-step-header">
+          <span class="mfa-step-number">1</span>
+          <span class="mfa-step-title">Scan QR Code</span>
+        </div>
+        <div class="qr-container">
+          <div class="qr-code" id="qrCode">
+            <div class="spinner" style="width: 60px; height: 60px; margin: 60px;"></div>
+          </div>
+          <div class="secret-section">
+            <div class="secret-label">Can't scan? Enter this code manually:</div>
+            <div class="secret-code" id="secretCode" onclick="copySecret()">
+              <span class="secret-code-value" id="secretValue">Loading...</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+              </svg>
+            </div>
+            <div class="copy-feedback" id="copyFeedback"></div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Step 2: Enter Verification Code -->
+      <div class="mfa-step">
+        <div class="mfa-step-header">
+          <span class="mfa-step-number">2</span>
+          <span class="mfa-step-title">Enter Verification Code</span>
+        </div>
+        <p style="color: var(--text-secondary); margin-bottom: var(--sp-4); font-size: var(--text-sm);">
+          Open your authenticator app (Google Authenticator, Authy, etc.) and enter the 6-digit code.
+        </p>
+        <div class="totp-input" id="totpInput">
+          <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
+          <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
+          <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
+          <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
+          <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
+          <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
+        </div>
+      </div>
+      
+      <!-- Actions -->
+      <div class="mfa-actions">
+        <a href="settings.html" class="btn btn-secondary">Cancel</a>
+        <button class="btn btn-primary" id="verifyBtn" onclick="verifyAndEnableMFA()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          Verify & Enable
+        </button>
+      </div>
+    </div>
+    
+    <!-- Success View -->
+    <div class="mfa-container hidden" id="successView">
+      <div class="mfa-success">
+        <div class="mfa-success-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+        <h2>Two-Factor Authentication Enabled!</h2>
+        <p>Your account is now protected with an extra layer of security.</p>
+        <a href="settings.html" class="btn btn-primary">
+          Back to Settings
+        </a>
+      </div>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="js/components.js"></script>
+  <script src="js/supabase-client.js"></script>
+  
+  <script>
+    let client;
+    let currentFactorId = null;
+    let totpSecret = null;
+    
+    async function init() {
+      client = initSupabase();
+      
+      try {
+        await requireAuth(client);
+        
+        // Check if MFA is already enabled
+        const { data: factors } = await client.auth.mfa.listFactors();
+        const activeFactor = factors.totp?.find(f => f.status === 'verified');
+        
+        if (activeFactor) {
+          // Already enabled, redirect to settings
+          Toast.info('Two-factor authentication is already enabled');
+          setTimeout(() => {
+            window.location.href = 'settings.html';
+          }, 1500);
+          return;
+        }
+        
+        await startMFASetup();
+        initTOTPInputs();
+        
+      } catch (err) {
+        console.error('Auth error:', err);
+        window.location.href = 'login.html';
+      }
+    }
+    
+    async function startMFASetup() {
+      try {
+        // Unenroll any existing unverified factors
+        const { data: factors } = await client.auth.mfa.listFactors();
+        for (const factor of (factors.totp || [])) {
+          if (factor.status === 'unverified') {
+            await client.auth.mfa.unenroll({ factorId: factor.id });
+          }
+        }
+        
+        // Enroll new TOTP
+        const { data, error } = await client.auth.mfa.enroll({
+          factorType: 'totp',
+          friendlyName: 'Authenticator App'
+        });
+        
+        if (error) throw error;
+        
+        currentFactorId = data.id;
+        totpSecret = data.totp.secret;
+        
+        // Display QR code
+        document.getElementById('qrCode').innerHTML = `<img src="${data.totp.qr_code}" alt="QR Code">`;
+        
+        // Display secret for manual entry
+        document.getElementById('secretValue').textContent = formatSecret(totpSecret);
+        
+        // Focus first input
+        document.querySelector('#totpInput input')?.focus();
+        
+      } catch (err) {
+        Toast.error('Failed to set up 2FA: ' + err.message);
+        setTimeout(() => {
+          window.location.href = 'settings.html';
+        }, 2000);
+      }
+    }
+    
+    function formatSecret(secret) {
+      return secret.match(/.{1,4}/g)?.join(' ') || secret;
+    }
+    
+    async function copySecret() {
+      try {
+        await navigator.clipboard.writeText(totpSecret);
+        document.getElementById('copyFeedback').textContent = 'Copied to clipboard!';
+        setTimeout(() => {
+          document.getElementById('copyFeedback').textContent = '';
+        }, 2000);
+      } catch (err) {
+        // Fallback: select text
+        const el = document.getElementById('secretValue');
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+    }
+    
+    function initTOTPInputs() {
+      const inputs = document.querySelectorAll('#totpInput input');
+      
+      inputs.forEach((input, index) => {
+        input.addEventListener('input', (e) => {
+          // Only allow numbers
+          e.target.value = e.target.value.replace(/[^0-9]/g, '');
+          
+          // Remove error state
+          e.target.classList.remove('error');
+          
+          // Auto-advance to next input
+          if (e.target.value && index < inputs.length - 1) {
+            inputs[index + 1].focus();
+          }
+          
+          // Auto-verify when all filled
+          const code = getTOTPCode();
+          if (code.length === 6) {
+            verifyAndEnableMFA();
+          }
+        });
+        
+        input.addEventListener('keydown', (e) => {
+          // Handle backspace
+          if (e.key === 'Backspace' && !e.target.value && index > 0) {
+            inputs[index - 1].focus();
+          }
+        });
+        
+        // Handle paste
+        input.addEventListener('paste', (e) => {
+          e.preventDefault();
+          const pastedData = e.clipboardData.getData('text').replace(/[^0-9]/g, '').slice(0, 6);
+          
+          pastedData.split('').forEach((char, i) => {
+            if (inputs[i]) {
+              inputs[i].value = char;
+            }
+          });
+          
+          if (pastedData.length === 6) {
+            verifyAndEnableMFA();
+          } else if (inputs[pastedData.length]) {
+            inputs[pastedData.length].focus();
+          }
+        });
+      });
+    }
+    
+    function getTOTPCode() {
+      const inputs = document.querySelectorAll('#totpInput input');
+      return Array.from(inputs).map(i => i.value).join('');
+    }
+    
+    function clearTOTPInputs() {
+      const inputs = document.querySelectorAll('#totpInput input');
+      inputs.forEach(i => {
+        i.value = '';
+        i.classList.remove('error');
+      });
+      inputs[0]?.focus();
+    }
+    
+    function showInputError() {
+      const inputs = document.querySelectorAll('#totpInput input');
+      inputs.forEach(i => i.classList.add('error'));
+    }
+    
+    async function verifyAndEnableMFA() {
+      const code = getTOTPCode();
+      
+      if (code.length !== 6) {
+        Toast.error('Please enter the 6-digit code');
+        return;
+      }
+      
+      const btn = document.getElementById('verifyBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px;"></span> Verifying...';
+      
+      try {
+        const { data, error } = await client.auth.mfa.challengeAndVerify({
+          factorId: currentFactorId,
+          code: code
+        });
+        
+        if (error) throw error;
+        
+        // Show success view
+        document.getElementById('setupView').classList.add('hidden');
+        document.getElementById('successView').classList.remove('hidden');
+        
+        Toast.success('Two-factor authentication enabled!');
+        
+      } catch (err) {
+        Toast.error('Invalid code. Please try again.');
+        showInputError();
+        clearTOTPInputs();
+        
+        btn.disabled = false;
+        btn.innerHTML = `
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          Verify & Enable
+        `;
+      }
+    }
+    
+    // Initialize
+    init();
+  </script>
+</body>
+</html>

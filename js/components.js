@@ -559,6 +559,130 @@ class Toast {
 }
 
 // ============================================================================
+// Modal Dialog
+// ============================================================================
+class Modal {
+  constructor(options = {}) {
+    this.options = {
+      title: options.title || '',
+      content: options.content || '',
+      confirmText: options.confirmText || 'Confirm',
+      cancelText: options.cancelText || 'Cancel',
+      confirmClass: options.confirmClass || 'btn-primary',
+      showCancel: options.showCancel !== false,
+      danger: options.danger || false,
+      onConfirm: options.onConfirm || (() => {}),
+      onCancel: options.onCancel || (() => {}),
+      closeOnOverlay: options.closeOnOverlay !== false
+    };
+    
+    this.overlay = null;
+    this.build();
+  }
+  
+  build() {
+    this.overlay = document.createElement('div');
+    this.overlay.className = 'modal-overlay';
+    
+    const confirmClass = this.options.danger ? 'btn-danger' : this.options.confirmClass;
+    
+    this.overlay.innerHTML = `
+      <div class="modal">
+        <div class="modal-header">
+          <h3 class="modal-title">${this.options.title}</h3>
+          <button class="modal-close" data-action="close">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          ${this.options.content}
+        </div>
+        <div class="modal-footer">
+          ${this.options.showCancel ? `<button class="btn btn-secondary" data-action="cancel">${this.options.cancelText}</button>` : ''}
+          <button class="btn ${confirmClass}" data-action="confirm">${this.options.confirmText}</button>
+        </div>
+      </div>
+    `;
+    
+    // Bind events
+    this.overlay.querySelector('[data-action="close"]')?.addEventListener('click', () => this.close());
+    this.overlay.querySelector('[data-action="cancel"]')?.addEventListener('click', () => {
+      this.options.onCancel();
+      this.close();
+    });
+    this.overlay.querySelector('[data-action="confirm"]')?.addEventListener('click', () => {
+      this.options.onConfirm();
+      this.close();
+    });
+    
+    if (this.options.closeOnOverlay) {
+      this.overlay.addEventListener('click', (e) => {
+        if (e.target === this.overlay) this.close();
+      });
+    }
+    
+    // Close on Escape
+    this.handleKeydown = (e) => {
+      if (e.key === 'Escape') this.close();
+    };
+  }
+  
+  show() {
+    document.body.appendChild(this.overlay);
+    document.addEventListener('keydown', this.handleKeydown);
+    document.body.style.overflow = 'hidden';
+    
+    requestAnimationFrame(() => {
+      this.overlay.classList.add('visible');
+    });
+    
+    return this;
+  }
+  
+  close() {
+    this.overlay.classList.remove('visible');
+    document.removeEventListener('keydown', this.handleKeydown);
+    document.body.style.overflow = '';
+    
+    setTimeout(() => {
+      this.overlay.remove();
+    }, 300);
+  }
+  
+  // Static helper methods
+  static confirm(options) {
+    return new Promise((resolve) => {
+      new Modal({
+        ...options,
+        onConfirm: () => resolve(true),
+        onCancel: () => resolve(false)
+      }).show();
+    });
+  }
+  
+  static alert(options) {
+    return new Promise((resolve) => {
+      new Modal({
+        ...options,
+        showCancel: false,
+        onConfirm: () => resolve(true)
+      }).show();
+    });
+  }
+  
+  static danger(options) {
+    return Modal.confirm({
+      ...options,
+      danger: true,
+      confirmClass: 'btn-danger'
+    });
+  }
+}
+
+// ============================================================================
 // Initialize Custom Components
 // ============================================================================
 function initCustomComponents() {

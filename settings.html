@@ -53,147 +53,6 @@
       color: var(--text-muted);
     }
     
-    /* MFA Setup Styles */
-    .mfa-setup {
-      padding: var(--sp-5);
-    }
-    
-    .mfa-step {
-      margin-bottom: var(--sp-5);
-    }
-    
-    .mfa-step-number {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 24px;
-      height: 24px;
-      background: var(--color-primary);
-      color: white;
-      border-radius: 50%;
-      font-size: var(--text-xs);
-      font-weight: 600;
-      margin-right: var(--sp-3);
-    }
-    
-    .mfa-step-title {
-      font-weight: 600;
-      display: inline;
-    }
-    
-    .mfa-step-content {
-      margin-top: var(--sp-3);
-      padding-left: calc(24px + var(--sp-3));
-    }
-    
-    .qr-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: var(--sp-4);
-      padding: var(--sp-4);
-      background: var(--bg-hover);
-      border-radius: var(--radius-md);
-    }
-    
-    .qr-code {
-      background: white;
-      padding: var(--sp-4);
-      border-radius: var(--radius-md);
-    }
-    
-    .qr-code img,
-    .qr-code svg {
-      display: block;
-      width: 160px;
-      height: 160px;
-    }
-    
-    .secret-code {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: var(--sp-2);
-      width: 100%;
-    }
-    
-    .secret-code-label {
-      font-size: var(--text-xs);
-      color: var(--text-muted);
-    }
-    
-    .secret-code-value {
-      font-family: var(--font-mono);
-      font-size: var(--text-sm);
-      font-weight: 600;
-      background: var(--bg-surface);
-      padding: var(--sp-3) var(--sp-4);
-      border-radius: var(--radius-md);
-      border: 1px solid var(--border-color);
-      word-break: break-all;
-      text-align: center;
-      user-select: all;
-      cursor: pointer;
-      width: 100%;
-      max-width: 300px;
-    }
-    
-    .secret-code-value:hover {
-      border-color: var(--color-primary);
-    }
-    
-    .totp-input {
-      display: flex;
-      gap: var(--sp-2);
-      justify-content: center;
-    }
-    
-    .totp-input input {
-      width: 44px;
-      height: 52px;
-      text-align: center;
-      font-size: var(--text-xl);
-      font-weight: 600;
-      font-family: var(--font-mono);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      background: var(--bg-surface);
-      color: var(--text-primary);
-      outline: none;
-      transition: all var(--duration-fast);
-    }
-    
-    .totp-input input:focus {
-      border-color: var(--color-primary);
-      box-shadow: 0 0 0 3px var(--color-primary-light);
-    }
-    
-    .mfa-actions {
-      display: flex;
-      gap: var(--sp-3);
-      margin-top: var(--sp-5);
-    }
-    
-    .mfa-status {
-      display: flex;
-      align-items: center;
-      gap: var(--sp-3);
-      padding: var(--sp-4);
-      background: var(--color-success-light);
-      border-radius: var(--radius-md);
-    }
-    
-    .mfa-status-icon {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 32px;
-      height: 32px;
-      background: var(--color-success);
-      border-radius: 50%;
-      color: white;
-    }
-    
     .danger-zone {
       border-color: var(--color-error);
     }
@@ -203,16 +62,6 @@
     }
     
     @media (max-width: 640px) {
-      .totp-input input {
-        width: 40px;
-        height: 48px;
-        font-size: var(--text-lg);
-      }
-      
-      .mfa-actions {
-        flex-direction: column;
-      }
-      
       .settings-item {
         flex-wrap: wrap;
       }
@@ -372,72 +221,28 @@
                   <div class="settings-item-desc">Add an extra layer of security</div>
                 </div>
                 <div id="mfaToggleArea">
-                  <button class="btn btn-secondary btn-sm" id="mfaSetupBtn" onclick="startMFASetup()">
+                  <a href="mfa-setup.html" class="btn btn-secondary btn-sm" id="mfaSetupBtn">
                     Enable
-                  </button>
-                </div>
-              </div>
-              
-              <!-- MFA Setup Flow -->
-              <div id="mfaSetupFlow" class="hidden mfa-setup">
-                <div class="mfa-step">
-                  <span class="mfa-step-number">1</span>
-                  <span class="mfa-step-title">Scan QR Code or Enter Secret</span>
-                  <div class="mfa-step-content">
-                    <div class="qr-container">
-                      <div class="qr-code" id="qrCode">
-                        <!-- QR code will be inserted here -->
-                      </div>
-                      <div class="secret-code">
-                        <span class="secret-code-label">Can't scan? Enter this code manually:</span>
-                        <div class="secret-code-value" id="secretCode" onclick="copySecret()">
-                          Loading...
-                        </div>
-                        <span class="secret-code-label" style="color: var(--color-success);" id="copyFeedback"></span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div class="mfa-step">
-                  <span class="mfa-step-number">2</span>
-                  <span class="mfa-step-title">Enter Verification Code</span>
-                  <div class="mfa-step-content">
-                    <div class="totp-input" id="totpInput">
-                      <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
-                      <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
-                      <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
-                      <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
-                      <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
-                      <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
-                    </div>
-                  </div>
-                </div>
-                
-                <div class="mfa-actions">
-                  <button class="btn btn-secondary" onclick="cancelMFASetup()">Cancel</button>
-                  <button class="btn btn-primary" id="verifyMFABtn" onclick="verifyAndEnableMFA()">
-                    Verify & Enable
-                  </button>
+                  </a>
                 </div>
               </div>
               
               <!-- MFA Enabled Status -->
-              <div id="mfaEnabledStatus" class="hidden" style="padding: var(--sp-5);">
-                <div class="mfa-status">
-                  <div class="mfa-status-icon">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <polyline points="20 6 9 17 4 12"/>
-                    </svg>
+              <div id="mfaEnabledStatus" class="hidden">
+                <div class="settings-item" style="border-bottom: none;">
+                  <div class="settings-item-info">
+                    <div class="settings-item-title" style="color: var(--color-success);">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline; vertical-align: -2px; margin-right: 4px;">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                      2FA Enabled
+                    </div>
+                    <div class="settings-item-desc">Your account has an extra layer of security</div>
                   </div>
-                  <div>
-                    <div style="font-weight: 500;">Two-factor authentication is enabled</div>
-                    <div style="font-size: var(--text-xs); color: var(--text-muted);">Your account has an extra layer of security</div>
-                  </div>
+                  <button class="btn btn-secondary btn-sm" onclick="disableMFA()">
+                    Disable
+                  </button>
                 </div>
-                <button class="btn btn-secondary btn-sm" style="margin-top: var(--sp-4);" onclick="disableMFA()">
-                  Disable 2FA
-                </button>
               </div>
             </div>
             
@@ -521,7 +326,6 @@
   <script>
     let client;
     let currentFactorId = null;
-    let totpSecret = null;
     
     async function init() {
       client = initSupabase();
@@ -529,7 +333,6 @@
       try {
         await requireAuth(client);
         await loadSettings();
-        initTOTPInputs();
       } catch (err) {
         console.error('Auth error:', err);
         window.location.href = 'login.html';
@@ -570,185 +373,25 @@
       }
     }
     
-    async function startMFASetup() {
-      try {
-        document.getElementById('mfaSetupBtn').disabled = true;
-        document.getElementById('mfaSetupBtn').innerHTML = '<span class="spinner"></span>';
-        
-        // Unenroll any existing unverified factors
-        const { data: factors } = await client.auth.mfa.listFactors();
-        for (const factor of (factors.totp || [])) {
-          if (factor.status === 'unverified') {
-            await client.auth.mfa.unenroll({ factorId: factor.id });
-          }
-        }
-        
-        // Enroll new TOTP
-        const { data, error } = await client.auth.mfa.enroll({
-          factorType: 'totp',
-          friendlyName: 'Authenticator App'
-        });
-        
-        if (error) throw error;
-        
-        currentFactorId = data.id;
-        totpSecret = data.totp.secret;
-        
-        // Display QR code as image
-        const qrContainer = document.getElementById('qrCode');
-        qrContainer.innerHTML = `<img src="${data.totp.qr_code}" alt="QR Code for authenticator app">`;
-        
-        // Display secret for manual entry
-        document.getElementById('secretCode').textContent = formatSecret(totpSecret);
-        
-        // Show setup flow
-        document.getElementById('mfaSetupBtn').parentElement.classList.add('hidden');
-        document.getElementById('mfaSetupFlow').classList.remove('hidden');
-        
-        // Focus first TOTP input
-        document.querySelector('#totpInput input').focus();
-        
-      } catch (err) {
-        Toast.error('Failed to start MFA setup: ' + err.message);
-        document.getElementById('mfaSetupBtn').disabled = false;
-        document.getElementById('mfaSetupBtn').textContent = 'Enable';
-      }
-    }
-    
-    function formatSecret(secret) {
-      // Format secret in groups of 4 for easier reading
-      return secret.match(/.{1,4}/g)?.join(' ') || secret;
-    }
-    
-    async function copySecret() {
-      try {
-        await navigator.clipboard.writeText(totpSecret);
-        document.getElementById('copyFeedback').textContent = 'Copied!';
-        setTimeout(() => {
-          document.getElementById('copyFeedback').textContent = '';
-        }, 2000);
-      } catch (err) {
-        // Fallback for mobile
-        const el = document.getElementById('secretCode');
-        const range = document.createRange();
-        range.selectNodeContents(el);
-        const sel = window.getSelection();
-        sel.removeAllRanges();
-        sel.addRange(range);
-      }
-    }
-    
-    function initTOTPInputs() {
-      const inputs = document.querySelectorAll('#totpInput input');
-      
-      inputs.forEach((input, index) => {
-        input.addEventListener('input', (e) => {
-          const value = e.target.value;
-          
-          // Only allow numbers
-          e.target.value = value.replace(/[^0-9]/g, '');
-          
-          // Auto-advance to next input
-          if (value && index < inputs.length - 1) {
-            inputs[index + 1].focus();
-          }
-          
-          // Auto-submit when all filled
-          const code = getTOTPCode();
-          if (code.length === 6) {
-            verifyAndEnableMFA();
-          }
-        });
-        
-        input.addEventListener('keydown', (e) => {
-          // Handle backspace
-          if (e.key === 'Backspace' && !e.target.value && index > 0) {
-            inputs[index - 1].focus();
-          }
-        });
-        
-        // Handle paste
-        input.addEventListener('paste', (e) => {
-          e.preventDefault();
-          const pastedData = e.clipboardData.getData('text').replace(/[^0-9]/g, '').slice(0, 6);
-          
-          pastedData.split('').forEach((char, i) => {
-            if (inputs[i]) {
-              inputs[i].value = char;
-            }
-          });
-          
-          if (pastedData.length === 6) {
-            verifyAndEnableMFA();
-          } else if (inputs[pastedData.length]) {
-            inputs[pastedData.length].focus();
-          }
-        });
-      });
-    }
-    
-    function getTOTPCode() {
-      const inputs = document.querySelectorAll('#totpInput input');
-      return Array.from(inputs).map(i => i.value).join('');
-    }
-    
-    function clearTOTPInputs() {
-      const inputs = document.querySelectorAll('#totpInput input');
-      inputs.forEach(i => i.value = '');
-      inputs[0]?.focus();
-    }
-    
-    async function verifyAndEnableMFA() {
-      const code = getTOTPCode();
-      
-      if (code.length !== 6) {
-        Toast.error('Please enter the 6-digit code');
-        return;
-      }
-      
-      const btn = document.getElementById('verifyMFABtn');
-      btn.disabled = true;
-      btn.innerHTML = '<span class="spinner"></span> Verifying...';
-      
-      try {
-        const { data, error } = await client.auth.mfa.challengeAndVerify({
-          factorId: currentFactorId,
-          code: code
-        });
-        
-        if (error) throw error;
-        
-        Toast.success('Two-factor authentication enabled!');
-        
-        document.getElementById('mfaSetupFlow').classList.add('hidden');
-        document.getElementById('mfaEnabledStatus').classList.remove('hidden');
-        
-      } catch (err) {
-        Toast.error('Invalid code. Please try again.');
-        clearTOTPInputs();
-        btn.disabled = false;
-        btn.textContent = 'Verify & Enable';
-      }
-    }
-    
-    function cancelMFASetup() {
-      document.getElementById('mfaSetupFlow').classList.add('hidden');
-      document.getElementById('mfaSetupBtn').disabled = false;
-      document.getElementById('mfaSetupBtn').textContent = 'Enable';
-      document.getElementById('mfaSetupBtn').parentElement.classList.remove('hidden');
-      clearTOTPInputs();
-      
-      // Unenroll the unverified factor
-      if (currentFactorId) {
-        client.auth.mfa.unenroll({ factorId: currentFactorId }).catch(() => {});
-        currentFactorId = null;
-      }
-    }
-    
     async function disableMFA() {
-      if (!confirm('Are you sure you want to disable two-factor authentication? This will make your account less secure.')) {
-        return;
-      }
+      const confirmed = await Modal.danger({
+        title: 'Disable Two-Factor Authentication',
+        content: `
+          <p style="margin-bottom: var(--sp-4);">Are you sure you want to disable two-factor authentication?</p>
+          <p style="color: var(--color-warning);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline; vertical-align: -2px;">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            This will make your account less secure.
+          </p>
+        `,
+        confirmText: 'Disable 2FA',
+        cancelText: 'Keep Enabled'
+      });
+      
+      if (!confirmed) return;
       
       try {
         const { error } = await client.auth.mfa.unenroll({ factorId: currentFactorId });
@@ -758,8 +401,6 @@
         Toast.success('Two-factor authentication disabled');
         
         document.getElementById('mfaEnabledStatus').classList.add('hidden');
-        document.getElementById('mfaSetupBtn').disabled = false;
-        document.getElementById('mfaSetupBtn').textContent = 'Enable';
         document.getElementById('mfaSetupBtn').parentElement.classList.remove('hidden');
         
         currentFactorId = null;
@@ -812,13 +453,20 @@
     });
     
     async function deleteAllSubscriptions() {
-      if (!confirm('Are you sure you want to delete ALL your subscriptions? This cannot be undone.')) {
-        return;
-      }
+      const confirmed = await Modal.danger({
+        title: 'Delete All Subscriptions',
+        content: `
+          <p style="margin-bottom: var(--sp-4);">Are you sure you want to delete <strong>all</strong> your subscriptions?</p>
+          <div style="padding: var(--sp-4); background: var(--color-error-light); border-radius: var(--radius-md); color: var(--color-error);">
+            <strong>⚠️ This action cannot be undone!</strong>
+            <p style="margin-top: var(--sp-2); font-size: var(--text-sm);">All your subscription data will be permanently deleted.</p>
+          </div>
+        `,
+        confirmText: 'Delete All Subscriptions',
+        cancelText: 'Cancel'
+      });
       
-      if (!confirm('This is your final warning. All subscription data will be permanently deleted.')) {
-        return;
-      }
+      if (!confirmed) return;
       
       try {
         const user = await getCurrentUser(client);
