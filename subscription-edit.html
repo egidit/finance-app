@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Edit Subscription - Subscription Tracker</title>
+  
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/layout.css">
+  
+  <style>
+    .page-header {
+      margin-bottom: var(--spacing-6);
+    }
+    
+    .page-title {
+      font-size: var(--font-size-2xl);
+      font-weight: 700;
+    }
+    
+    .form-card {
+      max-width: 600px;
+    }
+    
+    .form-section {
+      margin-bottom: var(--spacing-6);
+    }
+    
+    .form-section-title {
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      margin-bottom: var(--spacing-4);
+      padding-bottom: var(--spacing-2);
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--spacing-4);
+    }
+    
+    .form-grid-full {
+      grid-column: span 2;
+    }
+    
+    .form-actions {
+      display: flex;
+      gap: var(--spacing-3);
+      justify-content: flex-end;
+      margin-top: var(--spacing-6);
+      padding-top: var(--spacing-4);
+      border-top: 1px solid var(--border-color);
+    }
+    
+    .lifecycle-toggle {
+      display: flex;
+      gap: var(--spacing-2);
+      margin-bottom: var(--spacing-4);
+    }
+    
+    .lifecycle-toggle .btn {
+      flex: 1;
+    }
+    
+    .lifecycle-toggle .btn.active {
+      background: var(--color-primary);
+      color: white;
+    }
+    
+    .constraint-info {
+      background: var(--bg-secondary);
+      padding: var(--spacing-3);
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-sm);
+      color: var(--text-secondary);
+      margin-bottom: var(--spacing-4);
+    }
+    
+    .status-toggle {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-3);
+      padding: var(--spacing-4);
+      background: var(--bg-secondary);
+      border-radius: var(--radius-md);
+    }
+    
+    .toggle-switch {
+      position: relative;
+      width: 48px;
+      height: 24px;
+    }
+    
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-full);
+      transition: background 0.3s;
+    }
+    
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      left: 2px;
+      bottom: 2px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.3s;
+    }
+    
+    .toggle-switch input:checked + .toggle-slider {
+      background: var(--color-success);
+    }
+    
+    .toggle-switch input:checked + .toggle-slider::before {
+      transform: translateX(24px);
+    }
+    
+    @media (max-width: 640px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .form-grid-full {
+        grid-column: span 1;
+      }
+      
+      .form-actions {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Mobile Header -->
+  <header class="mobile-header">
+    <button class="mobile-menu-btn" id="mobileMenuBtn">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+    </button>
+    <div class="mobile-logo">SubTracker</div>
+    <div style="width: 40px;"></div>
+  </header>
+  
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">SubTracker</div>
+      
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="nav-item">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          Dashboard
+        </a>
+        <a href="subscriptions.html" class="nav-item active">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+          </svg>
+          Subscriptions
+        </a>
+        <a href="subscription-new.html" class="nav-item">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="16"></line>
+            <line x1="8" y1="12" x2="16" y2="12"></line>
+          </svg>
+          New Subscription
+        </a>
+        <a href="settings.html" class="nav-item">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          Settings
+        </a>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <button class="btn btn-ghost" style="width: 100%;" onclick="handleSignOut()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          Sign Out
+        </button>
+      </div>
+    </aside>
+    
+    <!-- Mobile Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Loading State -->
+      <div id="loadingState" class="card">
+        <div class="card-content text-center" style="padding: var(--spacing-8);">
+          <p>Loading subscription...</p>
+        </div>
+      </div>
+      
+      <!-- Edit Form -->
+      <div id="editContent" class="hidden">
+        <div class="page-header">
+          <a href="#" id="backLink" style="color: var(--text-secondary); text-decoration: none; font-size: var(--font-size-sm);">
+            ← Back to Subscription
+          </a>
+          <h1 class="page-title">Edit Subscription</h1>
+        </div>
+        
+        <div id="alertContainer"></div>
+        
+        <div class="card form-card">
+          <div class="card-content">
+            <form id="subscriptionForm">
+              <!-- Status Toggle -->
+              <div class="form-section">
+                <div class="status-toggle">
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="is_active" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
+                  <div>
+                    <div style="font-weight: 500;">Active Subscription</div>
+                    <div style="font-size: var(--font-size-sm); color: var(--text-secondary);">
+                      Turn off to mark as cancelled
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Basic Info -->
+              <div class="form-section">
+                <h2 class="form-section-title">Basic Information</h2>
+                
+                <div class="form-grid">
+                  <div class="input-group form-grid-full">
+                    <label for="name" class="input-label">Subscription Name *</label>
+                    <input 
+                      type="text" 
+                      id="name" 
+                      class="input" 
+                      placeholder="Netflix, Spotify, etc."
+                      required
+                    >
+                  </div>
+                  
+                  <div class="input-group">
+                    <label for="amount" class="input-label">Amount *</label>
+                    <input 
+                      type="number" 
+                      id="amount" 
+                      class="input" 
+                      placeholder="9.99"
+                      step="0.01"
+                      min="0"
+                      required
+                    >
+                  </div>
+                  
+                  <div class="input-group">
+                    <label for="currency" class="input-label">Currency</label>
+                    <select id="currency" class="input">
+                      <option value="USD">USD ($)</option>
+                      <option value="EUR">EUR (€)</option>
+                      <option value="GBP">GBP (£)</option>
+                      <option value="CAD">CAD ($)</option>
+                      <option value="AUD">AUD ($)</option>
+                      <option value="JPY">JPY (¥)</option>
+                    </select>
+                  </div>
+                  
+                  <div class="input-group">
+                    <label for="billing_cycle" class="input-label">Billing Cycle *</label>
+                    <select id="billing_cycle" class="input" required>
+                      <option value="monthly">Monthly</option>
+                      <option value="yearly">Yearly</option>
+                      <option value="weekly">Weekly</option>
+                      <option value="quarterly">Quarterly</option>
+                    </select>
+                  </div>
+                  
+                  <div class="input-group">
+                    <label for="start_date" class="input-label">Start Date *</label>
+                    <input 
+                      type="date" 
+                      id="start_date" 
+                      class="input"
+                      required
+                    >
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Lifecycle Constraint -->
+              <div class="form-section">
+                <h2 class="form-section-title">Subscription Lifecycle</h2>
+                
+                <div class="constraint-info">
+                  <strong>Important:</strong> You must specify either a total number of payments OR an explicit end date.
+                </div>
+                
+                <div class="lifecycle-toggle">
+                  <button type="button" class="btn btn-secondary active" id="togglePayments" onclick="setLifecycleMode('payments')">
+                    Total Payments
+                  </button>
+                  <button type="button" class="btn btn-secondary" id="toggleEndDate" onclick="setLifecycleMode('endDate')">
+                    End Date
+                  </button>
+                </div>
+                
+                <div id="paymentsField" class="input-group">
+                  <label for="total_payments" class="input-label">Total Number of Payments</label>
+                  <input 
+                    type="number" 
+                    id="total_payments" 
+                    class="input" 
+                    placeholder="12"
+                    min="1"
+                  >
+                </div>
+                
+                <div id="endDateField" class="input-group hidden">
+                  <label for="explicit_end_date" class="input-label">End Date</label>
+                  <input 
+                    type="date" 
+                    id="explicit_end_date" 
+                    class="input"
+                  >
+                </div>
+              </div>
+              
+              <!-- Category & Notes -->
+              <div class="form-section">
+                <h2 class="form-section-title">Additional Details</h2>
+                
+                <div class="form-grid">
+                  <div class="input-group">
+                    <label for="category" class="input-label">Category</label>
+                    <select id="category" class="input">
+                      <option value="">Select a category</option>
+                      <option value="entertainment">Entertainment</option>
+                      <option value="productivity">Productivity</option>
+                      <option value="utilities">Utilities</option>
+                      <option value="health">Health & Fitness</option>
+                      <option value="education">Education</option>
+                      <option value="finance">Finance</option>
+                      <option value="shopping">Shopping</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  
+                  <div class="input-group">
+                    <label for="website" class="input-label">Website URL</label>
+                    <input 
+                      type="url" 
+                      id="website" 
+                      class="input" 
+                      placeholder="https://example.com"
+                    >
+                  </div>
+                  
+                  <div class="input-group form-grid-full">
+                    <label for="notes" class="input-label">Notes</label>
+                    <textarea 
+                      id="notes" 
+                      class="input" 
+                      rows="3"
+                      placeholder="Any additional notes..."
+                    ></textarea>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Actions -->
+              <div class="form-actions">
+                <a href="#" id="cancelLink" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary" id="submitBtn">
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/supabase-client.js"></script>
+  
+  <script>
+    let client;
+    let subscription = null;
+    let subscriptionId = null;
+    let lifecycleMode = 'payments';
+    
+    async function init() {
+      initTheme();
+      initMobileNav();
+      
+      client = initSupabase();
+      
+      try {
+        await requireAuth(client);
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        subscriptionId = urlParams.get('id');
+        
+        if (!subscriptionId) {
+          window.location.href = 'subscriptions.html';
+          return;
+        }
+        
+        // Set back links
+        document.getElementById('backLink').href = `subscription-detail.html?id=${subscriptionId}`;
+        document.getElementById('cancelLink').href = `subscription-detail.html?id=${subscriptionId}`;
+        
+        await loadSubscription();
+        
+      } catch (err) {
+        window.location.href = 'login.html';
+      }
+    }
+    
+    async function loadSubscription() {
+      try {
+        const user = await getCurrentUser(client);
+        
+        const { data, error } = await client
+          .from('subscriptions')
+          .select('*')
+          .eq('id', subscriptionId)
+          .eq('user_id', user.id)
+          .single();
+        
+        if (error) throw error;
+        if (!data) throw new Error('Subscription not found');
+        
+        subscription = data;
+        populateForm();
+        
+      } catch (err) {
+        document.getElementById('loadingState').innerHTML = `
+          <div class="card-content text-center" style="padding: var(--spacing-8);">
+            <p style="color: var(--color-error);">Failed to load subscription: ${err.message}</p>
+            <a href="subscriptions.html" class="btn btn-primary" style="margin-top: var(--spacing-4);">Back to List</a>
+          </div>
+        `;
+      }
+    }
+    
+    function populateForm() {
+      document.getElementById('loadingState').classList.add('hidden');
+      document.getElementById('editContent').classList.remove('hidden');
+      
+      const sub = subscription;
+      
+      document.getElementById('name').value = sub.name;
+      document.getElementById('amount').value = sub.amount;
+      document.getElementById('currency').value = sub.currency || 'USD';
+      document.getElementById('billing_cycle').value = sub.billing_cycle;
+      document.getElementById('start_date').value = sub.start_date;
+      document.getElementById('is_active').checked = sub.is_active !== false;
+      document.getElementById('category').value = sub.category || '';
+      document.getElementById('website').value = sub.website || '';
+      document.getElementById('notes').value = sub.notes || '';
+      
+      // Set lifecycle mode
+      if (sub.explicit_end_date) {
+        setLifecycleMode('endDate');
+        document.getElementById('explicit_end_date').value = sub.explicit_end_date;
+      } else if (sub.total_payments) {
+        setLifecycleMode('payments');
+        document.getElementById('total_payments').value = sub.total_payments;
+      }
+    }
+    
+    function setLifecycleMode(mode) {
+      lifecycleMode = mode;
+      
+      const togglePayments = document.getElementById('togglePayments');
+      const toggleEndDate = document.getElementById('toggleEndDate');
+      const paymentsField = document.getElementById('paymentsField');
+      const endDateField = document.getElementById('endDateField');
+      
+      if (mode === 'payments') {
+        togglePayments.classList.add('active');
+        toggleEndDate.classList.remove('active');
+        paymentsField.classList.remove('hidden');
+        endDateField.classList.add('hidden');
+        document.getElementById('explicit_end_date').value = '';
+      } else {
+        togglePayments.classList.remove('active');
+        toggleEndDate.classList.add('active');
+        paymentsField.classList.add('hidden');
+        endDateField.classList.remove('hidden');
+        document.getElementById('total_payments').value = '';
+      }
+    }
+    
+    document.getElementById('subscriptionForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const name = document.getElementById('name').value.trim();
+      const amount = parseFloat(document.getElementById('amount').value);
+      const currency = document.getElementById('currency').value;
+      const billing_cycle = document.getElementById('billing_cycle').value;
+      const start_date = document.getElementById('start_date').value;
+      const is_active = document.getElementById('is_active').checked;
+      const total_payments = document.getElementById('total_payments').value;
+      const explicit_end_date = document.getElementById('explicit_end_date').value;
+      const category = document.getElementById('category').value;
+      const website = document.getElementById('website').value.trim();
+      const notes = document.getElementById('notes').value.trim();
+      
+      const submitBtn = document.getElementById('submitBtn');
+      
+      document.getElementById('alertContainer').innerHTML = '';
+      
+      // Validate lifecycle constraint
+      if (!total_payments && !explicit_end_date) {
+        document.getElementById('alertContainer').innerHTML = 
+          '<div class="alert alert-error">Please specify either total payments or an end date.</div>';
+        return;
+      }
+      
+      if (total_payments && explicit_end_date) {
+        document.getElementById('alertContainer').innerHTML = 
+          '<div class="alert alert-error">Please specify only one: total payments OR end date, not both.</div>';
+        return;
+      }
+      
+      setLoading(submitBtn, true);
+      
+      try {
+        const updateData = {
+          name,
+          amount,
+          currency,
+          billing_cycle,
+          start_date,
+          is_active,
+          total_payments: total_payments ? parseInt(total_payments) : null,
+          explicit_end_date: explicit_end_date || null,
+          category: category || null,
+          website: website || null,
+          notes: notes || null,
+          updated_at: new Date().toISOString()
+        };
+        
+        const { error } = await client
+          .from('subscriptions')
+          .update(updateData)
+          .eq('id', subscriptionId);
+        
+        if (error) throw error;
+        
+        // Redirect back to detail page
+        window.location.href = `subscription-detail.html?id=${subscriptionId}`;
+        
+      } catch (err) {
+        document.getElementById('alertContainer').innerHTML = 
+          `<div class="alert alert-error">Failed to update subscription: ${err.message}</div>`;
+        setLoading(submitBtn, false);
+      }
+    });
+    
+    async function handleSignOut() {
+      await signOut(client);
+      window.location.href = 'login.html';
+    }
+    
+    // Initialize
+    init();
+  </script>
+</body>
+</html>

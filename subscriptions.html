@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Subscriptions - Subscription Tracker</title>
+  
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/layout.css">
+  
+  <style>
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--spacing-6);
+      flex-wrap: wrap;
+      gap: var(--spacing-4);
+    }
+    
+    .page-title {
+      font-size: var(--font-size-2xl);
+      font-weight: 700;
+    }
+    
+    .filters-bar {
+      display: flex;
+      gap: var(--spacing-3);
+      flex-wrap: wrap;
+      margin-bottom: var(--spacing-4);
+    }
+    
+    .filters-bar .input,
+    .filters-bar select {
+      min-width: 150px;
+    }
+    
+    .search-input {
+      flex: 1;
+      min-width: 200px;
+    }
+    
+    .subscription-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-3);
+    }
+    
+    .subscription-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: var(--spacing-4);
+      padding: var(--spacing-4);
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .subscription-item:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .subscription-main {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-1);
+    }
+    
+    .subscription-name {
+      font-weight: 600;
+      font-size: var(--font-size-lg);
+    }
+    
+    .subscription-meta {
+      display: flex;
+      gap: var(--spacing-3);
+      flex-wrap: wrap;
+      font-size: var(--font-size-sm);
+      color: var(--text-secondary);
+    }
+    
+    .subscription-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: var(--spacing-2);
+    }
+    
+    .subscription-amount {
+      font-weight: 700;
+      font-size: var(--font-size-lg);
+    }
+    
+    .progress-bar {
+      width: 100px;
+      height: 6px;
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      border-radius: var(--radius-full);
+      transition: width 0.3s;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: var(--spacing-12);
+    }
+    
+    .empty-icon {
+      font-size: 64px;
+      margin-bottom: var(--spacing-4);
+    }
+    
+    @media (max-width: 640px) {
+      .subscription-item {
+        grid-template-columns: 1fr;
+      }
+      
+      .subscription-right {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+      
+      .progress-bar {
+        width: 80px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Mobile Header -->
+  <header class="mobile-header">
+    <button class="mobile-menu-btn" id="mobileMenuBtn">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+    </button>
+    <div class="mobile-logo">SubTracker</div>
+    <div style="width: 40px;"></div>
+  </header>
+  
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">SubTracker</div>
+      
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="nav-item">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          Dashboard
+        </a>
+        <a href="subscriptions.html" class="nav-item active">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+          </svg>
+          Subscriptions
+        </a>
+        <a href="subscription-new.html" class="nav-item">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="16"></line>
+            <line x1="8" y1="12" x2="16" y2="12"></line>
+          </svg>
+          New Subscription
+        </a>
+        <a href="settings.html" class="nav-item">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          Settings
+        </a>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <button class="btn btn-ghost" style="width: 100%;" onclick="handleSignOut()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          Sign Out
+        </button>
+      </div>
+    </aside>
+    
+    <!-- Mobile Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="page-header">
+        <h1 class="page-title">All Subscriptions</h1>
+        <a href="subscription-new.html" class="btn btn-primary">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          Add Subscription
+        </a>
+      </div>
+      
+      <div id="alertContainer"></div>
+      
+      <!-- Filters -->
+      <div class="filters-bar">
+        <input 
+          type="search" 
+          id="searchInput" 
+          class="input search-input" 
+          placeholder="Search subscriptions..."
+        >
+        
+        <select id="statusFilter" class="input">
+          <option value="all">All Statuses</option>
+          <option value="active">Active</option>
+          <option value="ending_soon">Ending Soon</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+        
+        <select id="sortBy" class="input">
+          <option value="name">Sort by Name</option>
+          <option value="amount">Sort by Amount</option>
+          <option value="next_billing">Sort by Next Billing</option>
+          <option value="created">Sort by Created</option>
+        </select>
+      </div>
+      
+      <!-- Loading State -->
+      <div id="loadingState" class="card">
+        <div class="card-content text-center" style="padding: var(--spacing-8);">
+          <p>Loading subscriptions...</p>
+        </div>
+      </div>
+      
+      <!-- Empty State -->
+      <div id="emptyState" class="card hidden">
+        <div class="card-content empty-state">
+          <div class="empty-icon">📋</div>
+          <h3>No subscriptions yet</h3>
+          <p style="color: var(--text-secondary); margin-bottom: var(--spacing-4);">
+            Start tracking your subscriptions to see them here.
+          </p>
+          <a href="subscription-new.html" class="btn btn-primary">Add Your First Subscription</a>
+        </div>
+      </div>
+      
+      <!-- Subscriptions List -->
+      <div id="subscriptionList" class="subscription-list hidden"></div>
+    </main>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/calculations.js"></script>
+  
+  <script>
+    let allSubscriptions = [];
+    let client;
+    
+    async function init() {
+      initTheme();
+      initMobileNav();
+      
+      client = initSupabase();
+      
+      try {
+        await requireAuth(client);
+        await loadSubscriptions();
+      } catch (err) {
+        window.location.href = 'login.html';
+      }
+    }
+    
+    async function loadSubscriptions() {
+      try {
+        const user = await getCurrentUser(client);
+        
+        const { data, error } = await client
+          .from('subscriptions')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('name');
+        
+        if (error) throw error;
+        
+        allSubscriptions = (data || []).map(sub => enrichSubscription(sub));
+        
+        document.getElementById('loadingState').classList.add('hidden');
+        renderSubscriptions();
+        
+      } catch (err) {
+        document.getElementById('loadingState').classList.add('hidden');
+        document.getElementById('alertContainer').innerHTML = 
+          `<div class="alert alert-error">Failed to load subscriptions: ${err.message}</div>`;
+      }
+    }
+    
+    function renderSubscriptions() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const statusFilter = document.getElementById('statusFilter').value;
+      const sortBy = document.getElementById('sortBy').value;
+      
+      let filtered = allSubscriptions.filter(sub => {
+        // Search filter
+        if (search && !sub.name.toLowerCase().includes(search)) {
+          return false;
+        }
+        
+        // Status filter
+        if (statusFilter !== 'all' && sub.lifecycle?.status !== statusFilter) {
+          return false;
+        }
+        
+        return true;
+      });
+      
+      // Sort
+      filtered.sort((a, b) => {
+        switch (sortBy) {
+          case 'amount':
+            return (b.amount || 0) - (a.amount || 0);
+          case 'next_billing':
+            return new Date(a.lifecycle?.nextBillingDate || '9999-12-31') - 
+                   new Date(b.lifecycle?.nextBillingDate || '9999-12-31');
+          case 'created':
+            return new Date(b.created_at) - new Date(a.created_at);
+          default:
+            return a.name.localeCompare(b.name);
+        }
+      });
+      
+      if (filtered.length === 0) {
+        document.getElementById('emptyState').classList.remove('hidden');
+        document.getElementById('subscriptionList').classList.add('hidden');
+        return;
+      }
+      
+      document.getElementById('emptyState').classList.add('hidden');
+      document.getElementById('subscriptionList').classList.remove('hidden');
+      
+      const listHtml = filtered.map(sub => {
+        const status = sub.lifecycle?.status || 'active';
+        const progress = sub.lifecycle?.progressPercent || 0;
+        
+        let statusBadge = '';
+        let progressColor = 'var(--color-primary)';
+        
+        switch (status) {
+          case 'active':
+            statusBadge = '<span class="badge badge-success">Active</span>';
+            progressColor = 'var(--color-success)';
+            break;
+          case 'ending_soon':
+            statusBadge = '<span class="badge badge-warning">Ending Soon</span>';
+            progressColor = 'var(--color-warning)';
+            break;
+          case 'completed':
+            statusBadge = '<span class="badge badge-secondary">Completed</span>';
+            progressColor = 'var(--text-secondary)';
+            break;
+          case 'cancelled':
+            statusBadge = '<span class="badge badge-error">Cancelled</span>';
+            progressColor = 'var(--color-error)';
+            break;
+        }
+        
+        const nextBilling = sub.lifecycle?.nextBillingDate 
+          ? formatDate(sub.lifecycle.nextBillingDate)
+          : 'N/A';
+        
+        return `
+          <div class="card subscription-item" onclick="viewSubscription('${sub.id}')">
+            <div class="subscription-main">
+              <div class="subscription-name">${escapeHtml(sub.name)}</div>
+              <div class="subscription-meta">
+                <span>${sub.billing_cycle}</span>
+                <span>•</span>
+                <span>Next: ${nextBilling}</span>
+                ${statusBadge}
+              </div>
+            </div>
+            <div class="subscription-right">
+              <div class="subscription-amount">${formatCurrency(sub.amount, sub.currency)}</div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: ${progress}%; background: ${progressColor};"></div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+      document.getElementById('subscriptionList').innerHTML = listHtml;
+    }
+    
+    function viewSubscription(id) {
+      window.location.href = `subscription-detail.html?id=${id}`;
+    }
+    
+    function formatCurrency(amount, currency = 'USD') {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: currency
+      }).format(amount);
+    }
+    
+    function formatDate(dateStr) {
+      return new Date(dateStr).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      });
+    }
+    
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+    
+    async function handleSignOut() {
+      await signOut(client);
+      window.location.href = 'login.html';
+    }
+    
+    // Event listeners for filters
+    document.getElementById('searchInput').addEventListener('input', renderSubscriptions);
+    document.getElementById('statusFilter').addEventListener('change', renderSubscriptions);
+    document.getElementById('sortBy').addEventListener('change', renderSubscriptions);
+    
+    // Initialize
+    init();
+  </script>
+</body>
+</html>

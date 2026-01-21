@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Dashboard - Subscription Tracker</title>
+  
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/layout.css">
+  
+  <style>
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--spacing-4);
+      margin-bottom: var(--spacing-6);
+    }
+    
+    .summary-card {
+      padding: var(--spacing-4);
+    }
+    
+    .summary-label {
+      font-size: var(--font-size-sm);
+      color: var(--text-secondary);
+      margin-bottom: var(--spacing-2);
+    }
+    
+    .summary-value {
+      font-size: var(--font-size-3xl);
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    
+    .subscriptions-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-3);
+    }
+    
+    .subscription-card {
+      padding: var(--spacing-4);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+    
+    .subscription-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .subscription-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: var(--spacing-3);
+    }
+    
+    .subscription-info {
+      flex: 1;
+    }
+    
+    .subscription-name {
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      margin-bottom: var(--spacing-1);
+    }
+    
+    .subscription-price {
+      font-size: var(--font-size-sm);
+      color: var(--text-secondary);
+    }
+    
+    .subscription-lifecycle {
+      font-size: var(--font-size-sm);
+      color: var(--text-secondary);
+      margin-bottom: var(--spacing-3);
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: var(--spacing-16) var(--spacing-4);
+    }
+    
+    .empty-icon {
+      font-size: 64px;
+      margin-bottom: var(--spacing-4);
+      opacity: 0.5;
+    }
+    
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--spacing-4);
+    }
+    
+    .section-title {
+      font-size: var(--font-size-xl);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <!-- Mobile Header -->
+  <header class="mobile-header">
+    <button class="mobile-menu-btn" id="mobileMenuBtn">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+    </button>
+    <div class="mobile-logo">SubTracker</div>
+    <div style="width: 40px;"></div>
+  </header>
+  
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">SubTracker</div>
+      
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="nav-item active">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          Dashboard
+        </a>
+        <a href="subscriptions.html" class="nav-item">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+          </svg>
+          Subscriptions
+        </a>
+        <a href="subscription-new.html" class="nav-item">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="16"></line>
+            <line x1="8" y1="12" x2="16" y2="12"></line>
+          </svg>
+          New Subscription
+        </a>
+        <a href="settings.html" class="nav-item">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          Settings
+        </a>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <button class="btn btn-ghost" style="width: 100%;" onclick="handleSignOut()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          Sign Out
+        </button>
+      </div>
+    </aside>
+    
+    <!-- Mobile Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="page-header">
+        <h1 class="page-title">Dashboard</h1>
+        <p class="page-subtitle">Overview of your subscription lifecycles</p>
+      </div>
+      
+      <div id="alertContainer"></div>
+      
+      <!-- Summary Cards -->
+      <div class="summary-grid">
+        <div class="card summary-card">
+          <div class="summary-label">Active Subscriptions</div>
+          <div class="summary-value" id="activeCount">-</div>
+        </div>
+        
+        <div class="card summary-card">
+          <div class="summary-label">Ending Soon</div>
+          <div class="summary-value" id="endingSoonCount">-</div>
+        </div>
+        
+        <div class="card summary-card">
+          <div class="summary-label">Monthly Total</div>
+          <div class="summary-value" id="monthlyTotal">-</div>
+        </div>
+      </div>
+      
+      <!-- Subscriptions List -->
+      <div>
+        <div class="section-header">
+          <h2 class="section-title">Recent Subscriptions</h2>
+          <a href="subscription-new.html" class="btn btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Add New
+          </a>
+        </div>
+        
+        <div id="subscriptionsList" class="subscriptions-list">
+          <div class="card">
+            <div class="card-content empty-state">
+              <div class="empty-icon">📦</div>
+              <p>Loading subscriptions...</p>
+            </div>
+          </div>
+        </div>
+        
+        <div id="viewAllContainer" class="hidden" style="text-align: center; margin-top: var(--spacing-4);">
+          <a href="subscriptions.html" class="btn btn-secondary">View All Subscriptions</a>
+        </div>
+      </div>
+    </main>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/calculations.js"></script>
+  
+  <script>
+    let client;
+    
+    async function init() {
+      initTheme();
+      initMobileNav();
+      
+      client = initSupabase();
+      
+      try {
+        await requireAuth(client);
+        await loadDashboard();
+      } catch (err) {
+        window.location.href = 'login.html';
+      }
+    }
+    
+    async function loadDashboard() {
+      try {
+        const user = await getCurrentUser(client);
+        
+        const { data: subscriptions, error } = await client
+          .from('subscriptions')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(5);
+        
+        if (error) throw error;
+        
+        if (!subscriptions || subscriptions.length === 0) {
+          renderEmptyState();
+          updateSummary([]);
+          return;
+        }
+        
+        const enriched = subscriptions.map(enrichSubscription);
+        renderSubscriptions(enriched);
+        
+        // Load all subscriptions for summary
+        const { data: allSubs } = await client
+          .from('subscriptions')
+          .select('*')
+          .eq('user_id', user.id);
+        
+        const allEnriched = (allSubs || []).map(enrichSubscription);
+        updateSummary(allEnriched);
+        
+        if (allSubs && allSubs.length > 5) {
+          document.getElementById('viewAllContainer').classList.remove('hidden');
+        }
+        
+      } catch (err) {
+        console.error('Error loading dashboard:', err);
+        document.getElementById('alertContainer').innerHTML = 
+          `<div class="alert alert-error">Failed to load subscriptions: ${err.message}</div>`;
+      }
+    }
+    
+    function renderSubscriptions(enriched) {
+      const list = document.getElementById('subscriptionsList');
+      
+      if (enriched.length === 0) {
+        renderEmptyState();
+        return;
+      }
+      
+      list.innerHTML = enriched.map(sub => {
+        const lifecycle = sub.lifecycle || {};
+        const status = lifecycle.status || 'active';
+        const progress = lifecycle.progressPercent || 0;
+        
+        let statusBadge = '';
+        let progressColor = 'var(--color-primary)';
+        
+        switch (status) {
+          case 'active':
+            statusBadge = '<span class="badge badge-success">Active</span>';
+            progressColor = 'var(--color-success)';
+            break;
+          case 'ending_soon':
+            statusBadge = '<span class="badge badge-warning">Ending Soon</span>';
+            progressColor = 'var(--color-warning)';
+            break;
+          case 'completed':
+            statusBadge = '<span class="badge badge-secondary">Completed</span>';
+            progressColor = 'var(--text-secondary)';
+            break;
+          case 'cancelled':
+            statusBadge = '<span class="badge badge-error">Cancelled</span>';
+            progressColor = 'var(--color-error)';
+            break;
+        }
+        
+        return `
+          <div class="card subscription-card" onclick="window.location.href='subscription-detail.html?id=${sub.id}'">
+            <div class="subscription-header">
+              <div class="subscription-info">
+                <div class="subscription-name">${escapeHtml(sub.name)}</div>
+                <div class="subscription-price">${formatCurrency(sub.amount, sub.currency)} / ${sub.billing_cycle}</div>
+              </div>
+              ${statusBadge}
+            </div>
+            
+            <div class="subscription-lifecycle">
+              ${formatPaymentProgress(sub)} · ${formatTimeRemaining(sub)}
+            </div>
+            
+            <div class="progress">
+              <div class="progress-bar" style="width: ${progress}%; background: ${progressColor};"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    function renderEmptyState() {
+      const list = document.getElementById('subscriptionsList');
+      list.innerHTML = `
+        <div class="card">
+          <div class="card-content empty-state">
+            <div class="empty-icon">📦</div>
+            <h3>No subscriptions yet</h3>
+            <p style="margin-bottom: var(--spacing-4); color: var(--text-secondary);">
+              Start tracking your subscription lifecycles
+            </p>
+            <a href="subscription-new.html" class="btn btn-primary">Add Your First Subscription</a>
+          </div>
+        </div>
+      `;
+    }
+    
+    function updateSummary(enriched) {
+      // Active count
+      const active = enriched.filter(s => s.lifecycle?.status === 'active' || s.lifecycle?.status === 'ending_soon').length;
+      document.getElementById('activeCount').textContent = active;
+      
+      // Ending soon
+      const endingSoon = enriched.filter(s => s.lifecycle?.status === 'ending_soon').length;
+      document.getElementById('endingSoonCount').textContent = endingSoon;
+      
+      // Monthly total (approximate)
+      const monthlyTotal = enriched.reduce((sum, sub) => {
+        if (!sub.is_active) return sum;
+        
+        const amount = sub.amount || 0;
+        switch (sub.billing_cycle) {
+          case 'weekly': return sum + (amount * 4.33);
+          case 'monthly': return sum + amount;
+          case 'quarterly': return sum + (amount / 3);
+          case 'yearly': return sum + (amount / 12);
+          default: return sum + amount;
+        }
+      }, 0);
+      
+      document.getElementById('monthlyTotal').textContent = formatCurrency(monthlyTotal, 'USD');
+    }
+    
+    function formatCurrency(amount, currency = 'USD') {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: currency
+      }).format(amount);
+    }
+    
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+    
+    async function handleSignOut() {
+      await signOut(client);
+      window.location.href = 'login.html';
+    }
+    
+    // Initialize
+    init();
+  </script>
+</body>
+</html>

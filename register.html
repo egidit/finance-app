@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Register - Subscription Tracker</title>
+  
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/layout.css">
+  
+  <style>
+    .auth-container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--spacing-4);
+    }
+    
+    .auth-card {
+      max-width: 400px;
+      width: 100%;
+    }
+    
+    .auth-header {
+      text-align: center;
+      margin-bottom: var(--spacing-6);
+    }
+    
+    .auth-title {
+      font-size: var(--font-size-2xl);
+      font-weight: 700;
+      margin-bottom: var(--spacing-2);
+    }
+    
+    .auth-form {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-4);
+    }
+    
+    .auth-footer {
+      text-align: center;
+      margin-top: var(--spacing-4);
+      color: var(--text-secondary);
+      font-size: var(--font-size-sm);
+    }
+    
+    .auth-link {
+      color: var(--color-primary);
+      text-decoration: none;
+    }
+    
+    .auth-link:hover {
+      text-decoration: underline;
+    }
+    
+    .password-requirements {
+      font-size: var(--font-size-xs);
+      color: var(--text-tertiary);
+      margin-top: var(--spacing-1);
+    }
+    
+    .password-strength {
+      height: 4px;
+      background: var(--glass-light);
+      border-radius: var(--radius-full);
+      margin-top: var(--spacing-2);
+      overflow: hidden;
+    }
+    
+    .password-strength-bar {
+      height: 100%;
+      transition: all var(--transition-fast);
+      border-radius: var(--radius-full);
+    }
+    
+    .strength-weak { width: 25%; background: var(--color-error); }
+    .strength-fair { width: 50%; background: var(--color-warning); }
+    .strength-good { width: 75%; background: var(--color-primary); }
+    .strength-strong { width: 100%; background: var(--color-success); }
+  </style>
+</head>
+<body>
+  <div class="auth-container">
+    <div class="card card-heavy auth-card">
+      <div class="card-content">
+        <div class="auth-header">
+          <h1 class="auth-title">Create Account</h1>
+          <p>Start tracking your subscription lifecycles</p>
+        </div>
+        
+        <div id="alertContainer"></div>
+        
+        <form id="registerForm" class="auth-form">
+          <div class="input-group">
+            <label for="email" class="input-label">Email</label>
+            <input 
+              type="email" 
+              id="email" 
+              class="input" 
+              placeholder="you@example.com"
+              required
+            >
+          </div>
+          
+          <div class="input-group">
+            <label for="password" class="input-label">Password</label>
+            <input 
+              type="password" 
+              id="password" 
+              class="input" 
+              placeholder="Create a strong password"
+              required
+            >
+            <div class="password-strength">
+              <div id="strengthBar" class="password-strength-bar"></div>
+            </div>
+            <p class="password-requirements">
+              8+ characters, uppercase, lowercase, number, special character
+            </p>
+          </div>
+          
+          <div class="input-group">
+            <label for="confirmPassword" class="input-label">Confirm Password</label>
+            <input 
+              type="password" 
+              id="confirmPassword" 
+              class="input" 
+              placeholder="Confirm your password"
+              required
+            >
+          </div>
+          
+          <button type="submit" class="btn btn-primary" id="registerBtn">
+            Create Account
+          </button>
+        </form>
+        
+        <!-- Email Confirmation Message -->
+        <div id="confirmationMessage" class="hidden" style="text-align: center;">
+          <div style="font-size: 48px; margin-bottom: var(--spacing-4);">📧</div>
+          <h3 style="margin-bottom: var(--spacing-2);">Check your email</h3>
+          <p style="color: var(--text-secondary); margin-bottom: var(--spacing-4);">
+            We've sent a confirmation link to <strong id="sentEmail"></strong>
+          </p>
+          <a href="login.html" class="btn btn-secondary">Go to Login</a>
+        </div>
+        
+        <div class="auth-footer" id="authFooter">
+          <p>
+            Already have an account? 
+            <a href="login.html" class="auth-link">Sign in</a>
+          </p>
+          <p style="margin-top: var(--spacing-2);">
+            <a href="index.html" class="auth-link">← Back to home</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/supabase-client.js"></script>
+  
+  <script>
+    // Password strength indicator
+    document.getElementById('password').addEventListener('input', (e) => {
+      const password = e.target.value;
+      const strengthBar = document.getElementById('strengthBar');
+      
+      let score = 0;
+      if (password.length >= 8) score++;
+      if (password.length >= 12) score++;
+      if (/[a-z]/.test(password)) score++;
+      if (/[A-Z]/.test(password)) score++;
+      if (/[0-9]/.test(password)) score++;
+      if (/[^a-zA-Z0-9]/.test(password)) score++;
+      
+      strengthBar.className = 'password-strength-bar';
+      if (score <= 2) strengthBar.classList.add('strength-weak');
+      else if (score <= 3) strengthBar.classList.add('strength-fair');
+      else if (score <= 5) strengthBar.classList.add('strength-good');
+      else strengthBar.classList.add('strength-strong');
+    });
+    
+    // Handle registration form
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      const registerBtn = document.getElementById('registerBtn');
+      
+      // Clear previous alerts
+      document.getElementById('alertContainer').innerHTML = '';
+      
+      // Validate password
+      const validation = validatePassword(password);
+      if (!validation.valid) {
+        showAlertIn('alertContainer', validation.errors.join('. '), 'error');
+        return;
+      }
+      
+      // Check passwords match
+      if (password !== confirmPassword) {
+        showAlertIn('alertContainer', 'Passwords do not match', 'error');
+        return;
+      }
+      
+      setLoading(registerBtn, true);
+      
+      try {
+        const client = initSupabase();
+        
+        const { data, error } = await client.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: window.location.origin + '/login.html'
+          }
+        });
+        
+        if (error) throw error;
+        
+        // Show confirmation message
+        document.getElementById('registerForm').classList.add('hidden');
+        document.getElementById('authFooter').classList.add('hidden');
+        document.getElementById('confirmationMessage').classList.remove('hidden');
+        document.getElementById('sentEmail').textContent = email;
+        
+      } catch (err) {
+        showAlertIn('alertContainer', err.message, 'error');
+        setLoading(registerBtn, false);
+      }
+    });
+    
+    function showAlertIn(containerId, message, type) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+    }
+    
+    // Check if already logged in
+    async function checkAuth() {
+      const authenticated = await isAuthenticated();
+      if (authenticated) {
+        window.location.href = 'dashboard.html';
+      }
+    }
+    
+    checkAuth();
+  </script>
+</body>
+</html>

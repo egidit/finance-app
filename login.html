@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Sign In - Subscription Tracker</title>
+  
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/layout.css">
+  
+  <style>
+    .auth-container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--spacing-4);
+    }
+    
+    .auth-card {
+      max-width: 400px;
+      width: 100%;
+    }
+    
+    .auth-header {
+      text-align: center;
+      margin-bottom: var(--spacing-6);
+    }
+    
+    .auth-title {
+      font-size: var(--font-size-2xl);
+      font-weight: 700;
+      margin-bottom: var(--spacing-2);
+    }
+    
+    .auth-form {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-4);
+    }
+    
+    .auth-footer {
+      text-align: center;
+      margin-top: var(--spacing-4);
+      color: var(--text-secondary);
+      font-size: var(--font-size-sm);
+    }
+    
+    .auth-link {
+      color: var(--color-primary);
+      text-decoration: none;
+    }
+    
+    .auth-link:hover {
+      text-decoration: underline;
+    }
+    
+    .mfa-section {
+      display: none;
+    }
+    
+    .mfa-code-input {
+      text-align: center;
+      font-size: var(--font-size-xl);
+      letter-spacing: 0.5em;
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-container">
+    <div class="card card-heavy auth-card">
+      <div class="card-content">
+        <div class="auth-header">
+          <h1 class="auth-title">Sign In</h1>
+          <p>Welcome back to Subscription Tracker</p>
+        </div>
+        
+        <!-- Login Form -->
+        <form id="loginForm" class="auth-form">
+          <div class="input-group">
+            <label for="email" class="input-label">Email</label>
+            <input 
+              type="email" 
+              id="email" 
+              class="input" 
+              placeholder="you@example.com"
+              required
+            >
+          </div>
+          
+          <div class="input-group">
+            <label for="password" class="input-label">Password</label>
+            <input 
+              type="password" 
+              id="password" 
+              class="input" 
+              placeholder="••••••••"
+              required
+            >
+          </div>
+          
+          <button type="submit" class="btn btn-primary" id="loginBtn">
+            Sign In
+          </button>
+        </form>
+        
+        <!-- MFA Section (hidden by default) -->
+        <div id="mfaSection" class="mfa-section">
+          <p style="margin-bottom: var(--spacing-4); text-align: center;">
+            Enter the 6-digit code from your authenticator app
+          </p>
+          
+          <form id="mfaForm" class="auth-form">
+            <div class="input-group">
+              <input 
+                type="text" 
+                id="mfaCode" 
+                class="input mfa-code-input" 
+                placeholder="000000"
+                maxlength="6"
+                pattern="[0-9]{6}"
+                required
+              >
+            </div>
+            
+            <button type="submit" class="btn btn-primary" id="mfaBtn">
+              Verify
+            </button>
+            
+            <button type="button" class="btn btn-ghost" id="mfaBackBtn">
+              Back
+            </button>
+          </form>
+        </div>
+        
+        <div class="auth-footer">
+          <p>
+            Don't have an account? 
+            <a href="register.html" class="auth-link">Sign up</a>
+          </p>
+          <p style="margin-top: var(--spacing-2);">
+            <a href="forgot-password.html" class="auth-link">Forgot password?</a>
+          </p>
+          <p style="margin-top: var(--spacing-2);">
+            <a href="index.html" class="auth-link">← Back to home</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/supabase-client.js"></script>
+  
+  <script>
+    let factorId = null;
+    
+    // Handle login form submission
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const loginBtn = document.getElementById('loginBtn');
+      
+      setLoading(loginBtn, true);
+      
+      try {
+        const client = initSupabase();
+        
+        // Sign in with email/password
+        const { data, error } = await client.auth.signInWithPassword({
+          email,
+          password
+        });
+        
+        if (error) throw error;
+        
+        // Check if MFA is required
+        const { data: factors } = await client.auth.mfa.listFactors();
+        const verifiedFactors = factors?.totp?.filter(f => f.status === 'verified') || [];
+        
+        const currentAAL = data.session?.aal;
+        if (verifiedFactors.length > 0 && currentAAL === 'aal1') {
+          // MFA is enabled, show MFA form
+          factorId = verifiedFactors[0].id;
+          document.getElementById('loginForm').style.display = 'none';
+          document.getElementById('mfaSection').style.display = 'block';
+          setLoading(loginBtn, false);
+        } else {
+          // Login successful, redirect
+          window.location.href = 'dashboard.html';
+        }
+      } catch (err) {
+        showAlert(err.message, 'error');
+        setLoading(loginBtn, false);
+      }
+    });
+    
+    // Handle MFA verification
+    document.getElementById('mfaForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const code = document.getElementById('mfaCode').value;
+      const mfaBtn = document.getElementById('mfaBtn');
+      
+      setLoading(mfaBtn, true);
+      
+      try {
+        const client = initSupabase();
+        
+        // Create MFA challenge
+        const { data: challengeData, error: challengeError } = await client.auth.mfa.challenge({
+          factorId
+        });
+        
+        if (challengeError) throw challengeError;
+        
+        // Verify the code
+        const { error: verifyError } = await client.auth.mfa.verify({
+          factorId,
+          challengeId: challengeData.id,
+          code
+        });
+        
+        if (verifyError) throw verifyError;
+        
+        // MFA successful, redirect
+        window.location.href = 'dashboard.html';
+      } catch (err) {
+        showAlert(err.message, 'error');
+        setLoading(mfaBtn, false);
+      }
+    });
+    
+    // Back button from MFA
+    document.getElementById('mfaBackBtn').addEventListener('click', () => {
+      document.getElementById('loginForm').style.display = 'block';
+      document.getElementById('mfaSection').style.display = 'none';
+      document.getElementById('mfaCode').value = '';
+      factorId = null;
+    });
+    
+    // Auto-format MFA code input (numbers only)
+    document.getElementById('mfaCode').addEventListener('input', (e) => {
+      e.target.value = e.target.value.replace(/\D/g, '');
+    });
+    
+    // Check if already logged in
+    async function checkAuth() {
+      const authenticated = await isAuthenticated();
+      if (authenticated) {
+        window.location.href = 'dashboard.html';
+      }
+    }
+    
+    checkAuth();
+  </script>
+</body>
+</html>

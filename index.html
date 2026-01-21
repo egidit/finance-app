@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Subscription Tracker - Lifecycle-Focused Management</title>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/layout.css">
+  
+  <style>
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: var(--spacing-6);
+    }
+    
+    .hero-title {
+      font-size: var(--font-size-4xl);
+      font-weight: 700;
+      margin-bottom: var(--spacing-4);
+      background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .hero-subtitle {
+      font-size: var(--font-size-xl);
+      color: var(--text-secondary);
+      margin-bottom: var(--spacing-8);
+      max-width: 600px;
+    }
+    
+    .hero-buttons {
+      display: flex;
+      gap: var(--spacing-4);
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: var(--spacing-6);
+      max-width: 1200px;
+      margin: var(--spacing-16) auto;
+      padding: 0 var(--spacing-6);
+    }
+    
+    .feature-card {
+      padding: var(--spacing-6);
+      text-align: center;
+    }
+    
+    .feature-icon {
+      font-size: var(--font-size-4xl);
+      margin-bottom: var(--spacing-4);
+    }
+    
+    .feature-title {
+      font-size: var(--font-size-xl);
+      font-weight: 600;
+      margin-bottom: var(--spacing-2);
+    }
+    
+    .feature-desc {
+      color: var(--text-secondary);
+    }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <h1 class="hero-title">Subscription Tracker</h1>
+    <p class="hero-subtitle">
+      Track your subscription lifecycles with precision. 
+      Know exactly when each subscription ends, how much you've paid, and what's remaining.
+    </p>
+    
+    <div class="hero-buttons">
+      <a href="register.html" class="btn btn-primary btn-lg">Get Started</a>
+      <a href="login.html" class="btn btn-secondary btn-lg">Sign In</a>
+    </div>
+  </div>
+  
+  <div class="feature-grid">
+    <div class="card feature-card">
+      <div class="feature-icon">📊</div>
+      <h3 class="feature-title">Lifecycle Focused</h3>
+      <p class="feature-desc">
+        Every subscription has a defined end. Track "Paid X / Y · Ends in N months".
+      </p>
+    </div>
+    
+    <div class="card feature-card">
+      <div class="feature-icon">🔒</div>
+      <h3 class="feature-title">Secure by Default</h3>
+      <p class="feature-desc">
+        Row-level security, MFA support, and server-validated sessions.
+      </p>
+    </div>
+    
+    <div class="card feature-card">
+      <div class="feature-icon">📱</div>
+      <h3 class="feature-title">Mobile First</h3>
+      <p class="feature-desc">
+        Beautiful glassmorphism UI with iOS 26+ inspired design.
+      </p>
+    </div>
+    
+    <div class="card feature-card">
+      <div class="feature-icon">🌙</div>
+      <h3 class="feature-title">Dark Mode</h3>
+      <p class="feature-desc">
+        Automatic dark mode with system preference detection.
+      </p>
+    </div>
+    
+    <div class="card feature-card">
+      <div class="feature-icon">⚡</div>
+      <h3 class="feature-title">Real-time</h3>
+      <p class="feature-desc">
+        Powered by Supabase for instant updates and sync.
+      </p>
+    </div>
+    
+    <div class="card feature-card">
+      <div class="feature-icon">📈</div>
+      <h3 class="feature-title">Progress Tracking</h3>
+      <p class="feature-desc">
+        Visual progress bars and status indicators for each subscription.
+      </p>
+    </div>
+  </div>
+  
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <!-- App Scripts -->
+  <script src="config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/supabase-client.js"></script>
+  
+  <script>
+    // Check if already logged in
+    async function checkAuth() {
+      const authenticated = await isAuthenticated();
+      if (authenticated) {
+        // Update button to show dashboard
+        const heroButtons = document.querySelector('.hero-buttons');
+        heroButtons.innerHTML = '<a href="dashboard.html" class="btn btn-primary btn-lg">Go to Dashboard</a>';
+      }
+    }
+    
+    checkAuth();
+  </script>
+</body>
+</html>
