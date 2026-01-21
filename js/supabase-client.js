@@ -57,7 +57,7 @@ async function isAuthenticated() {
   return !!session;
 }
 
-// Require authentication - throws if not authenticated
+// Require authentication - throws if not authenticated or MFA not completed
 async function requireAuth(clientParam) {
   const client = clientParam || initSupabase();
   if (!client) {
@@ -92,9 +92,10 @@ async function requireAuth(clientParam) {
   
   if (verifiedFactors.length > 0 && session.aal === 'aal1') {
     // User has MFA enabled but hasn't completed verification
-    // Redirect to login to complete MFA
-    window.location.href = 'login.html';
-    throw new Error('MFA verification required');
+    // Redirect to login with MFA flag to show MFA form immediately
+    window.location.replace('login.html?mfa_required=1');
+    // Return a promise that never resolves to halt further execution
+    return new Promise(() => {});
   }
   
   return session;

@@ -352,11 +352,38 @@
           return;
         }
         
-        // Fully authenticated
-        window.location.href = 'dashboard.html';
+        // Fully authenticated - redirect to dashboard
+        window.location.replace('dashboard.html');
+      } else {
+        // No session but mfa_required param? Clear it and show login
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('mfa_required')) {
+          history.replaceState(null, '', 'login.html');
+        }
       }
     }
-    checkAuth();
+    
+    // Check for mfa_required URL parameter (redirected from protected page)
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('mfa_required')) {
+      // Session exists but needs MFA - check immediately
+      (async () => {
+        const { data: { session } } = await client.auth.getSession();
+        if (session) {
+          const { data: factors } = await client.auth.mfa.listFactors();
+          const verifiedFactors = factors?.totp?.filter(f => f.status === 'verified') || [];
+          if (verifiedFactors.length > 0) {
+            currentFactorId = verifiedFactors[0].id;
+            showMfaForm();
+            return;
+          }
+        }
+        // Fallback to normal check
+        checkAuth();
+      })();
+    } else {
+      checkAuth();
+    }
     
     function showMfaForm() {
       document.getElementById('loginForm').classList.add('hidden');
