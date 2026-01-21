@@ -337,6 +337,20 @@
     const client = initSupabase();
     let currentFactorId = null;
     
+    // Helper to get AAL from session (may need to decode JWT)
+    function getSessionAAL(session) {
+      if (session.aal) return session.aal;
+      if (session.access_token) {
+        try {
+          const payload = JSON.parse(atob(session.access_token.split('.')[1]));
+          return payload.aal;
+        } catch (e) {
+          console.error('Failed to decode JWT:', e);
+        }
+      }
+      return null;
+    }
+    
     // Check if already logged in with full MFA
     async function checkAuth() {
       const { data: { session } } = await client.auth.getSession();
@@ -344,8 +358,9 @@
         // Check if MFA is required but not completed
         const { data: factors } = await client.auth.mfa.listFactors();
         const verifiedFactors = factors?.totp?.filter(f => f.status === 'verified') || [];
+        const currentAAL = getSessionAAL(session);
         
-        if (verifiedFactors.length > 0 && session.aal === 'aal1') {
+        if (verifiedFactors.length > 0 && currentAAL === 'aal1') {
           // MFA enabled but not verified - show MFA form
           currentFactorId = verifiedFactors[0].id;
           showMfaForm();
@@ -446,7 +461,8 @@
         const verifiedFactors = factors?.totp?.filter(f => f.status === 'verified') || [];
         
         // Check AAL level - if MFA is enrolled but at aal1, need verification
-        if (verifiedFactors.length > 0 && data.session?.aal === 'aal1') {
+        const currentAAL = getSessionAAL(data.session);
+        if (verifiedFactors.length > 0 && currentAAL === 'aal1') {
           currentFactorId = verifiedFactors[0].id;
           submitBtn.disabled = false;
           submitBtn.textContent = 'Sign In';

@@ -38,8 +38,9 @@ A lifecycle-focused subscription tracking web application with a glassmorphic de
 ### 2. Set Up the Database
 
 1. Go to the SQL Editor in your Supabase dashboard
-2. Copy the contents of `database/schema.sql`
+2. Copy the contents of `../dev-tools/database/schema.sql`
 3. Run the SQL to create the subscriptions table with RLS policies
+4. Run any migrations in `../dev-tools/database/migrations/` in order
 
 ### 3. Configure Authentication
 
@@ -49,7 +50,8 @@ A lifecycle-focused subscription tracking web application with a glassmorphic de
 
 ### 4. Update Configuration
 
-Edit `config.js` with your Supabase credentials:
+1. Copy `config.example.js` to `config.js`
+2. Edit `config.js` with your Supabase credentials:
 
 ```javascript
 const CONFIG = {
@@ -59,6 +61,8 @@ const CONFIG = {
 ```
 
 Find these values in: Project Settings → API
+
+> ⚠️ **Never commit `config.js` to version control!** It's in `.gitignore` for a reason.
 
 ### 5. Run the App
 
@@ -96,18 +100,25 @@ html-app/
 ├── subscription-detail.html # View subscription
 ├── subscription-edit.html  # Edit subscription
 ├── settings.html           # Settings page
-├── config.js               # Supabase configuration
+├── mfa-setup.html          # MFA enrollment page
+├── config.example.js       # Configuration template (copy to config.js)
+├── config.js               # Your Supabase configuration (git-ignored)
+├── .gitignore              # Files to exclude from git
 ├── css/
-│   ├── tokens.css          # Design tokens (colors, spacing, etc.)
-│   ├── components.css      # Reusable components (buttons, cards, inputs)
-│   └── layout.css          # Layout styles (sidebar, navigation)
+│   └── design-system.css   # Complete design system with tokens & components
 ├── js/
 │   ├── supabase-client.js  # Supabase initialization & auth helpers
-│   ├── calculations.js     # Subscription lifecycle calculations
-│   └── utils.js            # Theme, validation, and utility functions
-├── database/
-│   └── schema.sql          # Database schema for Supabase
+│   └── components.js       # Custom UI components (DatePicker, etc.)
 └── README.md               # This file
+
+../dev-tools/               # Development files (not for production)
+├── config.js               # Your actual config with secrets
+├── debug-mfa.html          # MFA debugging tool
+├── test-mfa-login.html     # MFA login tester
+├── verify-mfa.html         # MFA verification checker
+└── database/
+    ├── schema.sql          # Database schema for Supabase
+    └── migrations/         # Database migration files
 ```
 
 ## Lifecycle Tracking

@@ -90,7 +90,18 @@ async function requireAuth(clientParam) {
   const { data: factors } = await client.auth.mfa.listFactors();
   const verifiedFactors = factors?.totp?.filter(f => f.status === 'verified') || [];
   
-  if (verifiedFactors.length > 0 && session.aal === 'aal1') {
+  // Get AAL from JWT claims since session.aal may be undefined
+  let currentAAL = session.aal;
+  if (!currentAAL && session.access_token) {
+    try {
+      const payload = JSON.parse(atob(session.access_token.split('.')[1]));
+      currentAAL = payload.aal;
+    } catch (e) {
+      console.error('Failed to decode JWT:', e);
+    }
+  }
+  
+  if (verifiedFactors.length > 0 && currentAAL === 'aal1') {
     // User has MFA enabled but hasn't completed verification
     // Redirect to login with MFA flag to show MFA form immediately
     window.location.replace('login.html?mfa_required=1');
