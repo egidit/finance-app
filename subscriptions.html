@@ -3,449 +3,618 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Subscriptions - Subscription Tracker</title>
-  
-  <link rel="stylesheet" href="css/tokens.css">
-  <link rel="stylesheet" href="css/components.css">
-  <link rel="stylesheet" href="css/layout.css">
-  
+  <title>Subscriptions - SubTracker</title>
+  <link rel="stylesheet" href="css/design-system.css">
   <style>
-    .page-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: var(--spacing-6);
-      flex-wrap: wrap;
-      gap: var(--spacing-4);
-    }
-    
-    .page-title {
-      font-size: var(--font-size-2xl);
-      font-weight: 700;
-    }
-    
     .filters-bar {
       display: flex;
-      gap: var(--spacing-3);
+      gap: var(--sp-3);
+      margin-bottom: var(--sp-5);
       flex-wrap: wrap;
-      margin-bottom: var(--spacing-4);
     }
     
-    .filters-bar .input,
-    .filters-bar select {
-      min-width: 150px;
-    }
-    
-    .search-input {
+    .search-input-wrapper {
+      position: relative;
       flex: 1;
       min-width: 200px;
     }
     
-    .subscription-list {
-      display: flex;
-      flex-direction: column;
-      gap: var(--spacing-3);
+    .search-input-wrapper svg {
+      position: absolute;
+      left: var(--sp-4);
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
     }
     
-    .subscription-item {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: var(--spacing-4);
-      padding: var(--spacing-4);
+    .search-input-wrapper input {
+      padding-left: 40px;
+    }
+    
+    .filter-select {
+      min-width: 140px;
+    }
+    
+    .subscriptions-grid {
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-3);
+    }
+    
+    .subscription-row {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-4);
+      padding: var(--sp-4);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
       cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
+      transition: all var(--duration-fast) var(--ease-out);
     }
     
-    .subscription-item:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-lg);
+    .subscription-row:hover {
+      border-color: var(--color-primary);
+      box-shadow: var(--shadow-md);
     }
     
-    .subscription-main {
+    .sub-icon {
       display: flex;
-      flex-direction: column;
-      gap: var(--spacing-1);
-    }
-    
-    .subscription-name {
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      background: var(--color-primary-light);
+      border-radius: var(--radius-md);
+      color: var(--color-primary);
       font-weight: 600;
-      font-size: var(--font-size-lg);
+      font-size: var(--text-lg);
+      flex-shrink: 0;
     }
     
-    .subscription-meta {
-      display: flex;
-      gap: var(--spacing-3);
-      flex-wrap: wrap;
-      font-size: var(--font-size-sm);
-      color: var(--text-secondary);
+    .sub-details {
+      flex: 1;
+      min-width: 0;
     }
     
-    .subscription-right {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: var(--spacing-2);
-    }
-    
-    .subscription-amount {
-      font-weight: 700;
-      font-size: var(--font-size-lg);
-    }
-    
-    .progress-bar {
-      width: 100px;
-      height: 6px;
-      background: var(--bg-tertiary);
-      border-radius: var(--radius-full);
+    .sub-name {
+      font-weight: 600;
+      font-size: var(--text-md);
+      white-space: nowrap;
       overflow: hidden;
+      text-overflow: ellipsis;
     }
     
-    .progress-fill {
-      height: 100%;
-      border-radius: var(--radius-full);
-      transition: width 0.3s;
+    .sub-meta {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-3);
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+      margin-top: 2px;
     }
     
-    .empty-state {
-      text-align: center;
-      padding: var(--spacing-12);
+    .sub-progress {
+      width: 120px;
+      flex-shrink: 0;
     }
     
-    .empty-icon {
-      font-size: 64px;
-      margin-bottom: var(--spacing-4);
+    .sub-progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+      margin-bottom: 4px;
     }
     
-    @media (max-width: 640px) {
-      .subscription-item {
-        grid-template-columns: 1fr;
+    .sub-amount {
+      text-align: right;
+      flex-shrink: 0;
+    }
+    
+    .sub-price {
+      font-weight: 600;
+      font-size: var(--text-md);
+    }
+    
+    .sub-cycle {
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+    }
+    
+    .sub-actions {
+      display: flex;
+      gap: var(--sp-2);
+      opacity: 0;
+      transition: opacity var(--duration-fast);
+    }
+    
+    .subscription-row:hover .sub-actions {
+      opacity: 1;
+    }
+    
+    @media (max-width: 768px) {
+      .sub-progress {
+        display: none;
       }
       
-      .subscription-right {
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-between;
+      .sub-actions {
+        opacity: 1;
       }
       
-      .progress-bar {
-        width: 80px;
+      .filters-bar {
+        flex-direction: column;
+      }
+      
+      .filter-select {
+        width: 100%;
       }
     }
   </style>
 </head>
 <body>
-  <!-- Mobile Header -->
-  <header class="mobile-header">
-    <button class="mobile-menu-btn" id="mobileMenuBtn">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="3" y1="12" x2="21" y2="12"></line>
-        <line x1="3" y1="6" x2="21" y2="6"></line>
-        <line x1="3" y1="18" x2="21" y2="18"></line>
-      </svg>
-    </button>
-    <div class="mobile-logo">SubTracker</div>
-    <div style="width: 40px;"></div>
-  </header>
-  
   <div class="app-layout">
-    <!-- Sidebar -->
+    <!-- Sidebar (Desktop) -->
     <aside class="sidebar" id="sidebar">
-      <div class="sidebar-logo">SubTracker</div>
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+            <path d="M2 17l10 5 10-5"/>
+            <path d="M2 12l10 5 10-5"/>
+          </svg>
+          SubTracker
+        </div>
+      </div>
       
       <nav class="sidebar-nav">
-        <a href="dashboard.html" class="nav-item">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="7" height="7"></rect>
-            <rect x="14" y="3" width="7" height="7"></rect>
-            <rect x="14" y="14" width="7" height="7"></rect>
-            <rect x="3" y="14" width="7" height="7"></rect>
-          </svg>
-          Dashboard
-        </a>
-        <a href="subscriptions.html" class="nav-item active">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-            <polyline points="14 2 14 8 20 8"></polyline>
-            <line x1="16" y1="13" x2="8" y2="13"></line>
-            <line x1="16" y1="17" x2="8" y2="17"></line>
-          </svg>
-          Subscriptions
-        </a>
-        <a href="subscription-new.html" class="nav-item">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="12" y1="8" x2="12" y2="16"></line>
-            <line x1="8" y1="12" x2="16" y2="12"></line>
-          </svg>
-          New Subscription
-        </a>
-        <a href="settings.html" class="nav-item">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="3"></circle>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-          </svg>
-          Settings
-        </a>
+        <div class="nav-section">
+          <div class="nav-section-title">Menu</div>
+          <a href="dashboard.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="9" rx="1"/>
+              <rect x="14" y="3" width="7" height="5" rx="1"/>
+              <rect x="14" y="12" width="7" height="9" rx="1"/>
+              <rect x="3" y="16" width="7" height="5" rx="1"/>
+            </svg>
+            Dashboard
+          </a>
+          <a href="subscriptions.html" class="nav-item active">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            </svg>
+            Subscriptions
+          </a>
+          <a href="subscription-new.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="16"/>
+              <line x1="8" y1="12" x2="16" y2="12"/>
+            </svg>
+            Add New
+          </a>
+        </div>
+        
+        <div class="nav-section">
+          <div class="nav-section-title">Account</div>
+          <a href="settings.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+            Settings
+          </a>
+        </div>
       </nav>
       
       <div class="sidebar-footer">
-        <button class="btn btn-ghost" style="width: 100%;" onclick="handleSignOut()">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-            <polyline points="16 17 21 12 16 7"></polyline>
-            <line x1="21" y1="12" x2="9" y2="12"></line>
+        <button class="btn btn-ghost" style="width: 100%; justify-content: flex-start;" onclick="handleSignOut()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
           </svg>
           Sign Out
         </button>
       </div>
     </aside>
     
-    <!-- Mobile Overlay -->
+    <!-- Sidebar Overlay (Mobile) -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
     
     <!-- Main Content -->
     <main class="main-content">
-      <div class="page-header">
-        <h1 class="page-title">All Subscriptions</h1>
-        <a href="subscription-new.html" class="btn btn-primary">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
+      <!-- Mobile Header -->
+      <header class="mobile-header">
+        <button class="mobile-menu-btn" id="mobileMenuBtn">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
           </svg>
-          Add Subscription
+        </button>
+        <span class="mobile-header-title">Subscriptions</span>
+        <a href="subscription-new.html" class="btn btn-icon btn-ghost">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
         </a>
-      </div>
+      </header>
       
-      <div id="alertContainer"></div>
-      
-      <!-- Filters -->
-      <div class="filters-bar">
-        <input 
-          type="search" 
-          id="searchInput" 
-          class="input search-input" 
-          placeholder="Search subscriptions..."
-        >
+      <div class="page-container">
+        <!-- Page Header -->
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Subscriptions</h1>
+            <p class="page-subtitle" id="subscriptionCount">Loading...</p>
+          </div>
+          <a href="subscription-new.html" class="btn btn-primary" style="display: none;" id="addBtnDesktop">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Add Subscription
+          </a>
+        </div>
         
-        <select id="statusFilter" class="input">
-          <option value="all">All Statuses</option>
-          <option value="active">Active</option>
-          <option value="ending_soon">Ending Soon</option>
-          <option value="completed">Completed</option>
-          <option value="cancelled">Cancelled</option>
-        </select>
+        <!-- Alert Container -->
+        <div id="alertContainer"></div>
         
-        <select id="sortBy" class="input">
-          <option value="name">Sort by Name</option>
-          <option value="amount">Sort by Amount</option>
-          <option value="next_billing">Sort by Next Billing</option>
-          <option value="created">Sort by Created</option>
-        </select>
-      </div>
-      
-      <!-- Loading State -->
-      <div id="loadingState" class="card">
-        <div class="card-content text-center" style="padding: var(--spacing-8);">
-          <p>Loading subscriptions...</p>
+        <!-- Filters Bar -->
+        <div class="filters-bar">
+          <div class="search-input-wrapper">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input type="text" class="input" placeholder="Search subscriptions..." id="searchInput">
+          </div>
+          <div class="select-wrapper filter-select">
+            <select class="select" id="categoryFilter">
+              <option value="">All Categories</option>
+              <option value="entertainment">Entertainment</option>
+              <option value="productivity">Productivity</option>
+              <option value="health">Health & Fitness</option>
+              <option value="education">Education</option>
+              <option value="finance">Finance</option>
+              <option value="utilities">Utilities</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="select-wrapper filter-select">
+            <select class="select" id="statusFilter">
+              <option value="">All Status</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+        </div>
+        
+        <!-- Loading State -->
+        <div id="loadingState">
+          <div style="display: flex; justify-content: center; padding: 3rem;">
+            <div class="spinner"></div>
+          </div>
+        </div>
+        
+        <!-- Subscriptions List -->
+        <div id="subscriptionsList" class="subscriptions-grid hidden"></div>
+        
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden">
+          <div class="empty-state">
+            <div class="empty-state-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+              </svg>
+            </div>
+            <h3 class="empty-state-title">No subscriptions found</h3>
+            <p class="empty-state-text" id="emptyStateText">Start tracking your subscriptions to get insights on your spending.</p>
+            <a href="subscription-new.html" class="btn btn-primary">Add Subscription</a>
+          </div>
         </div>
       </div>
       
-      <!-- Empty State -->
-      <div id="emptyState" class="card hidden">
-        <div class="card-content empty-state">
-          <div class="empty-icon">📋</div>
-          <h3>No subscriptions yet</h3>
-          <p style="color: var(--text-secondary); margin-bottom: var(--spacing-4);">
-            Start tracking your subscriptions to see them here.
-          </p>
-          <a href="subscription-new.html" class="btn btn-primary">Add Your First Subscription</a>
-        </div>
-      </div>
-      
-      <!-- Subscriptions List -->
-      <div id="subscriptionList" class="subscription-list hidden"></div>
+      <!-- Mobile Bottom Navigation -->
+      <nav class="mobile-nav">
+        <a href="dashboard.html" class="mobile-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="9" rx="1"/>
+            <rect x="14" y="3" width="7" height="5" rx="1"/>
+            <rect x="14" y="12" width="7" height="9" rx="1"/>
+            <rect x="3" y="16" width="7" height="5" rx="1"/>
+          </svg>
+          <span>Home</span>
+        </a>
+        <a href="subscriptions.html" class="mobile-nav-item active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+          </svg>
+          <span>Subs</span>
+        </a>
+        <a href="subscription-new.html" class="mobile-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="16"/>
+            <line x1="8" y1="12" x2="16" y2="12"/>
+          </svg>
+          <span>Add</span>
+        </a>
+        <a href="settings.html" class="mobile-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+          <span>Settings</span>
+        </a>
+      </nav>
     </main>
   </div>
   
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
-  <script src="js/utils.js"></script>
+  <script src="js/components.js"></script>
   <script src="js/supabase-client.js"></script>
-  <script src="js/calculations.js"></script>
   
   <script>
-    let allSubscriptions = [];
     let client;
+    let allSubscriptions = [];
     
     async function init() {
-      initTheme();
-      initMobileNav();
-      
       client = initSupabase();
       
       try {
         await requireAuth(client);
         await loadSubscriptions();
+        setupFilters();
+        
+        // Show desktop add button
+        if (window.innerWidth > 768) {
+          document.getElementById('addBtnDesktop').style.display = 'flex';
+        }
       } catch (err) {
+        console.error('Auth error:', err);
         window.location.href = 'login.html';
       }
     }
     
     async function loadSubscriptions() {
       try {
-        const user = await getCurrentUser(client);
-        
-        const { data, error } = await client
+        const { data: subscriptions, error } = await client
           .from('subscriptions')
           .select('*')
-          .eq('user_id', user.id)
-          .order('name');
+          .order('created_at', { ascending: false });
         
         if (error) throw error;
         
-        allSubscriptions = (data || []).map(sub => enrichSubscription(sub));
+        allSubscriptions = subscriptions || [];
         
         document.getElementById('loadingState').classList.add('hidden');
-        renderSubscriptions();
+        
+        renderSubscriptions(allSubscriptions);
         
       } catch (err) {
-        document.getElementById('loadingState').classList.add('hidden');
         document.getElementById('alertContainer').innerHTML = 
-          `<div class="alert alert-error">Failed to load subscriptions: ${err.message}</div>`;
+          `<div class="alert alert-error">${err.message}</div>`;
+        document.getElementById('loadingState').classList.add('hidden');
       }
     }
     
-    function renderSubscriptions() {
-      const search = document.getElementById('searchInput').value.toLowerCase();
-      const statusFilter = document.getElementById('statusFilter').value;
-      const sortBy = document.getElementById('sortBy').value;
+    function setupFilters() {
+      const searchInput = document.getElementById('searchInput');
+      const categoryFilter = document.getElementById('categoryFilter');
+      const statusFilter = document.getElementById('statusFilter');
       
-      let filtered = allSubscriptions.filter(sub => {
-        // Search filter
-        if (search && !sub.name.toLowerCase().includes(search)) {
-          return false;
+      const applyFilters = () => {
+        const search = searchInput.value.toLowerCase();
+        const category = categoryFilter.value;
+        const status = statusFilter.value;
+        
+        let filtered = allSubscriptions.filter(sub => {
+          const matchesSearch = !search || 
+            sub.name.toLowerCase().includes(search) ||
+            (sub.category && sub.category.toLowerCase().includes(search));
+          
+          const matchesCategory = !category || sub.category === category;
+          
+          const matchesStatus = !status || 
+            (status === 'active' && sub.is_active) ||
+            (status === 'inactive' && !sub.is_active);
+          
+          return matchesSearch && matchesCategory && matchesStatus;
+        });
+        
+        renderSubscriptions(filtered, search || category || status);
+      };
+      
+      searchInput.addEventListener('input', applyFilters);
+      categoryFilter.addEventListener('change', applyFilters);
+      statusFilter.addEventListener('change', applyFilters);
+    }
+    
+    function renderSubscriptions(subscriptions, hasFilters = false) {
+      const container = document.getElementById('subscriptionsList');
+      const emptyState = document.getElementById('emptyState');
+      const countEl = document.getElementById('subscriptionCount');
+      
+      if (subscriptions.length === 0) {
+        container.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+        
+        if (hasFilters) {
+          document.getElementById('emptyStateText').textContent = 'No subscriptions match your filters.';
+        } else {
+          document.getElementById('emptyStateText').textContent = 'Start tracking your subscriptions to get insights on your spending.';
         }
         
-        // Status filter
-        if (statusFilter !== 'all' && sub.lifecycle?.status !== statusFilter) {
-          return false;
-        }
-        
-        return true;
-      });
-      
-      // Sort
-      filtered.sort((a, b) => {
-        switch (sortBy) {
-          case 'amount':
-            return (b.amount || 0) - (a.amount || 0);
-          case 'next_billing':
-            return new Date(a.lifecycle?.nextBillingDate || '9999-12-31') - 
-                   new Date(b.lifecycle?.nextBillingDate || '9999-12-31');
-          case 'created':
-            return new Date(b.created_at) - new Date(a.created_at);
-          default:
-            return a.name.localeCompare(b.name);
-        }
-      });
-      
-      if (filtered.length === 0) {
-        document.getElementById('emptyState').classList.remove('hidden');
-        document.getElementById('subscriptionList').classList.add('hidden');
+        countEl.textContent = '0 subscriptions';
         return;
       }
       
-      document.getElementById('emptyState').classList.add('hidden');
-      document.getElementById('subscriptionList').classList.remove('hidden');
+      emptyState.classList.add('hidden');
+      container.classList.remove('hidden');
       
-      const listHtml = filtered.map(sub => {
-        const status = sub.lifecycle?.status || 'active';
-        const progress = sub.lifecycle?.progressPercent || 0;
-        
-        let statusBadge = '';
-        let progressColor = 'var(--color-primary)';
-        
-        switch (status) {
-          case 'active':
-            statusBadge = '<span class="badge badge-success">Active</span>';
-            progressColor = 'var(--color-success)';
-            break;
-          case 'ending_soon':
-            statusBadge = '<span class="badge badge-warning">Ending Soon</span>';
-            progressColor = 'var(--color-warning)';
-            break;
-          case 'completed':
-            statusBadge = '<span class="badge badge-secondary">Completed</span>';
-            progressColor = 'var(--text-secondary)';
-            break;
-          case 'cancelled':
-            statusBadge = '<span class="badge badge-error">Cancelled</span>';
-            progressColor = 'var(--color-error)';
-            break;
-        }
-        
-        const nextBilling = sub.lifecycle?.nextBillingDate 
-          ? formatDate(sub.lifecycle.nextBillingDate)
-          : 'N/A';
+      const activeCount = subscriptions.filter(s => s.is_active).length;
+      countEl.textContent = `${subscriptions.length} subscription${subscriptions.length !== 1 ? 's' : ''} • ${activeCount} active`;
+      
+      container.innerHTML = subscriptions.map(sub => {
+        const initial = sub.name.charAt(0).toUpperCase();
+        const progress = calculateProgress(sub);
+        const cycleLabel = {
+          'weekly': '/wk',
+          'monthly': '/mo',
+          'quarterly': '/qtr',
+          'yearly': '/yr'
+        }[sub.billing_cycle] || '';
         
         return `
-          <div class="card subscription-item" onclick="viewSubscription('${sub.id}')">
-            <div class="subscription-main">
-              <div class="subscription-name">${escapeHtml(sub.name)}</div>
-              <div class="subscription-meta">
-                <span>${sub.billing_cycle}</span>
-                <span>•</span>
-                <span>Next: ${nextBilling}</span>
-                ${statusBadge}
+          <div class="subscription-row" 
+               onclick="viewSubscription('${sub.id}')"
+               oncontextmenu="showContextMenu(event, '${sub.id}', '${sub.name.replace(/'/g, "\\'")}')">
+            <div class="sub-icon">${initial}</div>
+            <div class="sub-details">
+              <div class="sub-name">${escapeHtml(sub.name)}</div>
+              <div class="sub-meta">
+                <span>${sub.category || 'Uncategorized'}</span>
+                <span class="badge ${sub.is_active ? 'badge-success' : 'badge-default'}">${sub.is_active ? 'Active' : 'Inactive'}</span>
               </div>
             </div>
-            <div class="subscription-right">
-              <div class="subscription-amount">${formatCurrency(sub.amount, sub.currency)}</div>
-              <div class="progress-bar">
-                <div class="progress-fill" style="width: ${progress}%; background: ${progressColor};"></div>
+            <div class="sub-progress">
+              <div class="sub-progress-label">
+                <span>Progress</span>
+                <span>${progress}%</span>
               </div>
+              <div class="progress ${progress > 75 ? 'progress-warning' : ''}">
+                <div class="progress-bar" style="width: ${progress}%"></div>
+              </div>
+            </div>
+            <div class="sub-amount">
+              <div class="sub-price">${formatCurrency(sub.amount, sub.currency)}</div>
+              <div class="sub-cycle">${cycleLabel}</div>
+            </div>
+            <div class="sub-actions">
+              <button class="btn btn-icon btn-sm btn-ghost" onclick="event.stopPropagation(); editSubscription('${sub.id}')" title="Edit">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+              </button>
+              <button class="btn btn-icon btn-sm btn-ghost" onclick="event.stopPropagation(); confirmDelete('${sub.id}', '${sub.name.replace(/'/g, "\\'")}')" title="Delete">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                </svg>
+              </button>
             </div>
           </div>
         `;
       }).join('');
+    }
+    
+    function calculateProgress(sub) {
+      const startDate = new Date(sub.start_date);
+      const now = new Date();
       
-      document.getElementById('subscriptionList').innerHTML = listHtml;
+      if (sub.total_payments) {
+        // Payment-based progress
+        const elapsed = Math.floor((now - startDate) / (1000 * 60 * 60 * 24));
+        let paymentsMade = 0;
+        
+        switch (sub.billing_cycle) {
+          case 'weekly': paymentsMade = Math.floor(elapsed / 7); break;
+          case 'monthly': paymentsMade = Math.floor(elapsed / 30); break;
+          case 'quarterly': paymentsMade = Math.floor(elapsed / 90); break;
+          case 'yearly': paymentsMade = Math.floor(elapsed / 365); break;
+        }
+        
+        return Math.min(100, Math.round((paymentsMade / sub.total_payments) * 100));
+      }
+      
+      if (sub.explicit_end_date) {
+        // Date-based progress
+        const endDate = new Date(sub.explicit_end_date);
+        const totalDays = (endDate - startDate) / (1000 * 60 * 60 * 24);
+        const elapsedDays = (now - startDate) / (1000 * 60 * 60 * 24);
+        
+        return Math.min(100, Math.max(0, Math.round((elapsedDays / totalDays) * 100)));
+      }
+      
+      return 0;
+    }
+    
+    function formatCurrency(amount, currency = 'USD') {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: currency,
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+      }).format(amount);
+    }
+    
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
     }
     
     function viewSubscription(id) {
       window.location.href = `subscription-detail.html?id=${id}`;
     }
     
-    function formatCurrency(amount, currency = 'USD') {
-      return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: currency
-      }).format(amount);
+    function editSubscription(id) {
+      window.location.href = `subscription-edit.html?id=${id}`;
     }
     
-    function formatDate(dateStr) {
-      return new Date(dateStr).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-      });
+    function showContextMenu(e, id, name) {
+      contextMenu.show(e, [
+        {
+          label: 'View Details',
+          icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
+          action: () => viewSubscription(id)
+        },
+        {
+          label: 'Edit',
+          icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>',
+          action: () => editSubscription(id)
+        },
+        { divider: true },
+        {
+          label: 'Delete',
+          icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>',
+          danger: true,
+          action: () => confirmDelete(id, name)
+        }
+      ], { id, name });
     }
     
-    function escapeHtml(str) {
-      const div = document.createElement('div');
-      div.textContent = str;
-      return div.innerHTML;
+    async function confirmDelete(id, name) {
+      if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
+      
+      try {
+        const { error } = await client
+          .from('subscriptions')
+          .delete()
+          .eq('id', id);
+        
+        if (error) throw error;
+        
+        Toast.success('Subscription deleted');
+        
+        // Remove from local array and re-render
+        allSubscriptions = allSubscriptions.filter(s => s.id !== id);
+        renderSubscriptions(allSubscriptions);
+        
+      } catch (err) {
+        Toast.error('Failed to delete subscription');
+      }
     }
     
     async function handleSignOut() {
       await signOut(client);
       window.location.href = 'login.html';
     }
-    
-    // Event listeners for filters
-    document.getElementById('searchInput').addEventListener('input', renderSubscriptions);
-    document.getElementById('statusFilter').addEventListener('change', renderSubscriptions);
-    document.getElementById('sortBy').addEventListener('change', renderSubscriptions);
     
     // Initialize
     init();

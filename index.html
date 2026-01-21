@@ -3,161 +3,486 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Subscription Tracker - Lifecycle-Focused Management</title>
-  
-  <!-- CSS -->
-  <link rel="stylesheet" href="css/tokens.css">
-  <link rel="stylesheet" href="css/components.css">
-  <link rel="stylesheet" href="css/layout.css">
-  
+  <title>SubTracker - Subscription Management Made Simple</title>
+  <link rel="stylesheet" href="css/design-system.css">
   <style>
-    .hero {
+    .landing-page {
       min-height: 100vh;
+    }
+    
+    .landing-nav {
       display: flex;
-      flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: space-between;
+      padding: var(--sp-4) var(--sp-6);
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .landing-logo {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+      font-weight: 700;
+      font-size: var(--text-xl);
+      color: var(--text-primary);
+    }
+    
+    .landing-logo svg {
+      width: 32px;
+      height: 32px;
+      color: var(--color-primary);
+    }
+    
+    .landing-nav-links {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-3);
+    }
+    
+    .hero-section {
       text-align: center;
-      padding: var(--spacing-6);
+      padding: var(--sp-10) var(--sp-6);
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--sp-2);
+      padding: var(--sp-2) var(--sp-4);
+      background: var(--color-primary-light);
+      color: var(--color-primary);
+      border-radius: var(--radius-full);
+      font-size: var(--text-sm);
+      font-weight: 500;
+      margin-bottom: var(--sp-5);
     }
     
     .hero-title {
-      font-size: var(--font-size-4xl);
-      font-weight: 700;
-      margin-bottom: var(--spacing-4);
-      background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: var(--sp-5);
+      color: var(--text-primary);
+    }
+    
+    .hero-title span {
+      background: linear-gradient(135deg, var(--color-primary), #4f46e5);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
     
     .hero-subtitle {
-      font-size: var(--font-size-xl);
+      font-size: var(--text-lg);
       color: var(--text-secondary);
-      margin-bottom: var(--spacing-8);
+      margin-bottom: var(--sp-8);
       max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
     }
     
-    .hero-buttons {
+    .hero-cta {
       display: flex;
-      gap: var(--spacing-4);
-      flex-wrap: wrap;
+      gap: var(--sp-3);
       justify-content: center;
+      flex-wrap: wrap;
     }
     
-    .feature-grid {
+    .hero-cta .btn {
+      min-width: 150px;
+    }
+    
+    .hero-image {
+      margin-top: var(--sp-10);
+      padding: 0 var(--sp-6);
+    }
+    
+    .hero-image-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      box-shadow: var(--shadow-xl);
+      border: 1px solid var(--border-color);
+      background: var(--bg-surface);
+    }
+    
+    .hero-image-container img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    
+    .hero-mockup {
+      padding: var(--sp-6);
+    }
+    
+    .mockup-header {
+      display: flex;
+      gap: var(--sp-2);
+      margin-bottom: var(--sp-4);
+    }
+    
+    .mockup-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--border-color);
+    }
+    
+    .mockup-dot:nth-child(1) { background: #ff5f56; }
+    .mockup-dot:nth-child(2) { background: #ffbd2e; }
+    .mockup-dot:nth-child(3) { background: #27ca40; }
+    
+    .mockup-content {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: var(--spacing-6);
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--sp-4);
+    }
+    
+    .mockup-card {
+      background: var(--bg-muted);
+      border-radius: var(--radius-lg);
+      padding: var(--sp-4);
+    }
+    
+    .mockup-card-header {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-3);
+      margin-bottom: var(--sp-3);
+    }
+    
+    .mockup-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--color-primary);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+    }
+    
+    .mockup-name {
+      font-weight: 600;
+    }
+    
+    .mockup-price {
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+    }
+    
+    .features-section {
+      padding: var(--sp-10) var(--sp-6);
+      background: var(--bg-muted);
+    }
+    
+    .features-container {
       max-width: 1200px;
-      margin: var(--spacing-16) auto;
-      padding: 0 var(--spacing-6);
+      margin: 0 auto;
+    }
+    
+    .features-header {
+      text-align: center;
+      margin-bottom: var(--sp-8);
+    }
+    
+    .features-header h2 {
+      font-size: var(--text-3xl);
+      font-weight: 700;
+      margin-bottom: var(--sp-3);
+    }
+    
+    .features-header p {
+      color: var(--text-secondary);
+      font-size: var(--text-lg);
+    }
+    
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: var(--sp-6);
     }
     
     .feature-card {
-      padding: var(--spacing-6);
-      text-align: center;
+      background: var(--bg-surface);
+      border-radius: var(--radius-xl);
+      padding: var(--sp-6);
+      border: 1px solid var(--border-color);
     }
     
     .feature-icon {
-      font-size: var(--font-size-4xl);
-      margin-bottom: var(--spacing-4);
+      width: 48px;
+      height: 48px;
+      background: var(--color-primary-light);
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-primary);
+      margin-bottom: var(--sp-4);
     }
     
-    .feature-title {
-      font-size: var(--font-size-xl);
+    .feature-icon svg {
+      width: 24px;
+      height: 24px;
+    }
+    
+    .feature-card h3 {
+      font-size: var(--text-lg);
       font-weight: 600;
-      margin-bottom: var(--spacing-2);
+      margin-bottom: var(--sp-2);
     }
     
-    .feature-desc {
+    .feature-card p {
       color: var(--text-secondary);
+      font-size: var(--text-sm);
+    }
+    
+    .cta-section {
+      padding: var(--sp-10) var(--sp-6);
+      text-align: center;
+    }
+    
+    .cta-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: linear-gradient(135deg, var(--color-primary), #4f46e5);
+      border-radius: var(--radius-xl);
+      padding: var(--sp-8);
+      color: white;
+    }
+    
+    .cta-container h2 {
+      font-size: var(--text-2xl);
+      font-weight: 700;
+      margin-bottom: var(--sp-3);
+    }
+    
+    .cta-container p {
+      opacity: 0.9;
+      margin-bottom: var(--sp-5);
+    }
+    
+    .cta-container .btn {
+      background: white;
+      color: var(--color-primary);
+    }
+    
+    .cta-container .btn:hover {
+      background: rgba(255,255,255,0.9);
+    }
+    
+    .footer {
+      padding: var(--sp-6);
+      text-align: center;
+      color: var(--text-muted);
+      font-size: var(--text-sm);
+    }
+    
+    @media (max-width: 768px) {
+      .mockup-content {
+        grid-template-columns: 1fr;
+      }
+      
+      .landing-nav {
+        padding: var(--sp-3) var(--sp-4);
+      }
+      
+      .hero-section {
+        padding: var(--sp-6) var(--sp-4);
+      }
     }
   </style>
 </head>
 <body>
-  <div class="hero">
-    <h1 class="hero-title">Subscription Tracker</h1>
-    <p class="hero-subtitle">
-      Track your subscription lifecycles with precision. 
-      Know exactly when each subscription ends, how much you've paid, and what's remaining.
-    </p>
+  <div class="landing-page">
+    <nav class="landing-nav">
+      <div class="landing-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+          <path d="M2 17l10 5 10-5"/>
+          <path d="M2 12l10 5 10-5"/>
+        </svg>
+        SubTracker
+      </div>
+      <div class="landing-nav-links">
+        <a href="login.html" class="btn btn-ghost">Sign In</a>
+        <a href="register.html" class="btn btn-primary">Get Started</a>
+      </div>
+    </nav>
     
-    <div class="hero-buttons">
-      <a href="register.html" class="btn btn-primary btn-lg">Get Started</a>
-      <a href="login.html" class="btn btn-secondary btn-lg">Sign In</a>
+    <section class="hero-section">
+      <div class="hero-badge">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+        Free to use, forever
+      </div>
+      <h1 class="hero-title">
+        All your subscriptions,<br><span>one place.</span>
+      </h1>
+      <p class="hero-subtitle">
+        Track, manage, and optimize your recurring payments. Get insights on spending, never miss a payment, and take control of your subscription lifecycle.
+      </p>
+      <div class="hero-cta">
+        <a href="register.html" class="btn btn-primary btn-lg">Start Free</a>
+        <a href="login.html" class="btn btn-ghost btn-lg">Sign In</a>
+      </div>
+    </section>
+    
+    <div class="hero-image">
+      <div class="hero-image-container">
+        <div class="hero-mockup">
+          <div class="mockup-header">
+            <div class="mockup-dot"></div>
+            <div class="mockup-dot"></div>
+            <div class="mockup-dot"></div>
+          </div>
+          <div class="mockup-content">
+            <div class="mockup-card">
+              <div class="mockup-card-header">
+                <div class="mockup-icon">N</div>
+                <div>
+                  <div class="mockup-name">Netflix</div>
+                  <div class="mockup-price">$15.99/mo</div>
+                </div>
+              </div>
+              <div class="progress">
+                <div class="progress-bar" style="width: 45%"></div>
+              </div>
+            </div>
+            <div class="mockup-card">
+              <div class="mockup-card-header">
+                <div class="mockup-icon" style="background: #1DB954;">S</div>
+                <div>
+                  <div class="mockup-name">Spotify</div>
+                  <div class="mockup-price">$9.99/mo</div>
+                </div>
+              </div>
+              <div class="progress">
+                <div class="progress-bar" style="width: 75%"></div>
+              </div>
+            </div>
+            <div class="mockup-card">
+              <div class="mockup-card-header">
+                <div class="mockup-icon" style="background: #00A1E0;">A</div>
+                <div>
+                  <div class="mockup-name">Adobe CC</div>
+                  <div class="mockup-price">$54.99/mo</div>
+                </div>
+              </div>
+              <div class="progress">
+                <div class="progress-bar" style="width: 20%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+    
+    <section class="features-section">
+      <div class="features-container">
+        <div class="features-header">
+          <h2>Everything you need</h2>
+          <p>Powerful features to manage all your subscriptions</p>
+        </div>
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+            </div>
+            <h3>Lifecycle Tracking</h3>
+            <p>Monitor your subscription progress with payment counts, end dates, and visual progress bars.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="1" x2="12" y2="23"/>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+              </svg>
+            </div>
+            <h3>Cost Analytics</h3>
+            <p>See your monthly, yearly, and total spending at a glance. Identify where your money goes.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+              </svg>
+            </div>
+            <h3>Smart Reminders</h3>
+            <p>Never miss a payment or renewal with upcoming payment notifications.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+            </div>
+            <h3>Secure & Private</h3>
+            <p>Your data is encrypted and secure. MFA support for extra protection.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                <line x1="8" y1="21" x2="16" y2="21"/>
+                <line x1="12" y1="17" x2="12" y2="21"/>
+              </svg>
+            </div>
+            <h3>Multi-Device</h3>
+            <p>Access your subscriptions from desktop or mobile. Responsive design that works everywhere.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+              </svg>
+            </div>
+            <h3>Categories</h3>
+            <p>Organize subscriptions by category. Filter and search to find what you need.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <section class="cta-section">
+      <div class="cta-container">
+        <h2>Ready to take control?</h2>
+        <p>Join thousands of users who manage their subscriptions with SubTracker.</p>
+        <a href="register.html" class="btn btn-lg">Get Started — It's Free</a>
+      </div>
+    </section>
+    
+    <footer class="footer">
+      <p>&copy; 2025 SubTracker. All rights reserved.</p>
+    </footer>
   </div>
   
-  <div class="feature-grid">
-    <div class="card feature-card">
-      <div class="feature-icon">📊</div>
-      <h3 class="feature-title">Lifecycle Focused</h3>
-      <p class="feature-desc">
-        Every subscription has a defined end. Track "Paid X / Y · Ends in N months".
-      </p>
-    </div>
-    
-    <div class="card feature-card">
-      <div class="feature-icon">🔒</div>
-      <h3 class="feature-title">Secure by Default</h3>
-      <p class="feature-desc">
-        Row-level security, MFA support, and server-validated sessions.
-      </p>
-    </div>
-    
-    <div class="card feature-card">
-      <div class="feature-icon">📱</div>
-      <h3 class="feature-title">Mobile First</h3>
-      <p class="feature-desc">
-        Beautiful glassmorphism UI with iOS 26+ inspired design.
-      </p>
-    </div>
-    
-    <div class="card feature-card">
-      <div class="feature-icon">🌙</div>
-      <h3 class="feature-title">Dark Mode</h3>
-      <p class="feature-desc">
-        Automatic dark mode with system preference detection.
-      </p>
-    </div>
-    
-    <div class="card feature-card">
-      <div class="feature-icon">⚡</div>
-      <h3 class="feature-title">Real-time</h3>
-      <p class="feature-desc">
-        Powered by Supabase for instant updates and sync.
-      </p>
-    </div>
-    
-    <div class="card feature-card">
-      <div class="feature-icon">📈</div>
-      <h3 class="feature-title">Progress Tracking</h3>
-      <p class="feature-desc">
-        Visual progress bars and status indicators for each subscription.
-      </p>
-    </div>
-  </div>
-  
-  <!-- Supabase JS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  
-  <!-- App Scripts -->
   <script src="config.js"></script>
-  <script src="js/utils.js"></script>
   <script src="js/supabase-client.js"></script>
   
   <script>
     // Check if already logged in
     async function checkAuth() {
-      const authenticated = await isAuthenticated();
-      if (authenticated) {
-        // Update button to show dashboard
-        const heroButtons = document.querySelector('.hero-buttons');
-        heroButtons.innerHTML = '<a href="dashboard.html" class="btn btn-primary btn-lg">Go to Dashboard</a>';
+      const client = initSupabase();
+      const { data: { session } } = await client.auth.getSession();
+      if (session) {
+        window.location.href = 'dashboard.html';
       }
     }
-    
     checkAuth();
   </script>
 </body>

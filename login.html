@@ -3,148 +3,253 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Sign In - Subscription Tracker</title>
-  
-  <link rel="stylesheet" href="css/tokens.css">
-  <link rel="stylesheet" href="css/components.css">
-  <link rel="stylesheet" href="css/layout.css">
-  
+  <title>Login - SubTracker</title>
+  <link rel="stylesheet" href="css/design-system.css">
   <style>
-    .auth-container {
+    .auth-layout {
       min-height: 100vh;
+      display: flex;
+    }
+    
+    .auth-sidebar {
+      flex: 1;
+      background: linear-gradient(135deg, var(--color-primary), #4f46e5);
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: var(--sp-8);
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .auth-sidebar::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+      background-size: 50px 50px;
+      animation: float 30s linear infinite;
+    }
+    
+    @keyframes float {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(50px, 50px); }
+    }
+    
+    .auth-sidebar-content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      max-width: 400px;
+    }
+    
+    .auth-sidebar-logo {
+      width: 80px;
+      height: 80px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: var(--spacing-4);
+      margin: 0 auto var(--sp-6);
+    }
+    
+    .auth-sidebar-logo svg {
+      width: 48px;
+      height: 48px;
+    }
+    
+    .auth-sidebar h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: var(--sp-3);
+    }
+    
+    .auth-sidebar p {
+      font-size: var(--text-lg);
+      opacity: 0.9;
+    }
+    
+    .auth-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: var(--sp-6);
+      background: var(--bg-base);
     }
     
     .auth-card {
-      max-width: 400px;
       width: 100%;
+      max-width: 400px;
     }
     
     .auth-header {
       text-align: center;
-      margin-bottom: var(--spacing-6);
+      margin-bottom: var(--sp-6);
+    }
+    
+    .auth-mobile-logo {
+      width: 56px;
+      height: 56px;
+      background: var(--color-primary);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto var(--sp-4);
+      color: white;
+    }
+    
+    .auth-mobile-logo svg {
+      width: 32px;
+      height: 32px;
     }
     
     .auth-title {
-      font-size: var(--font-size-2xl);
+      font-size: var(--text-2xl);
       font-weight: 700;
-      margin-bottom: var(--spacing-2);
+      margin-bottom: var(--sp-2);
     }
     
-    .auth-form {
+    .auth-subtitle {
+      color: var(--text-secondary);
+      font-size: var(--text-md);
+    }
+    
+    .auth-form .form-group {
+      margin-bottom: var(--sp-4);
+    }
+    
+    .auth-form .btn-primary {
+      width: 100%;
+      margin-top: var(--sp-4);
+    }
+    
+    .auth-divider {
       display: flex;
-      flex-direction: column;
-      gap: var(--spacing-4);
+      align-items: center;
+      gap: var(--sp-3);
+      margin: var(--sp-5) 0;
+      color: var(--text-muted);
+      font-size: var(--text-sm);
+    }
+    
+    .auth-divider::before,
+    .auth-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-color);
     }
     
     .auth-footer {
       text-align: center;
-      margin-top: var(--spacing-4);
+      margin-top: var(--sp-5);
+      font-size: var(--text-sm);
       color: var(--text-secondary);
-      font-size: var(--font-size-sm);
     }
     
-    .auth-link {
+    .auth-footer a {
       color: var(--color-primary);
-      text-decoration: none;
+      font-weight: 500;
     }
     
-    .auth-link:hover {
-      text-decoration: underline;
+    .password-input-wrapper {
+      position: relative;
     }
     
-    .mfa-section {
-      display: none;
+    .password-toggle {
+      position: absolute;
+      right: var(--sp-3);
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: var(--sp-1);
     }
     
-    .mfa-code-input {
-      text-align: center;
-      font-size: var(--font-size-xl);
-      letter-spacing: 0.5em;
+    @media (min-width: 1024px) {
+      .auth-sidebar {
+        display: flex;
+      }
+      
+      .auth-mobile-logo {
+        display: none;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="auth-container">
-    <div class="card card-heavy auth-card">
-      <div class="card-content">
+  <div class="auth-layout">
+    <div class="auth-sidebar">
+      <div class="auth-sidebar-content">
+        <div class="auth-sidebar-logo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+            <path d="M2 17l10 5 10-5"/>
+            <path d="M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <h1>SubTracker</h1>
+        <p>Track, manage, and optimize all your subscriptions in one place. Never miss a payment again.</p>
+      </div>
+    </div>
+    
+    <div class="auth-main">
+      <div class="auth-card">
         <div class="auth-header">
-          <h1 class="auth-title">Sign In</h1>
-          <p>Welcome back to Subscription Tracker</p>
+          <div class="auth-mobile-logo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+              <path d="M2 17l10 5 10-5"/>
+              <path d="M2 12l10 5 10-5"/>
+            </svg>
+          </div>
+          <h1 class="auth-title">Welcome back</h1>
+          <p class="auth-subtitle">Sign in to your account</p>
         </div>
         
-        <!-- Login Form -->
-        <form id="loginForm" class="auth-form">
-          <div class="input-group">
-            <label for="email" class="input-label">Email</label>
-            <input 
-              type="email" 
-              id="email" 
-              class="input" 
-              placeholder="you@example.com"
-              required
-            >
+        <div id="alertContainer"></div>
+        
+        <form class="auth-form" id="loginForm">
+          <div class="form-group">
+            <label class="label">Email</label>
+            <input type="email" class="input" id="email" placeholder="you@example.com" required autocomplete="email">
           </div>
           
-          <div class="input-group">
-            <label for="password" class="input-label">Password</label>
-            <input 
-              type="password" 
-              id="password" 
-              class="input" 
-              placeholder="••••••••"
-              required
-            >
+          <div class="form-group">
+            <label class="label">Password</label>
+            <div class="password-input-wrapper">
+              <input type="password" class="input" id="password" placeholder="••••••••" required autocomplete="current-password" style="padding-right: 44px;">
+              <button type="button" class="password-toggle" id="togglePassword">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+            </div>
           </div>
           
-          <button type="submit" class="btn btn-primary" id="loginBtn">
+          <div style="display: flex; justify-content: flex-end;">
+            <a href="forgot-password.html" style="font-size: var(--text-sm); color: var(--color-primary);">Forgot password?</a>
+          </div>
+          
+          <button type="submit" class="btn btn-primary" id="submitBtn">
             Sign In
           </button>
         </form>
         
-        <!-- MFA Section (hidden by default) -->
-        <div id="mfaSection" class="mfa-section">
-          <p style="margin-bottom: var(--spacing-4); text-align: center;">
-            Enter the 6-digit code from your authenticator app
-          </p>
-          
-          <form id="mfaForm" class="auth-form">
-            <div class="input-group">
-              <input 
-                type="text" 
-                id="mfaCode" 
-                class="input mfa-code-input" 
-                placeholder="000000"
-                maxlength="6"
-                pattern="[0-9]{6}"
-                required
-              >
-            </div>
-            
-            <button type="submit" class="btn btn-primary" id="mfaBtn">
-              Verify
-            </button>
-            
-            <button type="button" class="btn btn-ghost" id="mfaBackBtn">
-              Back
-            </button>
-          </form>
-        </div>
-        
         <div class="auth-footer">
-          <p>
-            Don't have an account? 
-            <a href="register.html" class="auth-link">Sign up</a>
-          </p>
-          <p style="margin-top: var(--spacing-2);">
-            <a href="forgot-password.html" class="auth-link">Forgot password?</a>
-          </p>
-          <p style="margin-top: var(--spacing-2);">
-            <a href="index.html" class="auth-link">← Back to home</a>
-          </p>
+          Don't have an account? <a href="register.html">Sign up</a>
         </div>
       </div>
     </div>
@@ -152,26 +257,47 @@
   
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
-  <script src="js/utils.js"></script>
+  <script src="js/components.js"></script>
   <script src="js/supabase-client.js"></script>
   
   <script>
-    let factorId = null;
+    const client = initSupabase();
     
-    // Handle login form submission
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    // Check if already logged in
+    async function checkAuth() {
+      const { data: { session } } = await client.auth.getSession();
+      if (session) {
+        window.location.href = 'dashboard.html';
+      }
+    }
+    checkAuth();
+    
+    // Toggle password visibility
+    document.getElementById('togglePassword').addEventListener('click', function() {
+      const passwordInput = document.getElementById('password');
+      const isPassword = passwordInput.type === 'password';
+      passwordInput.type = isPassword ? 'text' : 'password';
+      
+      this.innerHTML = isPassword 
+        ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>'
+        : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+    });
+    
+    // Form submission
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      const loginBtn = document.getElementById('loginBtn');
+      const submitBtn = document.getElementById('submitBtn');
+      const alertContainer = document.getElementById('alertContainer');
       
-      setLoading(loginBtn, true);
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px;"></span> Signing in...';
+      alertContainer.innerHTML = '';
       
       try {
-        const client = initSupabase();
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
         
-        // Sign in with email/password
         const { data, error } = await client.auth.signInWithPassword({
           email,
           password
@@ -179,85 +305,14 @@
         
         if (error) throw error;
         
-        // Check if MFA is required
-        const { data: factors } = await client.auth.mfa.listFactors();
-        const verifiedFactors = factors?.totp?.filter(f => f.status === 'verified') || [];
-        
-        const currentAAL = data.session?.aal;
-        if (verifiedFactors.length > 0 && currentAAL === 'aal1') {
-          // MFA is enabled, show MFA form
-          factorId = verifiedFactors[0].id;
-          document.getElementById('loginForm').style.display = 'none';
-          document.getElementById('mfaSection').style.display = 'block';
-          setLoading(loginBtn, false);
-        } else {
-          // Login successful, redirect
-          window.location.href = 'dashboard.html';
-        }
-      } catch (err) {
-        showAlert(err.message, 'error');
-        setLoading(loginBtn, false);
-      }
-    });
-    
-    // Handle MFA verification
-    document.getElementById('mfaForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const code = document.getElementById('mfaCode').value;
-      const mfaBtn = document.getElementById('mfaBtn');
-      
-      setLoading(mfaBtn, true);
-      
-      try {
-        const client = initSupabase();
-        
-        // Create MFA challenge
-        const { data: challengeData, error: challengeError } = await client.auth.mfa.challenge({
-          factorId
-        });
-        
-        if (challengeError) throw challengeError;
-        
-        // Verify the code
-        const { error: verifyError } = await client.auth.mfa.verify({
-          factorId,
-          challengeId: challengeData.id,
-          code
-        });
-        
-        if (verifyError) throw verifyError;
-        
-        // MFA successful, redirect
         window.location.href = 'dashboard.html';
+        
       } catch (err) {
-        showAlert(err.message, 'error');
-        setLoading(mfaBtn, false);
+        alertContainer.innerHTML = `<div class="alert alert-error">${err.message}</div>`;
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Sign In';
       }
     });
-    
-    // Back button from MFA
-    document.getElementById('mfaBackBtn').addEventListener('click', () => {
-      document.getElementById('loginForm').style.display = 'block';
-      document.getElementById('mfaSection').style.display = 'none';
-      document.getElementById('mfaCode').value = '';
-      factorId = null;
-    });
-    
-    // Auto-format MFA code input (numbers only)
-    document.getElementById('mfaCode').addEventListener('input', (e) => {
-      e.target.value = e.target.value.replace(/\D/g, '');
-    });
-    
-    // Check if already logged in
-    async function checkAuth() {
-      const authenticated = await isAuthenticated();
-      if (authenticated) {
-        window.location.href = 'dashboard.html';
-      }
-    }
-    
-    checkAuth();
   </script>
 </body>
 </html>

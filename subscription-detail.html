@@ -3,403 +3,411 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Subscription Details - Subscription Tracker</title>
-  
-  <link rel="stylesheet" href="css/tokens.css">
-  <link rel="stylesheet" href="css/components.css">
-  <link rel="stylesheet" href="css/layout.css">
-  
+  <title>Subscription Details - SubTracker</title>
+  <link rel="stylesheet" href="css/design-system.css">
   <style>
-    .page-header {
+    .detail-header {
       display: flex;
-      justify-content: space-between;
       align-items: flex-start;
-      margin-bottom: var(--spacing-6);
-      flex-wrap: wrap;
-      gap: var(--spacing-4);
+      gap: var(--sp-5);
+      margin-bottom: var(--sp-6);
     }
     
-    .page-title {
-      font-size: var(--font-size-2xl);
-      font-weight: 700;
-    }
-    
-    .header-actions {
+    .detail-icon {
       display: flex;
-      gap: var(--spacing-2);
-    }
-    
-    .detail-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: var(--spacing-4);
-    }
-    
-    .detail-card {
-      height: fit-content;
-    }
-    
-    .card-title {
-      font-size: var(--font-size-lg);
-      font-weight: 600;
-      margin-bottom: var(--spacing-4);
-    }
-    
-    .detail-row {
-      display: flex;
-      justify-content: space-between;
       align-items: center;
-      padding: var(--spacing-3) 0;
-      border-bottom: 1px solid var(--border-color);
+      justify-content: center;
+      width: 64px;
+      height: 64px;
+      background: var(--color-primary-light);
+      border-radius: var(--radius-xl);
+      color: var(--color-primary);
+      font-weight: 700;
+      font-size: 28px;
+      flex-shrink: 0;
     }
     
-    .detail-row:last-child {
-      border-bottom: none;
+    .detail-info {
+      flex: 1;
+      min-width: 0;
     }
     
-    .detail-label {
-      color: var(--text-secondary);
-      font-size: var(--font-size-sm);
+    .detail-name {
+      font-size: var(--text-2xl);
+      font-weight: 700;
+      margin-bottom: var(--sp-2);
     }
     
-    .detail-value {
-      font-weight: 500;
-      text-align: right;
+    .detail-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--sp-3);
+      align-items: center;
+    }
+    
+    .detail-actions {
+      display: flex;
+      gap: var(--sp-2);
     }
     
     .lifecycle-card {
-      grid-column: span 2;
+      background: linear-gradient(135deg, var(--color-primary-light), var(--bg-surface));
+      border: 1px solid var(--color-primary);
+      border-radius: var(--radius-xl);
+      padding: var(--sp-5);
+      margin-bottom: var(--sp-5);
     }
     
-    .progress-section {
-      margin-bottom: var(--spacing-6);
-    }
-    
-    .progress-header {
+    .lifecycle-title {
+      font-weight: 600;
+      margin-bottom: var(--sp-4);
       display: flex;
-      justify-content: space-between;
-      margin-bottom: var(--spacing-2);
+      align-items: center;
+      gap: var(--sp-2);
     }
     
-    .progress-bar-large {
-      height: 16px;
-      background: var(--bg-tertiary);
-      border-radius: var(--radius-full);
-      overflow: hidden;
-      margin-bottom: var(--spacing-2);
-    }
-    
-    .progress-fill-large {
-      height: 100%;
-      border-radius: var(--radius-full);
-      transition: width 0.5s ease;
+    .lifecycle-progress {
+      margin-bottom: var(--sp-4);
     }
     
     .lifecycle-stats {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: var(--spacing-4);
-    }
-    
-    .lifecycle-stat {
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--sp-4);
       text-align: center;
-      padding: var(--spacing-4);
-      background: var(--bg-secondary);
-      border-radius: var(--radius-md);
     }
     
     .lifecycle-stat-value {
-      font-size: var(--font-size-xl);
+      font-size: var(--text-xl);
       font-weight: 700;
-      margin-bottom: var(--spacing-1);
+      color: var(--color-primary);
     }
     
     .lifecycle-stat-label {
-      font-size: var(--font-size-sm);
-      color: var(--text-secondary);
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--sp-4);
+    }
+    
+    .info-item {
+      padding: var(--sp-4);
+      background: var(--bg-muted);
+      border-radius: var(--radius-lg);
+    }
+    
+    .info-label {
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: var(--sp-1);
+    }
+    
+    .info-value {
+      font-size: var(--text-md);
+      font-weight: 500;
+    }
+    
+    .notes-section {
+      margin-top: var(--sp-5);
+      padding: var(--sp-4);
+      background: var(--bg-muted);
+      border-radius: var(--radius-lg);
+    }
+    
+    .notes-title {
+      font-size: var(--text-sm);
+      font-weight: 600;
+      margin-bottom: var(--sp-2);
     }
     
     .notes-content {
-      background: var(--bg-secondary);
-      padding: var(--spacing-4);
-      border-radius: var(--radius-md);
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
       white-space: pre-wrap;
     }
     
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.5);
+    .payment-timeline {
+      margin-top: var(--sp-5);
+    }
+    
+    .timeline-title {
+      font-weight: 600;
+      margin-bottom: var(--sp-4);
+    }
+    
+    .timeline-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-2);
+    }
+    
+    .timeline-item {
       display: flex;
       align-items: center;
-      justify-content: center;
-      z-index: 100;
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.2s, visibility 0.2s;
+      gap: var(--sp-3);
+      padding: var(--sp-3);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
     }
     
-    .modal-backdrop.active {
-      opacity: 1;
-      visibility: visible;
+    .timeline-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--color-success);
+      flex-shrink: 0;
     }
     
-    .modal {
-      background: var(--bg-primary);
-      border-radius: var(--radius-lg);
-      padding: var(--spacing-6);
-      max-width: 400px;
-      width: 90%;
-      transform: scale(0.9);
-      transition: transform 0.2s;
+    .timeline-dot.future {
+      background: var(--border-color);
     }
     
-    .modal-backdrop.active .modal {
-      transform: scale(1);
+    .timeline-date {
+      font-size: var(--text-sm);
+      flex: 1;
     }
     
-    .modal-title {
-      font-size: var(--font-size-lg);
-      font-weight: 600;
-      margin-bottom: var(--spacing-4);
-    }
-    
-    .modal-actions {
-      display: flex;
-      gap: var(--spacing-3);
-      justify-content: flex-end;
-      margin-top: var(--spacing-6);
+    .timeline-amount {
+      font-weight: 500;
+      font-size: var(--text-sm);
     }
     
     @media (max-width: 768px) {
-      .lifecycle-card {
-        grid-column: span 1;
+      .detail-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .detail-actions {
+        width: 100%;
+        margin-top: var(--sp-3);
+      }
+      
+      .detail-actions .btn {
+        flex: 1;
+      }
+      
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .lifecycle-stats {
+        grid-template-columns: 1fr;
+        text-align: left;
       }
     }
   </style>
 </head>
 <body>
-  <!-- Mobile Header -->
-  <header class="mobile-header">
-    <button class="mobile-menu-btn" id="mobileMenuBtn">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="3" y1="12" x2="21" y2="12"></line>
-        <line x1="3" y1="6" x2="21" y2="6"></line>
-        <line x1="3" y1="18" x2="21" y2="18"></line>
-      </svg>
-    </button>
-    <div class="mobile-logo">SubTracker</div>
-    <div style="width: 40px;"></div>
-  </header>
-  
   <div class="app-layout">
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
-      <div class="sidebar-logo">SubTracker</div>
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+            <path d="M2 17l10 5 10-5"/>
+            <path d="M2 12l10 5 10-5"/>
+          </svg>
+          SubTracker
+        </div>
+      </div>
       
       <nav class="sidebar-nav">
-        <a href="dashboard.html" class="nav-item">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="7" height="7"></rect>
-            <rect x="14" y="3" width="7" height="7"></rect>
-            <rect x="14" y="14" width="7" height="7"></rect>
-            <rect x="3" y="14" width="7" height="7"></rect>
-          </svg>
-          Dashboard
-        </a>
-        <a href="subscriptions.html" class="nav-item active">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-            <polyline points="14 2 14 8 20 8"></polyline>
-            <line x1="16" y1="13" x2="8" y2="13"></line>
-            <line x1="16" y1="17" x2="8" y2="17"></line>
-          </svg>
-          Subscriptions
-        </a>
-        <a href="subscription-new.html" class="nav-item">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="12" y1="8" x2="12" y2="16"></line>
-            <line x1="8" y1="12" x2="16" y2="12"></line>
-          </svg>
-          New Subscription
-        </a>
-        <a href="settings.html" class="nav-item">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="3"></circle>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-          </svg>
-          Settings
-        </a>
+        <div class="nav-section">
+          <div class="nav-section-title">Menu</div>
+          <a href="dashboard.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="9" rx="1"/>
+              <rect x="14" y="3" width="7" height="5" rx="1"/>
+              <rect x="14" y="12" width="7" height="9" rx="1"/>
+              <rect x="3" y="16" width="7" height="5" rx="1"/>
+            </svg>
+            Dashboard
+          </a>
+          <a href="subscriptions.html" class="nav-item active">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            </svg>
+            Subscriptions
+          </a>
+          <a href="subscription-new.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="16"/>
+              <line x1="8" y1="12" x2="16" y2="12"/>
+            </svg>
+            Add New
+          </a>
+        </div>
+        
+        <div class="nav-section">
+          <div class="nav-section-title">Account</div>
+          <a href="settings.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+            Settings
+          </a>
+        </div>
       </nav>
       
       <div class="sidebar-footer">
-        <button class="btn btn-ghost" style="width: 100%;" onclick="handleSignOut()">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-            <polyline points="16 17 21 12 16 7"></polyline>
-            <line x1="21" y1="12" x2="9" y2="12"></line>
+        <button class="btn btn-ghost" style="width: 100%; justify-content: flex-start;" onclick="handleSignOut()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
           </svg>
           Sign Out
         </button>
       </div>
     </aside>
     
-    <!-- Mobile Overlay -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
     
-    <!-- Main Content -->
     <main class="main-content">
-      <!-- Loading State -->
-      <div id="loadingState" class="card">
-        <div class="card-content text-center" style="padding: var(--spacing-8);">
-          <p>Loading subscription...</p>
+      <header class="mobile-header">
+        <a href="subscriptions.html" class="btn btn-icon btn-ghost">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+        </a>
+        <span class="mobile-header-title">Details</span>
+        <button class="btn btn-icon btn-ghost" id="mobileMoreBtn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="1"/>
+            <circle cx="12" cy="5" r="1"/>
+            <circle cx="12" cy="19" r="1"/>
+          </svg>
+        </button>
+      </header>
+      
+      <div class="page-container">
+        <!-- Loading -->
+        <div id="loadingState">
+          <div style="display: flex; justify-content: center; padding: 3rem;">
+            <div class="spinner"></div>
+          </div>
+        </div>
+        
+        <!-- Content -->
+        <div id="detailContent" class="hidden">
+          <div class="detail-header">
+            <div class="detail-icon" id="subIcon"></div>
+            <div class="detail-info">
+              <h1 class="detail-name" id="subName"></h1>
+              <div class="detail-meta">
+                <span class="badge" id="subStatus"></span>
+                <span class="badge badge-default" id="subCategory"></span>
+              </div>
+            </div>
+            <div class="detail-actions" id="detailActions">
+              <a href="#" class="btn btn-primary" id="editBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+                Edit
+              </a>
+              <button class="btn btn-ghost" id="deleteBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                </svg>
+                Delete
+              </button>
+            </div>
+          </div>
+          
+          <!-- Lifecycle Card -->
+          <div class="lifecycle-card" id="lifecycleCard">
+            <div class="lifecycle-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+              Subscription Lifecycle
+            </div>
+            <div class="lifecycle-progress">
+              <div class="progress">
+                <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+              </div>
+            </div>
+            <div class="lifecycle-stats" id="lifecycleStats"></div>
+          </div>
+          
+          <!-- Info Grid -->
+          <div class="info-grid" id="infoGrid"></div>
+          
+          <!-- Notes -->
+          <div class="notes-section hidden" id="notesSection">
+            <div class="notes-title">Notes</div>
+            <div class="notes-content" id="notesContent"></div>
+          </div>
+          
+          <!-- Payment Timeline -->
+          <div class="payment-timeline hidden" id="paymentTimeline">
+            <div class="timeline-title">Payment Schedule</div>
+            <div class="timeline-list" id="timelineList"></div>
+          </div>
         </div>
       </div>
       
-      <!-- Detail Content -->
-      <div id="detailContent" class="hidden">
-        <div class="page-header">
-          <div>
-            <a href="subscriptions.html" style="color: var(--text-secondary); text-decoration: none; font-size: var(--font-size-sm);">
-              ← Back to Subscriptions
-            </a>
-            <h1 class="page-title" id="subscriptionName"></h1>
-            <span id="statusBadge"></span>
-          </div>
-          <div class="header-actions">
-            <button class="btn btn-secondary" onclick="editSubscription()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-              </svg>
-              Edit
-            </button>
-            <button class="btn btn-error" onclick="showDeleteModal()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="3 6 5 6 21 6"></polyline>
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-              </svg>
-              Delete
-            </button>
-          </div>
-        </div>
-        
-        <div id="alertContainer"></div>
-        
-        <div class="detail-grid">
-          <!-- Lifecycle Progress -->
-          <div class="card lifecycle-card detail-card">
-            <div class="card-content">
-              <h3 class="card-title">Subscription Lifecycle</h3>
-              
-              <div class="progress-section">
-                <div class="progress-header">
-                  <span id="progressLabel">Progress</span>
-                  <span id="progressPercent">0%</span>
-                </div>
-                <div class="progress-bar-large">
-                  <div id="progressFill" class="progress-fill-large" style="width: 0%;"></div>
-                </div>
-                <div style="display: flex; justify-content: space-between; font-size: var(--font-size-sm); color: var(--text-secondary);">
-                  <span id="startDateLabel"></span>
-                  <span id="endDateLabel"></span>
-                </div>
-              </div>
-              
-              <div class="lifecycle-stats">
-                <div class="lifecycle-stat">
-                  <div class="lifecycle-stat-value" id="paymentsMade">0</div>
-                  <div class="lifecycle-stat-label">Payments Made</div>
-                </div>
-                <div class="lifecycle-stat">
-                  <div class="lifecycle-stat-value" id="paymentsRemaining">0</div>
-                  <div class="lifecycle-stat-label">Payments Remaining</div>
-                </div>
-                <div class="lifecycle-stat">
-                  <div class="lifecycle-stat-value" id="totalSpent">$0</div>
-                  <div class="lifecycle-stat-label">Total Spent</div>
-                </div>
-                <div class="lifecycle-stat">
-                  <div class="lifecycle-stat-value" id="nextBilling">-</div>
-                  <div class="lifecycle-stat-label">Next Billing</div>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Basic Details -->
-          <div class="card detail-card">
-            <div class="card-content">
-              <h3 class="card-title">Subscription Details</h3>
-              
-              <div class="detail-row">
-                <span class="detail-label">Amount</span>
-                <span class="detail-value" id="detailAmount"></span>
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">Billing Cycle</span>
-                <span class="detail-value" id="detailBillingCycle"></span>
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">Category</span>
-                <span class="detail-value" id="detailCategory"></span>
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">Start Date</span>
-                <span class="detail-value" id="detailStartDate"></span>
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">End Date</span>
-                <span class="detail-value" id="detailEndDate"></span>
-              </div>
-              <div class="detail-row" id="websiteRow" style="display: none;">
-                <span class="detail-label">Website</span>
-                <span class="detail-value"><a id="detailWebsite" href="#" target="_blank" style="color: var(--color-primary);"></a></span>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Notes -->
-          <div class="card detail-card" id="notesCard" style="display: none;">
-            <div class="card-content">
-              <h3 class="card-title">Notes</h3>
-              <div class="notes-content" id="detailNotes"></div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <nav class="mobile-nav">
+        <a href="dashboard.html" class="mobile-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="9" rx="1"/>
+            <rect x="14" y="3" width="7" height="5" rx="1"/>
+            <rect x="14" y="12" width="7" height="9" rx="1"/>
+            <rect x="3" y="16" width="7" height="5" rx="1"/>
+          </svg>
+          <span>Home</span>
+        </a>
+        <a href="subscriptions.html" class="mobile-nav-item active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+          </svg>
+          <span>Subs</span>
+        </a>
+        <a href="subscription-new.html" class="mobile-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="16"/>
+            <line x1="8" y1="12" x2="16" y2="12"/>
+          </svg>
+          <span>Add</span>
+        </a>
+        <a href="settings.html" class="mobile-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+          <span>Settings</span>
+        </a>
+      </nav>
     </main>
-  </div>
-  
-  <!-- Delete Modal -->
-  <div class="modal-backdrop" id="deleteModal">
-    <div class="modal">
-      <h3 class="modal-title">Delete Subscription?</h3>
-      <p style="color: var(--text-secondary);">
-        Are you sure you want to delete <strong id="deleteSubName"></strong>? This action cannot be undone.
-      </p>
-      <div class="modal-actions">
-        <button class="btn btn-secondary" onclick="hideDeleteModal()">Cancel</button>
-        <button class="btn btn-error" id="confirmDeleteBtn" onclick="confirmDelete()">Delete</button>
-      </div>
-    </div>
   </div>
   
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
-  <script src="js/utils.js"></script>
+  <script src="js/components.js"></script>
   <script src="js/supabase-client.js"></script>
-  <script src="js/calculations.js"></script>
   
   <script>
     let client;
-    let subscription = null;
+    let subscription;
     
     async function init() {
-      initTheme();
-      initMobileNav();
-      
       client = initSupabase();
       
       try {
@@ -415,6 +423,15 @@
         
         await loadSubscription(id);
         
+        // Mobile more button
+        document.getElementById('mobileMoreBtn').addEventListener('click', (e) => {
+          contextMenu.show(e, [
+            { label: 'Edit', action: () => window.location.href = `subscription-edit.html?id=${id}` },
+            { divider: true },
+            { label: 'Delete', danger: true, action: () => handleDelete() }
+          ]);
+        });
+        
       } catch (err) {
         window.location.href = 'login.html';
       }
@@ -422,28 +439,23 @@
     
     async function loadSubscription(id) {
       try {
-        const user = await getCurrentUser(client);
-        
         const { data, error } = await client
           .from('subscriptions')
           .select('*')
           .eq('id', id)
-          .eq('user_id', user.id)
           .single();
         
         if (error) throw error;
         if (!data) throw new Error('Subscription not found');
         
-        subscription = enrichSubscription(data);
+        subscription = data;
         renderSubscription();
         
       } catch (err) {
-        document.getElementById('loadingState').innerHTML = `
-          <div class="card-content text-center" style="padding: var(--spacing-8);">
-            <p style="color: var(--color-error);">Failed to load subscription: ${err.message}</p>
-            <a href="subscriptions.html" class="btn btn-primary" style="margin-top: var(--spacing-4);">Back to List</a>
-          </div>
-        `;
+        Toast.error(err.message);
+        setTimeout(() => {
+          window.location.href = 'subscriptions.html';
+        }, 1500);
       }
     }
     
@@ -452,97 +464,257 @@
       document.getElementById('detailContent').classList.remove('hidden');
       
       const sub = subscription;
-      const lifecycle = sub.lifecycle || {};
       
       // Header
-      document.getElementById('subscriptionName').textContent = sub.name;
-      document.getElementById('deleteSubName').textContent = sub.name;
+      document.getElementById('subIcon').textContent = sub.name.charAt(0).toUpperCase();
+      document.getElementById('subName').textContent = sub.name;
       
-      // Status badge
-      let statusHtml = '';
-      switch (lifecycle.status) {
-        case 'active':
-          statusHtml = '<span class="badge badge-success">Active</span>';
-          break;
-        case 'ending_soon':
-          statusHtml = '<span class="badge badge-warning">Ending Soon</span>';
-          break;
-        case 'completed':
-          statusHtml = '<span class="badge badge-secondary">Completed</span>';
-          break;
-        case 'cancelled':
-          statusHtml = '<span class="badge badge-error">Cancelled</span>';
-          break;
-      }
-      document.getElementById('statusBadge').innerHTML = statusHtml;
+      const statusEl = document.getElementById('subStatus');
+      statusEl.textContent = sub.is_active ? 'Active' : 'Inactive';
+      statusEl.className = `badge ${sub.is_active ? 'badge-success' : 'badge-default'}`;
       
-      // Progress
-      const progress = lifecycle.progressPercent || 0;
-      let progressColor = 'var(--color-primary)';
-      if (lifecycle.status === 'completed') progressColor = 'var(--text-secondary)';
-      else if (lifecycle.status === 'ending_soon') progressColor = 'var(--color-warning)';
-      else if (lifecycle.status === 'cancelled') progressColor = 'var(--color-error)';
+      document.getElementById('subCategory').textContent = sub.category || 'Uncategorized';
+      document.getElementById('editBtn').href = `subscription-edit.html?id=${sub.id}`;
+      document.getElementById('deleteBtn').addEventListener('click', handleDelete);
       
-      document.getElementById('progressPercent').textContent = Math.round(progress) + '%';
-      document.getElementById('progressFill').style.width = progress + '%';
-      document.getElementById('progressFill').style.background = progressColor;
+      // Lifecycle
+      renderLifecycle(sub);
       
-      document.getElementById('startDateLabel').textContent = formatDate(sub.start_date);
-      document.getElementById('endDateLabel').textContent = lifecycle.expectedEndDate 
-        ? formatDate(lifecycle.expectedEndDate) 
-        : 'Ongoing';
+      // Info Grid
+      const cycleLabels = {
+        'weekly': 'Weekly',
+        'monthly': 'Monthly',
+        'quarterly': 'Quarterly',
+        'yearly': 'Yearly'
+      };
       
-      // Lifecycle stats
-      const paymentsMade = lifecycle.paymentsMade || 0;
-      const totalPayments = lifecycle.totalPayments || 0;
-      const paymentsRemaining = Math.max(0, totalPayments - paymentsMade);
+      const infoItems = [
+        { label: 'Amount', value: formatCurrency(sub.amount, sub.currency) },
+        { label: 'Billing Cycle', value: cycleLabels[sub.billing_cycle] || sub.billing_cycle },
+        { label: 'Start Date', value: formatDate(sub.start_date) },
+        { label: 'Next Payment', value: calculateNextPayment(sub) },
+        { label: 'Monthly Cost', value: formatCurrency(calculateMonthlyCost(sub), sub.currency) },
+        { label: 'Yearly Cost', value: formatCurrency(calculateYearlyCost(sub), sub.currency) }
+      ];
       
-      document.getElementById('paymentsMade').textContent = paymentsMade;
-      document.getElementById('paymentsRemaining').textContent = paymentsRemaining;
-      document.getElementById('totalSpent').textContent = formatCurrency(paymentsMade * sub.amount, sub.currency);
-      document.getElementById('nextBilling').textContent = lifecycle.nextBillingDate 
-        ? formatShortDate(lifecycle.nextBillingDate)
-        : 'N/A';
-      
-      // Details
-      document.getElementById('detailAmount').textContent = formatCurrency(sub.amount, sub.currency) + ' / ' + sub.billing_cycle;
-      document.getElementById('detailBillingCycle').textContent = capitalizeFirst(sub.billing_cycle);
-      document.getElementById('detailCategory').textContent = sub.category ? capitalizeFirst(sub.category) : 'Uncategorized';
-      document.getElementById('detailStartDate').textContent = formatDate(sub.start_date);
-      document.getElementById('detailEndDate').textContent = lifecycle.expectedEndDate 
-        ? formatDate(lifecycle.expectedEndDate) 
-        : 'Ongoing';
-      
-      // Website
-      if (sub.website) {
-        document.getElementById('websiteRow').style.display = 'flex';
-        const websiteLink = document.getElementById('detailWebsite');
-        websiteLink.href = sub.website;
-        websiteLink.textContent = sub.website.replace(/^https?:\/\//, '').split('/')[0];
-      }
+      document.getElementById('infoGrid').innerHTML = infoItems.map(item => `
+        <div class="info-item">
+          <div class="info-label">${item.label}</div>
+          <div class="info-value">${item.value}</div>
+        </div>
+      `).join('');
       
       // Notes
       if (sub.notes) {
-        document.getElementById('notesCard').style.display = 'block';
-        document.getElementById('detailNotes').textContent = sub.notes;
+        document.getElementById('notesSection').classList.remove('hidden');
+        document.getElementById('notesContent').textContent = sub.notes;
+      }
+      
+      // Payment Timeline
+      if (sub.total_payments) {
+        renderPaymentTimeline(sub);
       }
     }
     
-    function editSubscription() {
-      window.location.href = `subscription-edit.html?id=${subscription.id}`;
+    function renderLifecycle(sub) {
+      const progress = calculateProgress(sub);
+      document.getElementById('progressBar').style.width = `${progress}%`;
+      
+      const statsContainer = document.getElementById('lifecycleStats');
+      
+      if (sub.total_payments) {
+        const paymentsMade = calculatePaymentsMade(sub);
+        const remaining = sub.total_payments - paymentsMade;
+        const totalSpent = paymentsMade * sub.amount;
+        
+        statsContainer.innerHTML = `
+          <div>
+            <div class="lifecycle-stat-value">${paymentsMade}/${sub.total_payments}</div>
+            <div class="lifecycle-stat-label">Payments Made</div>
+          </div>
+          <div>
+            <div class="lifecycle-stat-value">${remaining}</div>
+            <div class="lifecycle-stat-label">Remaining</div>
+          </div>
+          <div>
+            <div class="lifecycle-stat-value">${formatCurrency(totalSpent, sub.currency)}</div>
+            <div class="lifecycle-stat-label">Total Spent</div>
+          </div>
+        `;
+      } else if (sub.explicit_end_date) {
+        const startDate = new Date(sub.start_date);
+        const endDate = new Date(sub.explicit_end_date);
+        const now = new Date();
+        const daysRemaining = Math.max(0, Math.ceil((endDate - now) / (1000 * 60 * 60 * 24)));
+        const totalDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+        
+        statsContainer.innerHTML = `
+          <div>
+            <div class="lifecycle-stat-value">${progress}%</div>
+            <div class="lifecycle-stat-label">Complete</div>
+          </div>
+          <div>
+            <div class="lifecycle-stat-value">${daysRemaining}</div>
+            <div class="lifecycle-stat-label">Days Remaining</div>
+          </div>
+          <div>
+            <div class="lifecycle-stat-value">${formatDate(sub.explicit_end_date)}</div>
+            <div class="lifecycle-stat-label">End Date</div>
+          </div>
+        `;
+      } else {
+        // Ongoing
+        const paymentsMade = calculatePaymentsMade(sub);
+        const totalSpent = paymentsMade * sub.amount;
+        
+        statsContainer.innerHTML = `
+          <div>
+            <div class="lifecycle-stat-value">∞</div>
+            <div class="lifecycle-stat-label">Ongoing</div>
+          </div>
+          <div>
+            <div class="lifecycle-stat-value">${paymentsMade}</div>
+            <div class="lifecycle-stat-label">Payments Made</div>
+          </div>
+          <div>
+            <div class="lifecycle-stat-value">${formatCurrency(totalSpent, sub.currency)}</div>
+            <div class="lifecycle-stat-label">Total Spent</div>
+          </div>
+        `;
+        
+        document.getElementById('lifecycleCard').querySelector('.lifecycle-progress').style.display = 'none';
+      }
     }
     
-    function showDeleteModal() {
-      document.getElementById('deleteModal').classList.add('active');
+    function renderPaymentTimeline(sub) {
+      document.getElementById('paymentTimeline').classList.remove('hidden');
+      
+      const now = new Date();
+      const startDate = new Date(sub.start_date);
+      const items = [];
+      
+      let cycleDays;
+      switch (sub.billing_cycle) {
+        case 'weekly': cycleDays = 7; break;
+        case 'monthly': cycleDays = 30; break;
+        case 'quarterly': cycleDays = 90; break;
+        case 'yearly': cycleDays = 365; break;
+        default: cycleDays = 30;
+      }
+      
+      for (let i = 0; i < Math.min(sub.total_payments, 12); i++) {
+        const paymentDate = new Date(startDate);
+        paymentDate.setDate(paymentDate.getDate() + (cycleDays * i));
+        
+        items.push({
+          date: paymentDate,
+          isPast: paymentDate < now,
+          amount: sub.amount
+        });
+      }
+      
+      document.getElementById('timelineList').innerHTML = items.map(item => `
+        <div class="timeline-item">
+          <div class="timeline-dot ${item.isPast ? '' : 'future'}"></div>
+          <div class="timeline-date">${formatDate(item.date)}</div>
+          <div class="timeline-amount">${formatCurrency(item.amount, sub.currency)}</div>
+        </div>
+      `).join('');
     }
     
-    function hideDeleteModal() {
-      document.getElementById('deleteModal').classList.remove('active');
+    function calculateProgress(sub) {
+      const startDate = new Date(sub.start_date);
+      const now = new Date();
+      
+      if (sub.total_payments) {
+        const paymentsMade = calculatePaymentsMade(sub);
+        return Math.min(100, Math.round((paymentsMade / sub.total_payments) * 100));
+      }
+      
+      if (sub.explicit_end_date) {
+        const endDate = new Date(sub.explicit_end_date);
+        const totalDays = (endDate - startDate) / (1000 * 60 * 60 * 24);
+        const elapsedDays = (now - startDate) / (1000 * 60 * 60 * 24);
+        return Math.min(100, Math.max(0, Math.round((elapsedDays / totalDays) * 100)));
+      }
+      
+      return 0;
     }
     
-    async function confirmDelete() {
-      const deleteBtn = document.getElementById('confirmDeleteBtn');
-      setLoading(deleteBtn, true);
+    function calculatePaymentsMade(sub) {
+      const startDate = new Date(sub.start_date);
+      const now = new Date();
+      const elapsed = Math.floor((now - startDate) / (1000 * 60 * 60 * 24));
+      
+      switch (sub.billing_cycle) {
+        case 'weekly': return Math.floor(elapsed / 7) + 1;
+        case 'monthly': return Math.floor(elapsed / 30) + 1;
+        case 'quarterly': return Math.floor(elapsed / 90) + 1;
+        case 'yearly': return Math.floor(elapsed / 365) + 1;
+        default: return 0;
+      }
+    }
+    
+    function calculateNextPayment(sub) {
+      const now = new Date();
+      const startDate = new Date(sub.start_date);
+      
+      let cycleDays;
+      switch (sub.billing_cycle) {
+        case 'weekly': cycleDays = 7; break;
+        case 'monthly': cycleDays = 30; break;
+        case 'quarterly': cycleDays = 90; break;
+        case 'yearly': cycleDays = 365; break;
+        default: cycleDays = 30;
+      }
+      
+      const elapsed = Math.floor((now - startDate) / (1000 * 60 * 60 * 24));
+      const cyclesPassed = Math.floor(elapsed / cycleDays);
+      const nextPaymentDate = new Date(startDate);
+      nextPaymentDate.setDate(nextPaymentDate.getDate() + (cycleDays * (cyclesPassed + 1)));
+      
+      return formatDate(nextPaymentDate);
+    }
+    
+    function calculateMonthlyCost(sub) {
+      switch (sub.billing_cycle) {
+        case 'weekly': return sub.amount * 4.33;
+        case 'monthly': return sub.amount;
+        case 'quarterly': return sub.amount / 3;
+        case 'yearly': return sub.amount / 12;
+        default: return sub.amount;
+      }
+    }
+    
+    function calculateYearlyCost(sub) {
+      switch (sub.billing_cycle) {
+        case 'weekly': return sub.amount * 52;
+        case 'monthly': return sub.amount * 12;
+        case 'quarterly': return sub.amount * 4;
+        case 'yearly': return sub.amount;
+        default: return sub.amount * 12;
+      }
+    }
+    
+    function formatCurrency(amount, currency = 'USD') {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: currency,
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+      }).format(amount);
+    }
+    
+    function formatDate(date) {
+      return new Date(date).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      });
+    }
+    
+    async function handleDelete() {
+      if (!confirm(`Are you sure you want to delete "${subscription.name}"?`)) return;
       
       try {
         const { error } = await client
@@ -552,40 +724,13 @@
         
         if (error) throw error;
         
-        window.location.href = 'subscriptions.html';
-        
+        Toast.success('Subscription deleted');
+        setTimeout(() => {
+          window.location.href = 'subscriptions.html';
+        }, 1000);
       } catch (err) {
-        hideDeleteModal();
-        document.getElementById('alertContainer').innerHTML = 
-          `<div class="alert alert-error">Failed to delete: ${err.message}</div>`;
-        setLoading(deleteBtn, false);
+        Toast.error('Failed to delete subscription');
       }
-    }
-    
-    function formatCurrency(amount, currency = 'USD') {
-      return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: currency
-      }).format(amount);
-    }
-    
-    function formatDate(dateStr) {
-      return new Date(dateStr).toLocaleDateString('en-US', {
-        month: 'long',
-        day: 'numeric',
-        year: 'numeric'
-      });
-    }
-    
-    function formatShortDate(dateStr) {
-      return new Date(dateStr).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric'
-      });
-    }
-    
-    function capitalizeFirst(str) {
-      return str.charAt(0).toUpperCase() + str.slice(1);
     }
     
     async function handleSignOut() {
@@ -593,14 +738,6 @@
       window.location.href = 'login.html';
     }
     
-    // Close modal on backdrop click
-    document.getElementById('deleteModal').addEventListener('click', (e) => {
-      if (e.target.id === 'deleteModal') {
-        hideDeleteModal();
-      }
-    });
-    
-    // Initialize
     init();
   </script>
 </body>
