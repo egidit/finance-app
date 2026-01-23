@@ -1,10 +1,10 @@
 # Subscription Tracker
 
-A lifecycle-focused subscription tracking web application with a glassmorphic design, built with vanilla HTML, CSS, and JavaScript with Supabase as the backend.
+A subscription tracking website, built with vanilla HTML, CSS, and JavaScript with Supabase as the backend.
 
 ## Features
 
-- 📱 **Mobile-first responsive design** with glassmorphism aesthetic
+- 📱 **Mobile-first responsive design**
 - 🔐 **Secure authentication** with email/password and MFA (TOTP) support
 - 📊 **Lifecycle tracking** - see payment progress, time remaining, and status
 - 🎨 **Dark/Light theme** with system preference detection
@@ -88,7 +88,7 @@ Then open http://localhost:8000 in your browser.
 ## File Structure
 
 ```
-html-app/
+SubTracker/
 ├── index.html              # Landing page
 ├── login.html              # Login page
 ├── register.html           # Registration page
@@ -110,15 +110,6 @@ html-app/
 │   ├── supabase-client.js  # Supabase initialization & auth helpers
 │   └── components.js       # Custom UI components (DatePicker, etc.)
 └── README.md               # This file
-
-../dev-tools/               # Development files (not for production)
-├── config.js               # Your actual config with secrets
-├── debug-mfa.html          # MFA debugging tool
-├── test-mfa-login.html     # MFA login tester
-├── verify-mfa.html         # MFA verification checker
-└── database/
-    ├── schema.sql          # Database schema for Supabase
-    └── migrations/         # Database migration files
 ```
 
 ## Lifecycle Tracking
@@ -170,3 +161,4 @@ Works in all modern browsers:
 ## License
 
 MIT License - feel free to use and modify for your own projects!
+
