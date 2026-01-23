@@ -38,15 +38,12 @@ A subscription tracking website, built with vanilla HTML, CSS, and JavaScript wi
 ### 2. Set Up the Database
 
 1. Go to the SQL Editor in your Supabase dashboard
-2. Copy the contents of `../dev-tools/database/schema.sql`
-3. Run the SQL to create the subscriptions table with RLS policies
-4. Run any migrations in `../dev-tools/database/migrations/` in order
 
 ### 3. Configure Authentication
 
 1. Go to Authentication → Providers in Supabase
 2. Ensure Email provider is enabled
-3. (Optional) Enable MFA in Authentication → Settings → Multi-Factor Authentication
+3. (Recommended) Enable MFA in Authentication → Settings → Multi-Factor Authentication
 
 ### 4. Update Configuration
 
@@ -161,4 +158,5 @@ Works in all modern browsers:
 ## License
 
 MIT License - feel free to use and modify for your own projects!
+
 
