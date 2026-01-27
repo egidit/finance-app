@@ -149,6 +149,12 @@
             </svg>
             Subscriptions
           </a>
+          <a href="categories.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 4h4v4H4zM14 4h4v4h-4zM4 14h4v4H4zM14 14h4v4h-4z"/>
+            </svg>
+            Categories
+          </a>
           <a href="subscription-new.html" class="nav-item">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="12" cy="12" r="10"/>
@@ -259,13 +265,7 @@
                   <div class="select-wrapper">
                     <select class="select" id="category">
                       <option value="">Select category</option>
-                      <option value="entertainment">Entertainment</option>
-                      <option value="productivity">Productivity</option>
-                      <option value="health">Health & Fitness</option>
-                      <option value="education">Education</option>
-                      <option value="finance">Finance</option>
-                      <option value="utilities">Utilities</option>
-                      <option value="other">Other</option>
+                      <!-- Populated dynamically from backend -->
                     </select>
                   </div>
                 </div>
@@ -386,10 +386,12 @@
   <script src="config.js"></script>
   <script src="js/components.js"></script>
   <script src="js/supabase-client.js"></script>
-  
+  <script src="js/categories.js"></script>
+
   <script>
     let client;
     let subscription;
+    let allCategories = [];
     let amountInput;
     let startDatePicker;
     let endDatePicker;
@@ -434,7 +436,7 @@
         if (!data) throw new Error('Subscription not found');
         
         subscription = data;
-        setupForm();
+        await setupForm();
         populateForm();
         
       } catch (err) {
@@ -445,10 +447,13 @@
       }
     }
     
-    function setupForm() {
+    async function setupForm() {
       document.getElementById('loadingState').classList.add('hidden');
       document.getElementById('formContent').classList.remove('hidden');
-      
+
+      // Load categories from backend
+      allCategories = await CategoriesAPI.loadCategories(client);
+
       // Initialize custom components
       amountInput = new NumberInput('#amountInput', {
         min: 0,
@@ -456,11 +461,11 @@
         placeholder: '9.99',
         prefix: '$'
       });
-      
+
       startDatePicker = new DatePicker('#startDatePicker', {
         placeholder: 'Select start date'
       });
-      
+
       // End type selection
       document.querySelectorAll('.end-type-option').forEach(option => {
         option.addEventListener('click', () => {
@@ -470,19 +475,26 @@
           updateEndTypeFields();
         });
       });
-      
+
       // Form submission
       document.getElementById('subscriptionForm').addEventListener('submit', handleSubmit);
     }
     
     function populateForm() {
       const sub = subscription;
-      
+
       document.getElementById('subName').textContent = sub.name;
       document.getElementById('name').value = sub.name;
       document.getElementById('currency').value = sub.currency || 'USD';
       document.getElementById('billingCycle').value = sub.billing_cycle;
-      document.getElementById('category').value = sub.category || '';
+
+      // Populate category dropdown from backend
+      CategoriesAPI.populateCategorySelect(
+        document.getElementById('category'),
+        allCategories,
+        sub.category || ''
+      );
+
       document.getElementById('isActive').value = sub.is_active ? 'true' : 'false';
       document.getElementById('notes').value = sub.notes || '';
       

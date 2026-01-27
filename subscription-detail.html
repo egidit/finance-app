@@ -239,6 +239,12 @@
             </svg>
             Subscriptions
           </a>
+          <a href="categories.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 4h4v4H4zM14 4h4v4h-4zM4 14h4v4H4zM14 14h4v4h-4z"/>
+            </svg>
+            Categories
+          </a>
           <a href="subscription-new.html" class="nav-item">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="12" cy="12" r="10"/>
@@ -248,7 +254,7 @@
             Add New
           </a>
         </div>
-        
+
         <div class="nav-section">
           <div class="nav-section-title">Account</div>
           <a href="settings.html" class="nav-item">
@@ -402,10 +408,12 @@
   <script src="config.js"></script>
   <script src="js/components.js"></script>
   <script src="js/supabase-client.js"></script>
-  
+  <script src="js/categories.js"></script>
+
   <script>
     let client;
     let subscription;
+    let allCategories = [];
     
     async function init() {
       client = initSupabase();
@@ -439,15 +447,18 @@
     
     async function loadSubscription(id) {
       try {
+        // Load categories from backend
+        allCategories = await CategoriesAPI.loadCategories(client);
+
         const { data, error } = await client
           .from('subscriptions')
           .select('*')
           .eq('id', id)
           .single();
-        
+
         if (error) throw error;
         if (!data) throw new Error('Subscription not found');
-        
+
         subscription = data;
         renderSubscription();
         
@@ -466,14 +477,24 @@
       const sub = subscription;
       
       // Header
+      const categoryColor = CategoriesAPI.getCategoryColor(allCategories, sub.category);
       document.getElementById('subIcon').textContent = sub.name.charAt(0).toUpperCase();
+      document.getElementById('subIcon').style.background = `${categoryColor}20`;
+      document.getElementById('subIcon').style.color = categoryColor;
       document.getElementById('subName').textContent = sub.name;
-      
+
+      const statusInfo = CategoriesAPI.getStatusInfo(sub.is_active);
       const statusEl = document.getElementById('subStatus');
-      statusEl.textContent = sub.is_active ? 'Active' : 'Inactive';
-      statusEl.className = `badge ${sub.is_active ? 'badge-success' : 'badge-default'}`;
-      
-      document.getElementById('subCategory').textContent = sub.category || 'Uncategorized';
+      statusEl.textContent = statusInfo.text;
+      statusEl.className = `badge ${statusInfo.badge}`;
+
+      const categoryEl = document.getElementById('subCategory');
+      const categoryName = CategoriesAPI.formatCategoryName(sub.category);
+      categoryEl.textContent = categoryName;
+      categoryEl.style.background = `${categoryColor}15`;
+      categoryEl.style.color = categoryColor;
+      categoryEl.style.border = `1px solid ${categoryColor}40`;
+
       document.getElementById('editBtn').href = `subscription-edit.html?id=${sub.id}`;
       document.getElementById('deleteBtn').addEventListener('click', handleDelete);
       

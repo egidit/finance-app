@@ -39,6 +39,12 @@
             </svg>
             Subscriptions
           </a>
+          <a href="categories.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 4h4v4H4zM14 4h4v4h-4zM4 14h4v4H4zM14 14h4v4h-4z"/>
+            </svg>
+            Categories
+          </a>
           <a href="subscription-new.html" class="nav-item">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="12" cy="12" r="10"/>
@@ -48,7 +54,7 @@
             Add New
           </a>
         </div>
-        
+
         <div class="nav-section">
           <div class="nav-section-title">Account</div>
           <a href="settings.html" class="nav-item">
@@ -151,18 +157,18 @@
             </div>
           </div>
           
-          <!-- Subscriptions Section -->
-          <div class="flex items-center justify-between mb-4">
-            <h2 style="font-size: var(--text-lg); font-weight: 600;">Recent Subscriptions</h2>
-            <a href="subscriptions.html" class="btn btn-ghost btn-sm">View All</a>
-          </div>
-          
-          <div id="subscriptionsList" style="display: flex; flex-direction: column; gap: var(--sp-3);">
-            <!-- Subscription cards will be rendered here -->
-          </div>
-          
-          <!-- Two Column Layout for Insights -->
-          <div class="insights-grid">
+          <!-- TOP ROW: Expense Heatmap (large) + Upcoming Payments (narrow) -->
+          <div class="dashboard-top-row">
+            <!-- Expense Heatmap - Primary visual -->
+            <div class="stat-card expense-heatmap-card" id="expenseHeatmapSection">
+              <div class="stat-label">Expense Heatmap</div>
+              <div class="expense-heatmap-wrapper">
+                <div class="expense-heatmap" id="expenseHeatmap">
+                  <div class="heatmap-loading">Loading...</div>
+                </div>
+              </div>
+            </div>
+
             <!-- Upcoming Payments Timeline -->
             <div class="insight-card">
               <div class="insight-header">
@@ -181,7 +187,10 @@
                 <div class="timeline-empty">No upcoming payments</div>
               </div>
             </div>
-            
+          </div>
+
+          <!-- BOTTOM ROW: Spending by Category + Recent Subscriptions -->
+          <div class="dashboard-bottom-row">
             <!-- Category Breakdown -->
             <div class="insight-card">
               <div class="insight-header">
@@ -198,8 +207,24 @@
                 <div class="timeline-empty">No data available</div>
               </div>
             </div>
+
+            <!-- Recent Subscriptions -->
+            <div class="insight-card recent-subscriptions-card">
+              <div class="insight-header">
+                <h3 class="insight-title">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                  </svg>
+                  Recent Subscriptions
+                </h3>
+                <a href="subscriptions.html" class="btn btn-ghost btn-sm" style="margin-left: auto;">View All</a>
+              </div>
+              <div class="insight-content recent-subs-content" id="subscriptionsList">
+                <!-- Subscription cards will be rendered here -->
+              </div>
+            </div>
           </div>
-          
+
           <!-- Empty State -->
           <div id="emptyState" class="hidden">
             <div class="empty-state">
@@ -526,16 +551,323 @@
       color: var(--color-error);
       font-weight: 500;
     }
+
+    /* ========== Expense Heatmap Section ========== */
+    /* Card uses .stat-card base class for consistent styling */
+    .expense-heatmap-card {
+      margin: 0;
+    }
+
+    /* Wrapper for the treemap square */
+    .expense-heatmap-wrapper {
+      margin-top: var(--sp-3);
+    }
+
+    /* The treemap container - 1:1 square, position:relative for absolute children */
+    .expense-heatmap {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      position: relative;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      /* Subtle background visible in gaps between tiles */
+      background: rgba(0, 0, 0, 0.08);
+    }
+
+    [data-theme="dark"] .expense-heatmap {
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .heatmap-loading {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: var(--text-sm);
+    }
+
+    /* ===== TREEMAP TILE BASE STYLES ===== */
+    /* Tiles are absolutely positioned with calc() gutters in JS */
+    .heatmap-tile {
+      position: absolute;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: filter 0.2s ease;
+      overflow: hidden;
+      /* Visible rounding even on small tiles */
+      border-radius: 5px;
+    }
+
+    .heatmap-tile:hover {
+      filter: brightness(1.1);
+      z-index: 10;
+    }
+
+    /* ===== TYPOGRAPHY MINIMUM RULES ===== */
+    /* These are the MINIMUM readable sizes - never go below these */
+
+    /* Name - primary identifier, line-clamped */
+    .heatmap-tile-name {
+      font-weight: 600;
+      line-height: 1.2;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      /* Minimum readable: 9px */
+      font-size: 9px;
+    }
+
+    /* Price container */
+    .heatmap-tile-price {
+      margin-top: auto;
+    }
+
+    /* Monthly price - primary value, must always be legible */
+    .heatmap-tile-monthly {
+      font-weight: 700;
+      line-height: 1.15;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      /* Minimum readable: 10px */
+      font-size: 10px;
+    }
+
+    /* Yearly price - secondary, quieter */
+    .heatmap-tile-yearly {
+      opacity: 0.75;
+      margin-top: 1px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      /* Minimum: 8px */
+      font-size: 8px;
+    }
+
+    /* Percentage badge */
+    .heatmap-tile-percent {
+      position: absolute;
+      font-weight: 600;
+      opacity: 0.8;
+      /* Minimum: 9px */
+      font-size: 9px;
+    }
+
+    /* ===== SIZE-SPECIFIC STYLES (pixel-area based) ===== */
+
+    /* XL tiles (≥12000 px²) - Hero tiles, full content */
+    .heatmap-tile.tile-xl {
+      padding: 12px;
+    }
+    .heatmap-tile.tile-xl .heatmap-tile-name {
+      font-size: 14px;
+      white-space: normal;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+    .heatmap-tile.tile-xl .heatmap-tile-monthly {
+      font-size: 20px;
+    }
+    .heatmap-tile.tile-xl .heatmap-tile-yearly {
+      font-size: 10px;
+    }
+    .heatmap-tile.tile-xl .heatmap-tile-percent {
+      top: 10px;
+      right: 10px;
+      font-size: 12px;
+    }
+
+    /* Large tiles (≥6000 px²) */
+    .heatmap-tile.tile-large {
+      padding: 10px;
+    }
+    .heatmap-tile.tile-large .heatmap-tile-name {
+      font-size: 11px;
+      white-space: normal;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+    .heatmap-tile.tile-large .heatmap-tile-monthly {
+      font-size: 15px;
+    }
+    .heatmap-tile.tile-large .heatmap-tile-yearly {
+      font-size: 9px;
+    }
+    .heatmap-tile.tile-large .heatmap-tile-percent {
+      top: 8px;
+      right: 8px;
+      font-size: 10px;
+    }
+
+    /* Medium tiles (≥3000 px²) - No yearly, no percent */
+    .heatmap-tile.tile-medium {
+      padding: 7px;
+    }
+    .heatmap-tile.tile-medium .heatmap-tile-name {
+      font-size: 10px;
+    }
+    .heatmap-tile.tile-medium .heatmap-tile-monthly {
+      font-size: 12px;
+    }
+
+    /* Small tiles (≥1500 px²) - Name + monthly only */
+    .heatmap-tile.tile-small {
+      padding: 5px;
+    }
+    .heatmap-tile.tile-small .heatmap-tile-name {
+      font-size: 9px;
+    }
+    .heatmap-tile.tile-small .heatmap-tile-monthly {
+      font-size: 10px;
+    }
+
+    /* Tiny tiles (<1500 px²) - Monthly price only, centered */
+    .heatmap-tile.tile-tiny {
+      padding: 4px;
+      justify-content: center;
+      align-items: center;
+    }
+    .heatmap-tile.tile-tiny .heatmap-tile-price {
+      margin-top: 0;
+      text-align: center;
+    }
+    .heatmap-tile.tile-tiny .heatmap-tile-monthly {
+      font-size: 10px;
+    }
+
+    /* ===== DASHBOARD LAYOUT ===== */
+
+    /* Top row: Heatmap (large) + Upcoming Payments (narrow) */
+    .dashboard-top-row {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: var(--sp-5);
+      margin-bottom: var(--sp-5);
+      align-items: stretch;
+    }
+
+    /* Upcoming Payments card in top row - match heatmap height */
+    .dashboard-top-row > .insight-card {
+      display: flex;
+      flex-direction: column;
+      min-height: 0; /* Allow flex shrinking */
+    }
+
+    .dashboard-top-row > .insight-card > .insight-content {
+      flex: 1;
+      min-height: 0;
+      max-height: none; /* Override default max-height */
+      overflow-y: auto;
+    }
+
+    /* Bottom row: Category + Recent (equal) */
+    .dashboard-bottom-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--sp-5);
+    }
+
+    /* Cards in bottom row should align heights */
+    .dashboard-bottom-row > .insight-card {
+      display: flex;
+      flex-direction: column;
+    }
+    .dashboard-bottom-row > .insight-card .insight-content {
+      flex: 1;
+    }
+
+    /* Recent subscriptions card styling */
+    .recent-subscriptions-card {
+      display: flex;
+      flex-direction: column;
+    }
+    .recent-subscriptions-card .recent-subs-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-3);
+    }
+
+    /* Mobile: Stack everything vertically */
+    @media (max-width: 900px) {
+      .dashboard-top-row {
+        grid-template-columns: 1fr;
+      }
+      .dashboard-bottom-row {
+        grid-template-columns: 1fr;
+      }
+      /* When stacked, restore max-height for upcoming payments */
+      .dashboard-top-row > .insight-card > .insight-content {
+        max-height: 400px;
+      }
+    }
+
+    /* ========== Responsive Breakpoints for Heatmap ========== */
+
+    /* Tablet/small laptop - reduced padding, compact fonts */
+    @media (max-width: 768px) {
+      .heatmap-tile { border-radius: 4px; }
+
+      .heatmap-tile.tile-xl { padding: 10px; }
+      .heatmap-tile.tile-large { padding: 8px; }
+      .heatmap-tile.tile-medium { padding: 6px; }
+      .heatmap-tile.tile-small { padding: 4px; }
+      .heatmap-tile.tile-tiny { padding: 3px; }
+
+      .heatmap-tile.tile-xl .heatmap-tile-name { font-size: 12px; }
+      .heatmap-tile.tile-large .heatmap-tile-name { font-size: 10px; }
+      .heatmap-tile.tile-medium .heatmap-tile-name { font-size: 9px; }
+      .heatmap-tile.tile-small .heatmap-tile-name { font-size: 9px; }
+
+      .heatmap-tile.tile-xl .heatmap-tile-monthly { font-size: 16px; }
+      .heatmap-tile.tile-large .heatmap-tile-monthly { font-size: 13px; }
+      .heatmap-tile.tile-medium .heatmap-tile-monthly { font-size: 11px; }
+      .heatmap-tile.tile-small .heatmap-tile-monthly { font-size: 10px; }
+      .heatmap-tile.tile-tiny .heatmap-tile-monthly { font-size: 9px; }
+    }
+
+    /* Mobile - minimum readable sizes enforced */
+    @media (max-width: 480px) {
+      .heatmap-tile { border-radius: 3px; }
+
+      .heatmap-tile.tile-xl { padding: 8px; }
+      .heatmap-tile.tile-large { padding: 6px; }
+      .heatmap-tile.tile-medium { padding: 5px; }
+      .heatmap-tile.tile-small { padding: 4px; }
+      .heatmap-tile.tile-tiny { padding: 3px; }
+
+      /* Enforce minimum readable font sizes - never below these */
+      .heatmap-tile.tile-xl .heatmap-tile-name { font-size: 11px; }
+      .heatmap-tile.tile-large .heatmap-tile-name { font-size: 10px; }
+      .heatmap-tile.tile-medium .heatmap-tile-name,
+      .heatmap-tile.tile-small .heatmap-tile-name { font-size: 9px; }
+
+      .heatmap-tile.tile-xl .heatmap-tile-monthly { font-size: 14px; }
+      .heatmap-tile.tile-large .heatmap-tile-monthly { font-size: 12px; }
+      .heatmap-tile.tile-medium .heatmap-tile-monthly { font-size: 10px; }
+      .heatmap-tile.tile-small .heatmap-tile-monthly,
+      .heatmap-tile.tile-tiny .heatmap-tile-monthly { font-size: 10px; }
+    }
   </style>
   
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
   <script src="js/components.js"></script>
   <script src="js/supabase-client.js"></script>
-  
+  <script src="js/categories.js"></script>
+
   <script>
     let client;
     let userCurrency = 'EUR';
+    let allCategories = [];
+    let cachedActiveSubs = []; // Store for resize re-render
     
     async function init() {
       client = initSupabase();
@@ -556,11 +888,14 @@
     
     async function loadDashboard() {
       try {
+        // Load categories from backend
+        allCategories = await CategoriesAPI.loadCategories(client);
+
         const { data: subscriptions, error } = await client
           .from('subscriptions')
           .select('*')
           .order('created_at', { ascending: false });
-        
+
         if (error) throw error;
         
         document.getElementById('loadingState').classList.add('hidden');
@@ -593,10 +928,14 @@
         
         // Render subscriptions (limit to 5 recent)
         renderSubscriptions(subscriptions.slice(0, 5));
-        
+
+        // Cache active subs for resize re-render
+        cachedActiveSubs = activeSubs;
+
         // Render new insight sections
         renderUpcomingPayments(activeSubs);
         renderCategoryBreakdown(activeInCurrency);
+        renderExpenseHeatmap(activeSubs);
         
       } catch (err) {
         document.getElementById('alertContainer').innerHTML = 
@@ -657,8 +996,8 @@
       return new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: currency,
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
       }).format(amount);
     }
     
@@ -679,19 +1018,24 @@
           'quarterly': '/qtr',
           'yearly': '/yr'
         }[sub.billing_cycle] || '';
-        
+
+        // Get category color from backend
+        const categoryColor = CategoriesAPI.getCategoryColor(allCategories, sub.category);
+        const categoryName = CategoriesAPI.formatCategoryName(sub.category);
+        const statusInfo = CategoriesAPI.getStatusInfo(sub.is_active);
+
         // Calculate next renewal date
         const nextDate = calculateNextBillingDate(sub);
         const renewalInfo = getNextRenewalDisplay(nextDate);
-        
+
         return `
-          <div class="subscription-card" 
+          <div class="subscription-card"
                onclick="viewSubscription('${sub.id}')"
                oncontextmenu="showSubscriptionMenu(event, '${sub.id}', '${sub.name.replace(/'/g, "\\'")}')">
-            <div class="subscription-icon">${initial}</div>
+            <div class="subscription-icon" style="background: ${categoryColor}20; color: ${categoryColor};">${initial}</div>
             <div class="subscription-info">
               <div class="subscription-name">${escapeHtml(sub.name)}</div>
-              <div class="subscription-meta">${sub.category || 'Uncategorized'} • ${sub.is_active ? 'Active' : 'Inactive'}</div>
+              <div class="subscription-meta"><span style="color: ${categoryColor};">${categoryName}</span> • ${statusInfo.text}</div>
               ${sub.is_active ? `<div class="subscription-renewal ${renewalInfo.class}">${renewalInfo.text}</div>` : ''}
             </div>
             <div class="subscription-amount">
@@ -728,7 +1072,7 @@
           ${upcoming.map(sub => {
             const daysUntil = Math.ceil((sub.nextDate - now) / (1000 * 60 * 60 * 24));
             const urgencyClass = daysUntil <= 1 ? 'imminent' : daysUntil <= 7 ? 'urgent' : '';
-            const badge = getBadgeForDays(daysUntil);
+            const badge = getBadgeForDays(daysUntil, sub.nextDate);
             
             return `
               <div class="timeline-item ${urgencyClass}" onclick="viewSubscription('${sub.id}')" style="cursor: pointer;">
@@ -749,10 +1093,25 @@
       `;
     }
     
-    function getBadgeForDays(days) {
+    function getBadgeForDays(days, targetDate) {
       if (days <= 0) return '<span class="timeline-badge today">Today</span>';
       if (days === 1) return '<span class="timeline-badge tomorrow">Tomorrow</span>';
-      if (days <= 7) return '<span class="timeline-badge this-week">This Week</span>';
+
+      // Check if date is within this week (Monday-Sunday)
+      const now = new Date();
+      const dayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+      // Convert to Monday-based: Monday = 0, Sunday = 6
+      const daysSinceMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+      const daysUntilSunday = 6 - daysSinceMonday;
+
+      // Calculate end of this week (Sunday at 23:59:59)
+      const endOfWeek = new Date(now);
+      endOfWeek.setDate(now.getDate() + daysUntilSunday);
+      endOfWeek.setHours(23, 59, 59, 999);
+
+      if (targetDate <= endOfWeek) {
+        return '<span class="timeline-badge this-week">This Week</span>';
+      }
       return '';
     }
     
@@ -805,14 +1164,14 @@
           ${categories.map(cat => {
             const percentage = grandTotal > 0 ? Math.round((cat.total / grandTotal) * 100) : 0;
             const barWidth = maxTotal > 0 ? Math.round((cat.total / maxTotal) * 100) : 0;
-            const displayName = formatCategoryName(cat.name);
-            const colorClass = `category-${cat.name.toLowerCase().replace(/[^a-z]/g, '')}`;
-            
+            const displayName = CategoriesAPI.formatCategoryName(cat.name);
+            const categoryColor = CategoriesAPI.getCategoryColor(allCategories, cat.name);
+
             return `
               <div class="category-item">
                 <div class="category-header">
                   <div class="category-info">
-                    <div class="category-dot ${colorClass}"></div>
+                    <div class="category-dot" style="background: ${categoryColor};"></div>
                     <span class="category-name">${displayName}</span>
                     <span class="category-count">(${cat.count})</span>
                   </div>
@@ -822,7 +1181,7 @@
                   </div>
                 </div>
                 <div class="category-bar-bg">
-                  <div class="category-bar ${colorClass}" style="width: ${barWidth}%"></div>
+                  <div class="category-bar" style="width: ${barWidth}%; background: ${categoryColor};"></div>
                 </div>
               </div>
             `;
@@ -841,11 +1200,344 @@
         default: return amount;
       }
     }
-    
-    function formatCategoryName(name) {
-      if (name === 'uncategorized') return 'Uncategorized';
-      // Capitalize first letter
-      return name.charAt(0).toUpperCase() + name.slice(1).replace(/_/g, ' ');
+
+    // ========== Expense Heatmap (Squarified Treemap) ==========
+    /**
+     * SQUARIFIED TREEMAP ALGORITHM
+     *
+     * This is a real treemap implementation that guarantees:
+     * - 100% fill of the container (no empty space)
+     * - Each subscription rendered exactly once
+     * - Area proportional to cost
+     * - Strictly monotonic: if cost(A) > cost(B), area(A) > area(B)
+     *
+     * Algorithm: Squarified treemap (Bruls, Huizing, van Wijk, 2000)
+     * - Recursively subdivides a rectangle
+     * - Optimizes for square-ish aspect ratios
+     * - Output: x, y, width, height as percentages
+     * - Rendering: absolute positioning (no CSS Grid)
+     */
+    function renderExpenseHeatmap(subscriptions) {
+      const container = document.getElementById('expenseHeatmap');
+      const section = document.getElementById('expenseHeatmapSection');
+
+      if (!subscriptions || subscriptions.length === 0) {
+        section.style.display = 'none';
+        return;
+      }
+
+      // ===== RESPONSIVE MODE DETECTION =====
+      const viewportWidth = window.innerWidth;
+      const isCompactMode = viewportWidth < 1350;
+      const isMinimalMode = viewportWidth < 1100;
+
+      // Get container dimensions for pixel-area calculations
+      const containerRect = container.getBoundingClientRect();
+      const containerSize = Math.min(containerRect.width, containerRect.height) || 400;
+
+      // Calculate monthly equivalent for each subscription
+      const withMonthly = subscriptions.map(sub => ({
+        ...sub,
+        monthlyAmount: getMonthlyAmount(sub),
+        yearlyAmount: getMonthlyAmount(sub) * 12
+      }));
+
+      // Sort by monthly amount descending
+      // In minimal mode (<1100px): show only top 5
+      // Otherwise: show top 10
+      const maxItems = isMinimalMode ? 5 : 10;
+      const top10 = withMonthly
+        .sort((a, b) => b.monthlyAmount - a.monthlyAmount)
+        .slice(0, maxItems);
+
+      if (top10.length === 0) {
+        section.style.display = 'none';
+        return;
+      }
+
+      section.style.display = '';
+
+      // Calculate total for percentage and area calculation
+      const totalMonthly = top10.reduce((sum, s) => sum + s.monthlyAmount, 0);
+
+      // Prepare data: normalize values to sum to total area (100%)
+      // Use sqrt scaling to compress extreme differences while maintaining order
+      const MIN_AREA_PERCENT = 4; // Minimum 4% area for readability
+
+      // Calculate scaled values
+      const sqrtScaled = top10.map(s => Math.sqrt(s.monthlyAmount));
+      const totalSqrt = sqrtScaled.reduce((a, b) => a + b, 0);
+
+      // Initial proportional areas
+      let areas = sqrtScaled.map(v => (v / totalSqrt) * 100);
+
+      // Enforce minimum area
+      areas = areas.map(a => Math.max(a, MIN_AREA_PERCENT));
+
+      // Renormalize to 100%
+      const areaSum = areas.reduce((a, b) => a + b, 0);
+      areas = areas.map(a => (a / areaSum) * 100);
+
+      // Enforce strict monotonicity
+      for (let i = 1; i < areas.length; i++) {
+        if (top10[i].monthlyAmount < top10[i - 1].monthlyAmount && areas[i] >= areas[i - 1]) {
+          areas[i] = areas[i - 1] * 0.95; // Ensure smaller
+        }
+      }
+
+      // Final renormalize to exactly 100%
+      const finalSum = areas.reduce((a, b) => a + b, 0);
+      areas = areas.map(a => (a / finalSum) * 100);
+
+      // Create items for treemap
+      const items = top10.map((sub, i) => ({
+        id: sub.id,
+        sub,
+        value: areas[i],
+        percentage: Math.round((sub.monthlyAmount / totalMonthly) * 100)
+      }));
+
+      /**
+       * SQUARIFIED TREEMAP LAYOUT
+       *
+       * Recursively lays out rectangles to fill the given area.
+       * Optimizes for square-ish aspect ratios.
+       */
+      function squarify(items, rect) {
+        if (items.length === 0) return [];
+        if (items.length === 1) {
+          return [{ ...items[0], x: rect.x, y: rect.y, w: rect.w, h: rect.h }];
+        }
+
+        const results = [];
+        let remaining = [...items];
+        let currentRect = { ...rect };
+
+        while (remaining.length > 0) {
+          const { row, rest } = layoutRow(remaining, currentRect);
+          results.push(...row);
+          remaining = rest;
+
+          // Calculate used area and update rect
+          const usedArea = row.reduce((sum, r) => sum + r.value, 0);
+          const totalArea = currentRect.w * currentRect.h;
+          const usedFraction = usedArea / (remaining.reduce((s, i) => s + i.value, 0) + usedArea);
+
+          if (currentRect.w >= currentRect.h) {
+            // Horizontal split
+            const usedWidth = currentRect.w * usedFraction;
+            currentRect = {
+              x: currentRect.x + usedWidth,
+              y: currentRect.y,
+              w: currentRect.w - usedWidth,
+              h: currentRect.h
+            };
+          } else {
+            // Vertical split
+            const usedHeight = currentRect.h * usedFraction;
+            currentRect = {
+              x: currentRect.x,
+              y: currentRect.y + usedHeight,
+              w: currentRect.w,
+              h: currentRect.h - usedHeight
+            };
+          }
+        }
+
+        return results;
+      }
+
+      function layoutRow(items, rect) {
+        if (items.length === 0) return { row: [], rest: [] };
+
+        const totalValue = items.reduce((s, i) => s + i.value, 0);
+        const isHorizontal = rect.w >= rect.h;
+        const side = isHorizontal ? rect.h : rect.w;
+
+        // Find optimal row using worst aspect ratio
+        let bestRow = [items[0]];
+        let bestWorst = worstRatio(bestRow, side, totalValue, rect);
+
+        for (let i = 1; i < items.length; i++) {
+          const testRow = items.slice(0, i + 1);
+          const testWorst = worstRatio(testRow, side, totalValue, rect);
+
+          if (testWorst <= bestWorst) {
+            bestRow = testRow;
+            bestWorst = testWorst;
+          } else {
+            break; // Adding more items makes it worse
+          }
+        }
+
+        // Layout the best row
+        const rowValue = bestRow.reduce((s, i) => s + i.value, 0);
+        const rowFraction = rowValue / totalValue;
+
+        let rowRects;
+        if (isHorizontal) {
+          const rowWidth = rect.w * rowFraction;
+          let y = rect.y;
+          rowRects = bestRow.map(item => {
+            const itemFraction = item.value / rowValue;
+            const h = rect.h * itemFraction;
+            const result = { ...item, x: rect.x, y, w: rowWidth, h };
+            y += h;
+            return result;
+          });
+        } else {
+          const rowHeight = rect.h * rowFraction;
+          let x = rect.x;
+          rowRects = bestRow.map(item => {
+            const itemFraction = item.value / rowValue;
+            const w = rect.w * itemFraction;
+            const result = { ...item, x, y: rect.y, w, h: rowHeight };
+            x += w;
+            return result;
+          });
+        }
+
+        return { row: rowRects, rest: items.slice(bestRow.length) };
+      }
+
+      function worstRatio(row, side, totalValue, rect) {
+        if (row.length === 0) return Infinity;
+
+        const rowValue = row.reduce((s, i) => s + i.value, 0);
+        const rowFraction = rowValue / totalValue;
+        const isHorizontal = rect.w >= rect.h;
+        const rowSize = isHorizontal ? rect.w * rowFraction : rect.h * rowFraction;
+
+        let worst = 0;
+        for (const item of row) {
+          const itemFraction = item.value / rowValue;
+          const itemSize = side * itemFraction;
+          const ratio = Math.max(rowSize / itemSize, itemSize / rowSize);
+          worst = Math.max(worst, ratio);
+        }
+        return worst;
+      }
+
+      // Run the algorithm
+      const layout = squarify(items, { x: 0, y: 0, w: 100, h: 100 });
+
+      // Verify: check for duplicates
+      const seenIds = new Set();
+      for (const tile of layout) {
+        if (seenIds.has(tile.id)) {
+          console.error(`TREEMAP ERROR: Duplicate ID ${tile.id}`);
+        }
+        seenIds.add(tile.id);
+      }
+
+      // ===== CONTENT VISIBILITY RULES =====
+      // Based on BOTH pixel area AND minimum dimension (min of width/height)
+      // Tile must satisfy BOTH conditions to show richer content
+
+      // Area thresholds (px²)
+      const AREA_XL = 15000;
+      const AREA_LARGE = 8000;
+      const AREA_MEDIUM = 4000;
+      const AREA_SMALL = 2000;
+
+      // Minimum dimension thresholds (px)
+      const MIN_DIM_FULL = 95;    // Required for yearly + percent
+      const MIN_DIM_NAME = 50;    // Required for name
+      // Monthly price always shown if tile renders at all
+
+      // Inner gutter size (applied as inset from calculated position)
+      const GUTTER = 3; // pixels
+
+      const tilesHtml = layout.map(tile => {
+        const sub = tile.sub;
+        const categoryColor = CategoriesAPI.getCategoryColor(allCategories, sub.category);
+        const textColor = getContrastColor(categoryColor);
+
+        // Calculate actual pixel dimensions
+        const tileWidthPx = (tile.w / 100) * containerSize;
+        const tileHeightPx = (tile.h / 100) * containerSize;
+        const pixelArea = tileWidthPx * tileHeightPx;
+        const minDim = Math.min(tileWidthPx, tileHeightPx);
+
+        // Size class from area (for CSS styling)
+        let sizeClass;
+        if (pixelArea >= AREA_XL) sizeClass = 'tile-xl';
+        else if (pixelArea >= AREA_LARGE) sizeClass = 'tile-large';
+        else if (pixelArea >= AREA_MEDIUM) sizeClass = 'tile-medium';
+        else if (pixelArea >= AREA_SMALL) sizeClass = 'tile-small';
+        else sizeClass = 'tile-tiny';
+
+        // Content visibility: requires BOTH area AND minDim thresholds
+        // Progressive hiding: percent → yearly → name
+        const hasFullSpace = pixelArea >= AREA_LARGE && minDim >= MIN_DIM_FULL;
+        const hasNameSpace = minDim >= MIN_DIM_NAME;
+
+        const showPercent = hasFullSpace;
+        const showYearly = hasFullSpace;
+        const showName = hasNameSpace;
+        const showMonthly = true; // Always show price
+
+        // Build HTML conditionally - remove content instead of shrinking
+        const percentHtml = showPercent ? `<span class="heatmap-tile-percent">${tile.percentage}%</span>` : '';
+        const nameHtml = showName ? `<div class="heatmap-tile-name">${escapeHtml(sub.name)}</div>` : '';
+        const yearlyHtml = showYearly ? `<div class="heatmap-tile-yearly">${formatCurrency(sub.yearlyAmount, sub.currency)}/yr</div>` : '';
+
+        return `
+          <div class="heatmap-tile ${sizeClass}"
+               data-sub-id="${tile.id}"
+               data-pixel-area="${Math.round(pixelArea)}"
+               style="
+                 left: calc(${tile.x}% + ${GUTTER}px);
+                 top: calc(${tile.y}% + ${GUTTER}px);
+                 width: calc(${tile.w}% - ${GUTTER * 2}px);
+                 height: calc(${tile.h}% - ${GUTTER * 2}px);
+                 background: ${categoryColor};
+                 color: ${textColor};
+               "
+               onclick="viewSubscription('${tile.id}')"
+               title="${escapeHtml(sub.name)} - ${formatCurrency(sub.monthlyAmount, sub.currency)}/mo (${tile.percentage}%)">
+            ${percentHtml}
+            ${nameHtml}
+            <div class="heatmap-tile-price">
+              <div class="heatmap-tile-monthly">${formatCurrency(sub.monthlyAmount, sub.currency)}</div>
+              ${yearlyHtml}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      container.innerHTML = tilesHtml;
+    }
+
+    // Re-render heatmap on resize (debounced) to recalculate pixel-area thresholds
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        if (cachedActiveSubs && cachedActiveSubs.length > 0) {
+          renderExpenseHeatmap(cachedActiveSubs);
+        }
+      }, 200);
+    });
+
+    // Helper to determine if text should be light or dark based on background
+    function getContrastColor(hexColor) {
+      // Default to white text if color is undefined
+      if (!hexColor || hexColor === '#94a3b8') return '#ffffff';
+
+      // Remove # if present
+      const hex = hexColor.replace('#', '');
+
+      // Parse RGB values
+      const r = parseInt(hex.substr(0, 2), 16);
+      const g = parseInt(hex.substr(2, 2), 16);
+      const b = parseInt(hex.substr(4, 2), 16);
+
+      // Calculate relative luminance using sRGB
+      const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+      // Return dark text for light backgrounds, light text for dark backgrounds
+      return luminance > 0.5 ? '#1a1a2e' : '#ffffff';
     }
     
     function getNextRenewalDisplay(nextDate) {

@@ -1,10 +1,10 @@
 # Subscription Tracker
 
-A subscription tracking website, built with vanilla HTML, CSS, and JavaScript with Supabase as the backend.
+A lifecycle-focused subscription tracking web application with a glassmorphic design, built with vanilla HTML, CSS, and JavaScript with Supabase as the backend.
 
 ## Features
 
-- 📱 **Mobile-first responsive design**
+- 📱 **Mobile-first responsive design** with glassmorphism aesthetic
 - 🔐 **Secure authentication** with email/password and MFA (TOTP) support
 - 📊 **Lifecycle tracking** - see payment progress, time remaining, and status
 - 🎨 **Dark/Light theme** with system preference detection
@@ -38,12 +38,15 @@ A subscription tracking website, built with vanilla HTML, CSS, and JavaScript wi
 ### 2. Set Up the Database
 
 1. Go to the SQL Editor in your Supabase dashboard
+2. Copy the contents of `../dev-tools/database/schema.sql`
+3. Run the SQL to create the subscriptions table with RLS policies
+4. Run any migrations in `../dev-tools/database/migrations/` in order
 
 ### 3. Configure Authentication
 
 1. Go to Authentication → Providers in Supabase
 2. Ensure Email provider is enabled
-3. (Recommended) Enable MFA in Authentication → Settings → Multi-Factor Authentication
+3. (Optional) Enable MFA in Authentication → Settings → Multi-Factor Authentication
 
 ### 4. Update Configuration
 
@@ -85,7 +88,7 @@ Then open http://localhost:8000 in your browser.
 ## File Structure
 
 ```
-SubTracker/
+html-app/
 ├── index.html              # Landing page
 ├── login.html              # Login page
 ├── register.html           # Registration page
@@ -107,6 +110,15 @@ SubTracker/
 │   ├── supabase-client.js  # Supabase initialization & auth helpers
 │   └── components.js       # Custom UI components (DatePicker, etc.)
 └── README.md               # This file
+
+../dev-tools/               # Development files (not for production)
+├── config.js               # Your actual config with secrets
+├── debug-mfa.html          # MFA debugging tool
+├── test-mfa-login.html     # MFA login tester
+├── verify-mfa.html         # MFA verification checker
+└── database/
+    ├── schema.sql          # Database schema for Supabase
+    └── migrations/         # Database migration files
 ```
 
 ## Lifecycle Tracking
@@ -158,5 +170,3 @@ Works in all modern browsers:
 ## License
 
 MIT License - feel free to use and modify for your own projects!
-
-

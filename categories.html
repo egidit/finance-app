@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Categories - SubTracker</title>
+  <link rel="stylesheet" href="css/design-system.css">
+  <style>
+    .categories-grid {
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-3);
+    }
+
+    .category-row {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-4);
+      padding: var(--sp-4);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      transition: all var(--duration-fast) var(--ease-out);
+    }
+
+    .category-row:hover {
+      border-color: var(--border-subtle);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .category-color {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-md);
+      flex-shrink: 0;
+    }
+
+    .category-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .category-name {
+      font-weight: 600;
+      font-size: var(--text-md);
+    }
+
+    .category-meta {
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .category-actions {
+      display: flex;
+      gap: var(--sp-2);
+    }
+
+    /* Color Palette */
+    .color-palette {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--sp-2);
+      margin-top: var(--sp-2);
+    }
+
+    .color-swatch {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-md);
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: all var(--duration-fast);
+    }
+
+    .color-swatch:hover {
+      transform: scale(1.1);
+    }
+
+    .color-swatch.selected {
+      border-color: var(--text-primary);
+      box-shadow: 0 0 0 2px var(--bg-surface);
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all var(--duration-normal);
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal {
+      background: var(--bg-surface);
+      border-radius: var(--radius-xl);
+      padding: var(--sp-6);
+      width: 90%;
+      max-width: 400px;
+      transform: scale(0.95);
+      transition: transform var(--duration-normal);
+    }
+
+    .modal-overlay.active .modal {
+      transform: scale(1);
+    }
+
+    .modal-title {
+      font-size: var(--text-lg);
+      font-weight: 600;
+      margin-bottom: var(--sp-4);
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--sp-3);
+      margin-top: var(--sp-5);
+    }
+
+    @media (max-width: 768px) {
+      .category-actions .btn span {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar (Desktop) -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+            <path d="M2 17l10 5 10-5"/>
+            <path d="M2 12l10 5 10-5"/>
+          </svg>
+          SubTracker
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">Menu</div>
+          <a href="dashboard.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="9" rx="1"/>
+              <rect x="14" y="3" width="7" height="5" rx="1"/>
+              <rect x="14" y="12" width="7" height="9" rx="1"/>
+              <rect x="3" y="16" width="7" height="5" rx="1"/>
+            </svg>
+            Dashboard
+          </a>
+          <a href="subscriptions.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            </svg>
+            Subscriptions
+          </a>
+          <a href="categories.html" class="nav-item active">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 4h4v4H4zM14 4h4v4h-4zM4 14h4v4H4zM14 14h4v4h-4z"/>
+            </svg>
+            Categories
+          </a>
+          <a href="subscription-new.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="16"/>
+              <line x1="8" y1="12" x2="16" y2="12"/>
+            </svg>
+            Add New
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Account</div>
+          <a href="settings.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+            Settings
+          </a>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="btn btn-ghost" style="width: 100%; justify-content: flex-start;" onclick="handleSignOut()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          Sign Out
+        </button>
+      </div>
+    </aside>
+
+    <!-- Sidebar Overlay (Mobile) -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Mobile Header -->
+      <header class="mobile-header">
+        <button class="mobile-menu-btn" id="mobileMenuBtn">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+        <span class="mobile-header-title">Categories</span>
+        <button class="btn btn-icon btn-ghost" onclick="openAddModal()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+        </button>
+      </header>
+
+      <div class="page-container">
+        <!-- Page Header -->
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Categories</h1>
+            <p class="page-subtitle">Manage subscription categories and their colors</p>
+          </div>
+          <button class="btn btn-primary" onclick="openAddModal()" style="display: none;" id="addBtnDesktop">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Add Category
+          </button>
+        </div>
+
+        <!-- Alert Container -->
+        <div id="alertContainer"></div>
+
+        <!-- Loading State -->
+        <div id="loadingState">
+          <div style="display: flex; justify-content: center; padding: 3rem;">
+            <div class="spinner"></div>
+          </div>
+        </div>
+
+        <!-- Categories List -->
+        <div id="categoriesList" class="categories-grid hidden"></div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden">
+          <div class="empty-state">
+            <div class="empty-state-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 4h4v4H4zM14 4h4v4h-4zM4 14h4v4H4zM14 14h4v4h-4z"/>
+              </svg>
+            </div>
+            <h3 class="empty-state-title">No custom categories</h3>
+            <p class="empty-state-text">Default categories are available. Create custom categories to organize your subscriptions.</p>
+            <button class="btn btn-primary" onclick="openAddModal()">Add Category</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile Bottom Navigation -->
+      <nav class="mobile-nav">
+        <a href="dashboard.html" class="mobile-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="9" rx="1"/>
+            <rect x="14" y="3" width="7" height="5" rx="1"/>
+            <rect x="14" y="12" width="7" height="9" rx="1"/>
+            <rect x="3" y="16" width="7" height="5" rx="1"/>
+          </svg>
+          <span>Home</span>
+        </a>
+        <a href="subscriptions.html" class="mobile-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+          </svg>
+          <span>Subs</span>
+        </a>
+        <a href="subscription-new.html" class="mobile-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="16"/>
+            <line x1="8" y1="12" x2="16" y2="12"/>
+          </svg>
+          <span>Add</span>
+        </a>
+        <a href="settings.html" class="mobile-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+          <span>Settings</span>
+        </a>
+      </nav>
+    </main>
+  </div>
+
+  <!-- Add/Edit Modal -->
+  <div class="modal-overlay" id="categoryModal">
+    <div class="modal">
+      <h2 class="modal-title" id="modalTitle">Add Category</h2>
+      <form id="categoryForm">
+        <div class="form-group">
+          <label class="label">Category Name *</label>
+          <input type="text" class="input" id="categoryName" placeholder="e.g., Streaming" required>
+        </div>
+        <div class="form-group">
+          <label class="label">Color</label>
+          <div class="color-palette" id="colorPalette"></div>
+          <input type="hidden" id="categoryColor" value="#8b5cf6">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="modalSubmitBtn">Add Category</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="js/components.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/categories.js"></script>
+
+  <script>
+    let client;
+    let allCategories = [];
+    let editingCategoryId = null;
+    let selectedColor = '#8b5cf6';
+
+    async function init() {
+      client = initSupabase();
+
+      try {
+        await requireAuth(client);
+        await loadCategoriesData();
+
+        // Show desktop add button
+        if (window.innerWidth > 768) {
+          document.getElementById('addBtnDesktop').style.display = 'flex';
+        }
+
+        // Setup form
+        document.getElementById('categoryForm').addEventListener('submit', handleSubmit);
+
+        // Setup color palette
+        CategoriesAPI.renderColorPalette('colorPalette', selectedColor, (color) => {
+          selectedColor = color;
+          document.getElementById('categoryColor').value = color;
+        });
+
+      } catch (err) {
+        console.error('Auth error:', err);
+        window.location.href = 'login.html';
+      }
+    }
+
+    async function loadCategoriesData() {
+      try {
+        allCategories = await CategoriesAPI.loadCategories(client, true);
+
+        document.getElementById('loadingState').classList.add('hidden');
+
+        renderCategories();
+
+      } catch (err) {
+        document.getElementById('alertContainer').innerHTML =
+          `<div class="alert alert-error">${err.message}</div>`;
+        document.getElementById('loadingState').classList.add('hidden');
+      }
+    }
+
+    function renderCategories() {
+      const container = document.getElementById('categoriesList');
+      const emptyState = document.getElementById('emptyState');
+
+      if (allCategories.length === 0) {
+        container.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+      container.classList.remove('hidden');
+
+      // Separate global and user categories
+      const globalCategories = allCategories.filter(c => CategoriesAPI.isGlobalCategory(c));
+      const userCategories = allCategories.filter(c => !CategoriesAPI.isGlobalCategory(c));
+
+      let html = '';
+
+      // User categories first (editable)
+      if (userCategories.length > 0) {
+        html += '<div class="text-muted" style="font-size: var(--text-sm); margin-bottom: var(--sp-2);">Your Categories</div>';
+        html += userCategories.map(cat => renderCategoryRow(cat, true)).join('');
+        html += '<div style="margin-top: var(--sp-5);"></div>';
+      }
+
+      // Global categories (read-only)
+      html += '<div class="text-muted" style="font-size: var(--text-sm); margin-bottom: var(--sp-2);">Default Categories</div>';
+      html += globalCategories.map(cat => renderCategoryRow(cat, false)).join('');
+
+      container.innerHTML = html;
+    }
+
+    function renderCategoryRow(category, editable) {
+      const displayName = CategoriesAPI.formatCategoryName(category.name);
+
+      return `
+        <div class="category-row">
+          <div class="category-color" style="background-color: ${category.color};"></div>
+          <div class="category-info">
+            <div class="category-name">${escapeHtml(displayName)}</div>
+            <div class="category-meta">${editable ? 'Custom category' : 'Default category'}</div>
+          </div>
+          ${editable ? `
+            <div class="category-actions">
+              <button class="btn btn-sm btn-ghost" onclick="openEditModal('${category.id}', '${escapeHtml(category.name)}', '${category.color}')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+                <span>Edit</span>
+              </button>
+              <button class="btn btn-sm btn-ghost" style="color: var(--color-error);" onclick="confirmDelete('${category.id}', '${escapeHtml(displayName)}')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                </svg>
+                <span>Delete</span>
+              </button>
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }
+
+    function openAddModal() {
+      editingCategoryId = null;
+      document.getElementById('modalTitle').textContent = 'Add Category';
+      document.getElementById('modalSubmitBtn').textContent = 'Add Category';
+      document.getElementById('categoryName').value = '';
+      selectedColor = '#8b5cf6';
+      CategoriesAPI.renderColorPalette('colorPalette', selectedColor, (color) => {
+        selectedColor = color;
+        document.getElementById('categoryColor').value = color;
+      });
+      document.getElementById('categoryModal').classList.add('active');
+    }
+
+    function openEditModal(id, name, color) {
+      editingCategoryId = id;
+      document.getElementById('modalTitle').textContent = 'Edit Category';
+      document.getElementById('modalSubmitBtn').textContent = 'Save Changes';
+      document.getElementById('categoryName').value = name;
+      selectedColor = color;
+      CategoriesAPI.renderColorPalette('colorPalette', selectedColor, (c) => {
+        selectedColor = c;
+        document.getElementById('categoryColor').value = c;
+      });
+      document.getElementById('categoryModal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('categoryModal').classList.remove('active');
+      editingCategoryId = null;
+    }
+
+    async function handleSubmit(e) {
+      e.preventDefault();
+
+      const name = document.getElementById('categoryName').value.trim();
+      const color = selectedColor;
+
+      if (!name) {
+        Toast.error('Category name is required');
+        return;
+      }
+
+      const submitBtn = document.getElementById('modalSubmitBtn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px;"></span>';
+
+      try {
+        if (editingCategoryId) {
+          await CategoriesAPI.updateCategory(client, editingCategoryId, { name, color });
+          Toast.success('Category updated');
+        } else {
+          await CategoriesAPI.createCategory(client, name, color);
+          Toast.success('Category created');
+        }
+
+        closeModal();
+        await loadCategoriesData();
+
+      } catch (err) {
+        Toast.error(err.message || 'Failed to save category');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = editingCategoryId ? 'Save Changes' : 'Add Category';
+      }
+    }
+
+    async function confirmDelete(id, name) {
+      if (!confirm(`Are you sure you want to delete "${name}"? Subscriptions using this category will become uncategorized.`)) return;
+
+      try {
+        await CategoriesAPI.deleteCategory(client, id);
+        Toast.success('Category deleted');
+        await loadCategoriesData();
+      } catch (err) {
+        Toast.error('Failed to delete category');
+      }
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    async function handleSignOut() {
+      CategoriesAPI.clearCategoriesCache();
+      await signOut(client);
+      window.location.href = 'login.html';
+    }
+
+    // Close modal on overlay click
+    document.getElementById('categoryModal').addEventListener('click', (e) => {
+      if (e.target.classList.contains('modal-overlay')) {
+        closeModal();
+      }
+    });
+
+    // Initialize
+    init();
+  </script>
+</body>
+</html>

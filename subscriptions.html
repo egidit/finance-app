@@ -199,6 +199,12 @@
             </svg>
             Subscriptions
           </a>
+          <a href="categories.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 4h4v4H4zM14 4h4v4h-4zM4 14h4v4H4zM14 14h4v4h-4z"/>
+            </svg>
+            Categories
+          </a>
           <a href="subscription-new.html" class="nav-item">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="12" cy="12" r="10"/>
@@ -208,7 +214,7 @@
             Add New
           </a>
         </div>
-        
+
         <div class="nav-section">
           <div class="nav-section-title">Account</div>
           <a href="settings.html" class="nav-item">
@@ -287,13 +293,7 @@
           <div class="select-wrapper filter-select">
             <select class="select" id="categoryFilter">
               <option value="">All Categories</option>
-              <option value="entertainment">Entertainment</option>
-              <option value="productivity">Productivity</option>
-              <option value="health">Health & Fitness</option>
-              <option value="education">Education</option>
-              <option value="finance">Finance</option>
-              <option value="utilities">Utilities</option>
-              <option value="other">Other</option>
+              <!-- Populated dynamically from backend -->
             </select>
           </div>
           <div class="select-wrapper filter-select">
@@ -370,19 +370,26 @@
   <script src="config.js"></script>
   <script src="js/components.js"></script>
   <script src="js/supabase-client.js"></script>
-  
+  <script src="js/categories.js"></script>
+
   <script>
     let client;
     let allSubscriptions = [];
+    let allCategories = [];
     
     async function init() {
       client = initSupabase();
-      
+
       try {
         await requireAuth(client);
+
+        // Load categories from backend
+        allCategories = await CategoriesAPI.loadCategories(client);
+        populateCategoryFilter();
+
         await loadSubscriptions();
         setupFilters();
-        
+
         // Show desktop add button
         if (window.innerWidth > 768) {
           document.getElementById('addBtnDesktop').style.display = 'flex';
@@ -391,6 +398,17 @@
         console.error('Auth error:', err);
         window.location.href = 'login.html';
       }
+    }
+
+    function populateCategoryFilter() {
+      const filterEl = document.getElementById('categoryFilter');
+      filterEl.innerHTML = '<option value="">All Categories</option>';
+      allCategories.forEach(cat => {
+        const option = document.createElement('option');
+        option.value = cat.name;
+        option.textContent = CategoriesAPI.formatCategoryName(cat.name);
+        filterEl.appendChild(option);
+      });
     }
     
     async function loadSubscriptions() {
@@ -481,17 +499,21 @@
           'quarterly': '/qtr',
           'yearly': '/yr'
         }[sub.billing_cycle] || '';
-        
+
+        const categoryColor = CategoriesAPI.getCategoryColor(allCategories, sub.category);
+        const categoryName = CategoriesAPI.formatCategoryName(sub.category);
+        const statusInfo = CategoriesAPI.getStatusInfo(sub.is_active);
+
         return `
-          <div class="subscription-row" 
+          <div class="subscription-row"
                onclick="viewSubscription('${sub.id}')"
                oncontextmenu="showContextMenu(event, '${sub.id}', '${sub.name.replace(/'/g, "\\'")}')">
-            <div class="sub-icon">${initial}</div>
+            <div class="sub-icon" style="background: ${categoryColor}20; color: ${categoryColor};">${initial}</div>
             <div class="sub-details">
               <div class="sub-name">${escapeHtml(sub.name)}</div>
               <div class="sub-meta">
-                <span>${sub.category || 'Uncategorized'}</span>
-                <span class="badge ${sub.is_active ? 'badge-success' : 'badge-default'}">${sub.is_active ? 'Active' : 'Inactive'}</span>
+                <span style="color: ${categoryColor};">${categoryName}</span>
+                <span class="badge ${statusInfo.badge}">${statusInfo.text}</span>
                 ${sub.is_active ? `<span class="sub-renewal ${getNextRenewalClass(sub)}">• ${getNextRenewalText(sub)}</span>` : ''}
               </div>
             </div>
